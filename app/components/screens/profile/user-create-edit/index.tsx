@@ -2,23 +2,32 @@ import { FontAwesome } from '@expo/vector-icons';
 import { NavigationProp, ParamListBase, useNavigation, useRoute } from '@react-navigation/native';
 import { FormikValues } from 'formik';
 import React from 'react';
-import { Keyboard, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Keyboard, Text, TextInput, View } from 'react-native';
+import DropDownPicker from 'react-native-dropdown-picker';
 import MaskInput from 'react-native-mask-input';
-import RNPickerSelect from 'react-native-picker-select';
 
 import { TInitialUserCreateEditFormValue, TUserCreateEditRouteParams } from './types';
-import { useAppDispatch } from '../../../../hooks/redux';
+import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
 import { createUserThunk, updateUserThunk } from '../../../../redux/http/userThunk';
 import { selectRoles } from '../../../../utils';
 import { ICON_MAIN_COLOR } from '../../../../utils/constants';
 import { registrationFormSchema, updateUserFormSchema } from '../../../../validation';
-import { CreateEditForm, DeleteButton, FieldWithError, LabelInput, Main } from '../../../wrappers';
+import {
+  CreateEditForm,
+  CrudButtonGroup,
+  FieldWithError,
+  LabelInput,
+  Main,
+} from '../../../wrappers';
 import { CrudMainButton } from '../../../wrappers/crud-main-button';
 
 export const UserCreateEdit = () => {
   const dispatch = useAppDispatch();
+  const [open, setOpen] = React.useState(false);
   const route = useRoute();
-  const { item }: TUserCreateEditRouteParams = (route.params as TUserCreateEditRouteParams) || {};
+  const { createUser, updateUser } = useAppSelector((state) => state.user);
+  const { item, isUser }: TUserCreateEditRouteParams =
+    (route.params as TUserCreateEditRouteParams) || {};
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
 
   React.useLayoutEffect((): void => {
@@ -31,11 +40,17 @@ export const UserCreateEdit = () => {
     firstname: item?.firstname || '',
     lastname: item?.lastname || '',
     username: item?.username || '',
+    address: item?.address || '',
     password: '',
     phone: item?.phone || '',
     role: item?.role || 'USER',
     confirmed: !item?.confirmed ? true : item?.confirmed || false,
   };
+
+  const handleSelectChange = (value: string, setFieldValue: FormikValues['setFieldValue']) => {
+    setFieldValue('role', value);
+  };
+
   const onSubmit = async (values: FormikValues) => {
     if (item) {
       await dispatch(updateUserThunk({ id: item?._id as string, formData: values }));
@@ -58,7 +73,7 @@ export const UserCreateEdit = () => {
           />
         }
         item={item}
-        label="հաճախորդ"
+        label={isUser ? 'անձնական տվյալները' : 'հաճախորդ'}
         onSubmit={onSubmit}
         validationSchema={item ? updateUserFormSchema : registrationFormSchema}
         renderItemComponent={(formikProps) => {
@@ -71,10 +86,11 @@ export const UserCreateEdit = () => {
             handleBlur,
             handleSubmit,
             isValid,
+            setFieldValue,
           } = formikProps;
           return (
             <>
-              <LabelInput label="Անուն" className="mt-5">
+              <LabelInput label="Անուն" className="mt-5" required>
                 <FieldWithError fieldName="firstname" errors={errors} touched={touched}>
                   <TextInput
                     onChangeText={handleChange('firstname')}
@@ -86,7 +102,7 @@ export const UserCreateEdit = () => {
                   />
                 </FieldWithError>
               </LabelInput>
-              <LabelInput label="Ազգանուն">
+              <LabelInput label="Ազգանուն" required>
                 <FieldWithError fieldName="lastname" errors={errors} touched={touched}>
                   <TextInput
                     onChangeText={handleChange('lastname')}
@@ -98,7 +114,7 @@ export const UserCreateEdit = () => {
                   />
                 </FieldWithError>
               </LabelInput>
-              <LabelInput label="Մուտքանուն">
+              <LabelInput label="Մուտքանուն" required>
                 <FieldWithError fieldName="username" errors={errors} touched={touched}>
                   <TextInput
                     onChangeText={handleChange('username')}
@@ -110,7 +126,19 @@ export const UserCreateEdit = () => {
                   />
                 </FieldWithError>
               </LabelInput>
-              <LabelInput label="Հեռախոսահամար">
+              <LabelInput label="Հասցե" required>
+                <FieldWithError fieldName="address" errors={errors} touched={touched}>
+                  <TextInput
+                    onChangeText={handleChange('address')}
+                    onBlur={handleBlur('address')}
+                    onSubmitEditing={Keyboard.dismiss}
+                    placeholder="Հասցե"
+                    value={values.address}
+                    className="rounded px-3 py-3 border border-gray-600"
+                  />
+                </FieldWithError>
+              </LabelInput>
+              <LabelInput label="Հեռախոսահամար" required>
                 <FieldWithError fieldName="phone" errors={errors} touched={touched}>
                   <MaskInput
                     className="rounded px-3 py-4 border border-gray-600"
@@ -139,7 +167,7 @@ export const UserCreateEdit = () => {
               </LabelInput>
               {!item ? (
                 <>
-                  <LabelInput label="Գաղտնաբառ">
+                  <LabelInput label="Գաղտնաբառ" required>
                     <FieldWithError fieldName="password" errors={errors} touched={touched}>
                       <TextInput
                         onChangeText={handleChange('password')}
@@ -152,7 +180,7 @@ export const UserCreateEdit = () => {
                       />
                     </FieldWithError>
                   </LabelInput>
-                  <LabelInput label="Գաղտնաբառ">
+                  <LabelInput label="Կրկնել գաղտնաբառը" required>
                     <FieldWithError fieldName="confirmPassword" errors={errors} touched={touched}>
                       <TextInput
                         onChangeText={handleChange('confirmPassword')}
@@ -166,26 +194,47 @@ export const UserCreateEdit = () => {
                   </LabelInput>
                 </>
               ) : null}
-              <RNPickerSelect
-                onValueChange={(value) => handleChange('role')(value)}
-                value={values.role}
-                items={selectRoles}
-              />
-              <View>
-                <CrudMainButton
-                  handleSubmit={handleSubmit}
-                  disabled={
-                    ((item?.confirmed && !isValid) as boolean) ||
-                    ((item?.confirmed && !dirty) as boolean)
-                  }>
-                  {item ? (item.confirmed ? 'Պահպանել' : 'Հաստատել') : 'Ստեղծել'}
-                </CrudMainButton>
-              </View>
-              {item ? (
+              {!isUser && (
+                <LabelInput label="Պարտականությունը" required>
+                  <DropDownPicker
+                    open={open}
+                    value={values.role}
+                    items={selectRoles}
+                    setOpen={setOpen}
+                    style={{
+                      borderRadius: 4,
+                      borderColor: 'gray',
+                      paddingLeft: 12,
+                      paddingRight: 12,
+                      backgroundColor: 'transparent',
+                    }}
+                    setValue={(val) => handleSelectChange(val(val), setFieldValue)}
+                    listMode="SCROLLVIEW"
+                    scrollViewProps={{
+                      nestedScrollEnabled: true,
+                    }}
+                  />
+                </LabelInput>
+              )}
+
+              <CrudButtonGroup>
                 <View>
-                  <DeleteButton>{item && (item.confirmed ? 'Ջնջել' : 'Չեղարկել')}</DeleteButton>
+                  <CrudMainButton
+                    handleSubmit={handleSubmit}
+                    isLoading={createUser.isLoading || updateUser.isLoading}
+                    disabled={
+                      ((item?.confirmed && !isValid) as boolean) ||
+                      ((item?.confirmed && !dirty) as boolean)
+                    }>
+                    {item ? (item.confirmed ? 'Պահպանել' : 'Հաստատել') : 'Ստեղծել'}
+                  </CrudMainButton>
                 </View>
-              ) : null}
+                {/*{item ? (*/}
+                {/*  <View>*/}
+                {/*    <DeleteButton>{item && (item.confirmed ? 'Ջնջել' : 'Չեղարկել')}</DeleteButton>*/}
+                {/*  </View>*/}
+                {/*) : null}*/}
+              </CrudButtonGroup>
             </>
           );
         }}

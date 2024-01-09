@@ -1,10 +1,12 @@
 import { TItemsWithTotalLength } from '../global';
+import { TProduct } from '../product';
 import { TStateStatus } from '../user';
 
 export type TCategory = {
   _id: string;
   title: string;
   description: string;
+  products: TProduct;
   picture: string;
   author: string;
   created_at: string;

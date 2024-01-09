@@ -1,11 +1,18 @@
+import { TCategory } from '../category';
+import { TItemsWithTotalLength } from '../global';
+import { TStateStatus } from '../user';
+
 export type TProduct = {
   _id: string;
-  category: string;
   title: string;
+  information: string;
   picture: string;
   price: number;
-  code: number;
+  count: number;
+  code: string;
   discount: number;
+  category: string;
+  author: string;
   created_at: string;
 };
 
@@ -14,10 +21,15 @@ export interface IProductHistory extends TProduct {
 }
 
 export type TInitialProductState = {
-  items: TProduct[];
+  products: TItemsWithTotalLength<TProduct[]>;
+  discountedProducts: TItemsWithTotalLength<TProduct[]>;
+  discountedProductsForHomeScreen: TItemsWithTotalLength<TProduct[]>;
+  productsForHomeScreen: TItemsWithTotalLength<TProduct[]>;
+  productsByCategory: TItemsWithTotalLength<TProduct[]>;
+  create: TStateStatus;
+  update: TStateStatus;
+  delete: TStateStatus;
   history: IProductHistory[];
-  search: {
-    items: TProduct[];
-    query: string;
-  };
+  search: TItemsWithTotalLength<TProduct[]>;
+  searchQuery: string;
 };

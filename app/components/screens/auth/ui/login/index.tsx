@@ -6,7 +6,7 @@ import { useAppDispatch, useAppSelector } from '../../../../../hooks/redux';
 import { loginThunk } from '../../../../../redux/http/userThunk';
 import { EAuthMode } from '../../../../../redux/types';
 import { loginFormSchema } from '../../../../../validation';
-import { FieldWithError } from '../../../../wrappers';
+import { FieldWithError, LabelInput } from '../../../../wrappers';
 import { initialLoginFormValue } from '../../data';
 import { LayoutAuth } from '../../layout';
 import { TInitialLoginFormValue } from '../../types';
@@ -26,29 +26,31 @@ export const Login = () => {
         onSubmit={(values) => onSubmit(values)}>
         {({ handleChange, handleBlur, values, handleSubmit, errors, touched, isValid }) => (
           <View className="p-5 w-full justify-center">
-            <FieldWithError fieldName="username" errors={errors} touched={touched}>
-              <TextInput
-                onChangeText={handleChange('username')}
-                onBlur={handleBlur('username')}
-                onSubmitEditing={Keyboard.dismiss}
-                value={values.username}
-                placeholder="Մուտքանուն"
-                className="rounded px-3 py-4 border border-gray-600"
-              />
-            </FieldWithError>
-
-            <FieldWithError fieldName="password" errors={errors} touched={touched}>
-              <TextInput
-                onChangeText={handleChange('password')}
-                onBlur={handleBlur('password')}
-                onSubmitEditing={Keyboard.dismiss}
-                value={values.password}
-                placeholder="Գաղտնաբառ"
-                className="rounded px-3 py-4 border border-gray-600"
-                secureTextEntry
-              />
-            </FieldWithError>
-
+            <LabelInput label="Մուտքանուն" required>
+              <FieldWithError fieldName="username" errors={errors} touched={touched}>
+                <TextInput
+                  onChangeText={handleChange('username')}
+                  onBlur={handleBlur('username')}
+                  onSubmitEditing={Keyboard.dismiss}
+                  value={values.username}
+                  placeholder="Մուտքանուն"
+                  className="rounded px-3 py-4 border border-gray-600"
+                />
+              </FieldWithError>
+            </LabelInput>
+            <LabelInput label="Գաղտնաբառ" required>
+              <FieldWithError fieldName="password" errors={errors} touched={touched}>
+                <TextInput
+                  onChangeText={handleChange('password')}
+                  onBlur={handleBlur('password')}
+                  onSubmitEditing={Keyboard.dismiss}
+                  value={values.password}
+                  placeholder="Գաղտնաբառ"
+                  className="rounded px-3 py-4 border border-gray-600"
+                  secureTextEntry
+                />
+              </FieldWithError>
+            </LabelInput>
             <View>
               <SignButton
                 handleSubmit={handleSubmit}

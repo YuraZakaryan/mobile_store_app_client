@@ -12,6 +12,7 @@ export type TUser = {
   firstname: string;
   lastname: string;
   username: string;
+  address: string;
   phone: string;
   role: TRole;
   confirmed: boolean;
@@ -33,6 +34,7 @@ export type TInitialUserState = {
   fetchMe: TStateStatus;
   createUser: TStateStatus;
   updateUser: TStateStatus;
+  updatePassword: TStateStatus;
 };
 
 export type TTokens = {

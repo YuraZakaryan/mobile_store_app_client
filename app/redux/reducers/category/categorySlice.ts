@@ -119,24 +119,34 @@ const categorySlice = createSlice({
       })
       .addCase(
         deleteCategoryThunk.fulfilled,
-        (state: TInitialCategoryState, action: PayloadAction<string>): void => {
+        (state: TInitialCategoryState, action: PayloadAction<string | undefined>): void => {
           state.delete.isError = false;
           state.delete.isLoading = false;
 
-          state.categories.items = state.categories.items.filter(
-            (category: TCategory): boolean => category._id !== action.payload
-          );
-          SHOW_SUCCESS('Կատեգորիան հաջողությամբ ջնջվեց');
+          if (action.payload) {
+            state.categories.items = state.categories.items.filter(
+              (category: TCategory): boolean => category._id !== action.payload
+            );
+            SHOW_SUCCESS('Կատեգորիան հաջողությամբ ջնջվեց');
+          } else {
+            console.error('deleteCategoryThunk.fulfilled: Payload is undefined');
+          }
         }
       )
       .addCase(deleteCategoryThunk.pending, (state: TInitialCategoryState): void => {
         state.delete.isError = false;
         state.delete.isLoading = true;
       })
-      .addCase(deleteCategoryThunk.rejected, (state: TInitialCategoryState): void => {
+      .addCase(deleteCategoryThunk.rejected, (state: TInitialCategoryState, action): void => {
         state.delete.isError = true;
         state.delete.isLoading = false;
-        SHOW_ERROR('Կատեգորիայի ջնջման հետ կապված խնդիր է առաջացել');
+        if (action.payload) {
+          if (action.payload === 409) {
+            SHOW_ERROR('Հայտնաբերվել են ապրանքներ տվյալ կատեգորիայով');
+          } else {
+            SHOW_ERROR('Կատեգորիայի ջնջման հետ կապված խնդիր է առաջացել');
+          }
+        }
       });
   },
 });

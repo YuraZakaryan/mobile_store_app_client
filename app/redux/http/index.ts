@@ -6,7 +6,7 @@ import { TPayloadActionUser } from '../types';
 
 export const $authHost = axios.create({
   baseURL: `${API_URL || 'http:localhost:5000'}/api/`,
-  timeout: 10000,
+  timeout: 1000,
 });
 
 $authHost.interceptors.request.use(
@@ -37,14 +37,21 @@ $authHost.interceptors.response.use(
       originalRequest._retry = true;
       const refresh_token = await SecureStoreService.getRefreshToken();
       if (refresh_token) {
-        const { data } = await $authHost.put<TPayloadActionUser>('auth/token/refresh', {
-          refresh_token,
-        });
-        await SecureStoreService.saveAccessToken(data.tokens.access_token);
-        await SecureStoreService.saveRefreshToken(data.tokens.refresh_token);
-        axios.defaults.headers.common['Authorization'] = `Bearer ${data.tokens.access_token}`;
-        return $authHost(originalRequest);
+        // console.log('refresh token');
+        try {
+          const { data } = await $authHost.put<TPayloadActionUser>('auth/token/refresh', {
+            refresh_token,
+          });
+          console.log(data);
+          await SecureStoreService.saveAccessToken(data.tokens.access_token);
+          await SecureStoreService.saveRefreshToken(data.tokens.refresh_token);
+          $authHost.defaults.headers.common['Authorization'] = `Bearer ${data.tokens.access_token}`;
+          return $authHost(originalRequest);
+        } catch (e) {
+          console.log(e, 'dwadwa');
+        }
       }
+      return Promise.reject(error);
     }
     return Promise.reject(error);
   }

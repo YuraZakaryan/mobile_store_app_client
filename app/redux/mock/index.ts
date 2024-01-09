@@ -1,12 +1,5 @@
-import {
-  EPacking,
-  IBasketItem,
-  IOrder,
-  IProductHistory,
-  TCategory,
-  TProduct,
-  TUser,
-} from '../types';
+import { IBasketItem, IOrder, IProductHistory, TCategory, TProduct, TUser } from '../types';
+import { EPackage } from '../types/order';
 
 export const userMock = {
   _id: '354135',
@@ -320,7 +313,7 @@ export const ordersMock: IOrder[] = [
     _id: '4124324532',
     user: usersMock[0],
     items: basketProducts,
-    packaging: EPacking.BAG,
+    packaging: EPackage.BAG,
     necessaryNotes: '',
     status: 'neutral',
     orderStartTime: '2012-10-15T22:20:17Z',
@@ -331,7 +324,7 @@ export const ordersMock: IOrder[] = [
     _id: '213123213',
     user: usersMock[1],
     items: basketProducts,
-    packaging: EPacking.BAG,
+    packaging: EPackage.BAG,
     necessaryNotes: '',
     status: 'completed',
     orderStartTime: '2012-10-15T22:20:17Z',
@@ -342,7 +335,7 @@ export const ordersMock: IOrder[] = [
     _id: '1231231321',
     user: usersMock[2],
     items: basketProducts,
-    packaging: EPacking.BAG,
+    packaging: EPackage.BAG,
     necessaryNotes: '',
     status: 'neutral',
     orderStartTime: '2012-10-15T22:20:17Z',

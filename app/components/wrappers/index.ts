@@ -8,3 +8,7 @@ export * from './label-input';
 export * from './order-item-card';
 export * from './field-with-error';
 export * from './delete-button';
+export * from './crud-button-group';
+export * from './sale-icon';
+export * from './orders-list';
+export * from './pagination-buttons';

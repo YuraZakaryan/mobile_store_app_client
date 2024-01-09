@@ -11,3 +11,7 @@ export const selectRoles: TRoleSelect[] = [
   { label: 'Մոդերատոր', value: 'MODERATOR' },
   { label: 'Ադմինիստրատոր', value: 'ADMIN' },
 ];
+export const accountEditLabels = {
+  editAccount: 'Փոփոխել տվյալները',
+  editPassword: 'Փոփոխել գաղտնաբառը',
+};

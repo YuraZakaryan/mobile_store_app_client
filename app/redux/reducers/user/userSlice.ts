@@ -9,6 +9,7 @@ import {
   fetchUsersThunk,
   loginThunk,
   registrationThunk,
+  updatePasswordThunk,
   updateUserThunk,
 } from '../../http/userThunk';
 import {
@@ -47,6 +48,10 @@ const initialState: TInitialUserState = {
     isError: false,
   },
   updateUser: {
+    isLoading: false,
+    isError: false,
+  },
+  updatePassword: {
     isLoading: false,
     isError: false,
   },
@@ -148,9 +153,9 @@ export const userSlice = createSlice({
       })
       .addCase(
         updateUserThunk.fulfilled,
-        (state: TInitialUserState, action: PayloadAction<TUser>) => {
-          state.fetchMe.isError = false;
-          state.fetchMe.isLoading = false;
+        (state: TInitialUserState, action: PayloadAction<TUser>): void => {
+          state.updateUser.isError = false;
+          state.updateUser.isLoading = false;
 
           const userIndex: number = state.users.items.findIndex(
             (user: TUser): boolean => user._id === action.payload._id
@@ -167,18 +172,35 @@ export const userSlice = createSlice({
           SHOW_SUCCESS('Բաժանորդի տվյալները հաջողությամբ փոխվեցին');
         }
       )
-      .addCase(updateUserThunk.pending, (state: TInitialUserState) => {
+      .addCase(updateUserThunk.pending, (state: TInitialUserState): void => {
         state.updateUser.isError = false;
         state.updateUser.isLoading = true;
       })
-      .addCase(updateUserThunk.rejected, (state: TInitialUserState) => {
+      .addCase(updateUserThunk.rejected, (state: TInitialUserState): void => {
         state.updateUser.isError = true;
         state.updateUser.isLoading = false;
         SHOW_ERROR('Բաժանորդի տվյալների փոփոխման հետ  կապված խնդիր է առաջացել');
       })
+      .addCase(updatePasswordThunk.fulfilled, (state: TInitialUserState): void => {
+        state.updatePassword.isError = false;
+        state.updatePassword.isLoading = false;
+
+        SHOW_SUCCESS('Գաղտնաբառը հաջողությամբ փոխվեց');
+      })
+      .addCase(updatePasswordThunk.pending, (state: TInitialUserState): void => {
+        state.updatePassword.isError = false;
+        state.updatePassword.isLoading = true;
+      })
+      .addCase(updatePasswordThunk.rejected, (state: TInitialUserState, action): void => {
+        state.updatePassword.isError = true;
+        state.updatePassword.isLoading = false;
+        if (action.payload === 400) {
+          SHOW_ERROR('Հին գաղտնաբառը սխալ է');
+        }
+      })
       .addCase(
         createUserThunk.fulfilled,
-        (state: TInitialUserState, action: PayloadAction<TPayloadActionUser>) => {
+        (state: TInitialUserState, action: PayloadAction<TPayloadActionUser>): void => {
           const { user } = action.payload;
           state.createUser.isError = false;
           state.createUser.isLoading = false;
@@ -187,28 +209,33 @@ export const userSlice = createSlice({
           SHOW_SUCCESS('Բաժանորդի հաջողությամբ ստեղծվեց');
         }
       )
-      .addCase(createUserThunk.pending, (state: TInitialUserState) => {
+      .addCase(createUserThunk.pending, (state: TInitialUserState): void => {
         state.createUser.isError = false;
         state.createUser.isLoading = true;
       })
-      .addCase(createUserThunk.rejected, (state: TInitialUserState) => {
+      .addCase(createUserThunk.rejected, (state: TInitialUserState): void => {
         state.createUser.isError = true;
         state.createUser.isLoading = false;
         SHOW_ERROR('Բաժանորդի ստեղծման հետ կապված խնդիր է առաջացել');
       })
 
-      .addCase(fetchMe.fulfilled, (state: TInitialUserState, action: PayloadAction<TUser>) => {
-        state.user = action.payload;
-        state.isAuth = true;
-        state.fetchMe.isError = false;
-        state.fetchMe.isLoading = false;
-      })
-      .addCase(fetchMe.pending, (state: TInitialUserState) => {
+      .addCase(
+        fetchMe.fulfilled,
+        (state: TInitialUserState, action: PayloadAction<TUser>): void => {
+          state.user = action.payload;
+          state.isAuth = true;
+          state.fetchMe.isError = false;
+          state.fetchMe.isLoading = false;
+        }
+      )
+      .addCase(fetchMe.pending, (state: TInitialUserState): void => {
+        console.log('pending');
         state.fetchMe.isError = false;
         state.fetchMe.isLoading = true;
       })
-      .addCase(fetchMe.rejected, (state: TInitialUserState) => {
+      .addCase(fetchMe.rejected, (state: TInitialUserState): void => {
         state.isAuth = false;
+        console.log('dwadwa');
         state.fetchMe.isError = true;
         state.fetchMe.isLoading = false;
       }),

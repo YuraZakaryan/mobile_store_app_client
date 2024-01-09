@@ -1,13 +1,14 @@
-import { IProductHistory } from '../../redux/types';
+import { TOrder } from '../../redux/types/order';
 
-export const groupedHistory = (sortedHistory: IProductHistory[]) => {
-  const history: Record<string, IProductHistory[]> = sortedHistory.reduce(
-    (acc, item) => {
-      const dateTime = item.created_at || '';
-      acc[dateTime] = [...(acc[dateTime] || []), item];
-      return acc;
-    },
-    {} as Record<string, IProductHistory[]>
-  );
+export const groupedHistory = (sortedHistory: TOrder[]) => {
+  const historyMap = sortedHistory.reduce((map, item) => {
+    const dateTime = item.createdAt || '';
+    const orders = map.get(dateTime) || [];
+    map.set(dateTime, [...orders, item]);
+    return map;
+  }, new Map<string, TOrder[]>());
+
+  const history: Record<string, TOrder[]> = {};
+  historyMap.forEach((value, key) => (history[key] = value));
   return history;
 };

@@ -1,4 +1,4 @@
-import { EvilIcons, AntDesign } from '@expo/vector-icons';
+import { AntDesign } from '@expo/vector-icons';
 import React from 'react';
 import {
   FlatList,
@@ -14,23 +14,36 @@ import {
 } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../hooks/redux';
+import { useDebounce } from '../../../hooks/useDebounce';
+import { searchProductsThunk } from '../../../redux/http/productThunk';
 import { clearSearchQuery, setSearchQuery } from '../../../redux/reducers/product/productSlice';
 import { TProduct } from '../../../redux/types';
+import { Loading } from '../../ui';
 import { ProductItem } from '../../wrappers';
 
 export const Search = () => {
   const dispatch = useAppDispatch();
-  const { search } = useAppSelector((state) => state.product);
+  const { search, searchQuery } = useAppSelector((state) => state.product);
+  const [initialSearch, setInitialSearch] = React.useState<boolean>(false);
 
-  const handleSearchChange = (text: string) => {
+  const debouncedSearch = useDebounce(searchQuery, 500);
+
+  React.useEffect(() => {
+    dispatch(searchProductsThunk({ query: debouncedSearch }));
+  }, [initialSearch, debouncedSearch]);
+
+  const handleSearchChange = (text: string): void => {
     dispatch(setSearchQuery(text));
+    setInitialSearch(true);
   };
 
-  const handleClearSearch = () => {
+  const handleClearSearch = (): void => {
     dispatch(clearSearchQuery());
   };
 
-  return (
+  return search.isLoading && !initialSearch ? (
+    <Loading />
+  ) : (
     <SafeAreaView>
       <ScrollView
         style={{
@@ -43,36 +56,53 @@ export const Search = () => {
               <TextInput
                 className="p-3 pr-9 rounded-lg border border-gray-500"
                 placeholder="Փնտրել"
-                value={search.query}
+                value={searchQuery}
                 onChangeText={handleSearchChange}
               />
               <View className="absolute right-3">
-                {search.query.length !== 0 ? (
+                {searchQuery.length !== 0 ? (
                   <TouchableOpacity onPress={handleClearSearch}>
-                    <AntDesign name="close" size={19} color="gray" />
+                    <AntDesign name="close" size={21} color="gray" />
                   </TouchableOpacity>
                 ) : (
-                  <EvilIcons name="search" size={24} color="gray" />
+                  <View>
+                    <AntDesign name="search1" size={21} color="gray" />
+                  </View>
                 )}
               </View>
             </View>
             <View className="mt-5">
-              <FlatList
-                scrollEnabled={false}
-                data={search.items}
-                ItemSeparatorComponent={() => <View style={{ height: 20 }} />}
-                renderItem={({ index, item }) => (
-                  <ProductItem
-                    item={item}
-                    index={index}
-                    key={item._id}
-                    isLastInRow={index === search.items.length - 1}
+              {!Array.isArray(search.items) || (!search.isLoading && search.items.length === 0) ? (
+                <View className="items-center">
+                  <Image
+                    source={require('./../../../assets/images/products/sad-search.png')}
+                    alt="products are not found"
+                    className="w-52 h-52"
                   />
-                )}
-                numColumns={2}
-                horizontal={false}
-                keyExtractor={(item: TProduct) => item._id}
-              />
+                  <Text className="text-center text-xl text-orange-500 font-bold w-full">
+                    Չի գտնվել ապրանք այդպիսի անվանումով
+                  </Text>
+                </View>
+              ) : (
+                <FlatList
+                  scrollEnabled={false}
+                  data={search.items}
+                  ItemSeparatorComponent={() => <View style={{ height: 20 }} />}
+                  renderItem={({ index, item }) => (
+                    <ProductItem
+                      item={item}
+                      index={index}
+                      key={item._id}
+                      isLastInRow={
+                        search.items.length % 2 === 0 || index === search.items.length - 1
+                      }
+                    />
+                  )}
+                  numColumns={2}
+                  horizontal={false}
+                  keyExtractor={(item: TProduct) => item._id}
+                />
+              )}
             </View>
           </View>
         </TouchableWithoutFeedback>

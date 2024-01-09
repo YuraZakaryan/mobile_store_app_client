@@ -5,6 +5,7 @@ import { FlatList, Text, TouchableOpacity, View } from 'react-native';
 
 import { ICrudListProps } from '../../../types';
 import { TUserListNavigationProps } from '../../screens/profile/users-control/types';
+import { PaginationButtons } from '../pagination-buttons';
 
 export const CrudList = <T,>(props: ICrudListProps<T>): React.ReactElement => {
   const {
@@ -51,36 +52,13 @@ export const CrudList = <T,>(props: ICrudListProps<T>): React.ReactElement => {
           keyExtractor={(item: T, index: number) => `${index}`}
         />
       </View>
-      {totalItems > 5 && (
-        <View className="w-full items-end px-2 py-3 bg-white">
-          <View className="flex-row gap-4">
-            <TouchableOpacity
-              className={`py-2 px-3 rounded bg-orange-400 justify-center items-center ${
-                previousButtonDisable ? 'bg-orange-300' : ''
-              }`}
-              onPress={handlePreviousPage}
-              disabled={previousButtonDisable}>
-              <Text
-                className={`font-semibold text-white ${
-                  previousButtonDisable ? 'text-gray-500' : ''
-                }`}>
-                Նախորդը
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className={`py-2 px-3 rounded bg-orange-400 justify-center items-center ${
-                nextButtonDisable ? 'bg-orange-300' : ''
-              }`}
-              onPress={handleNextPage}
-              disabled={nextButtonDisable}>
-              <Text
-                className={`font-semibold text-white ${nextButtonDisable ? 'text-gray-500' : ''}`}>
-                Հաջորդը
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
+      <PaginationButtons
+        total_items={totalItems}
+        previousButtonDisable={previousButtonDisable}
+        nextButtonDisable={nextButtonDisable}
+        handlePrevPage={handlePreviousPage}
+        handleNextPage={handleNextPage}
+      />
     </View>
   );
 };

@@ -13,8 +13,6 @@ import {
   CategoryCreateEdit,
   Home,
   LastOrders,
-  OrderCompletedView,
-  OrdersCompleted,
   OrdersControl,
   OrderView,
   ProductCreateEdit,
@@ -25,13 +23,17 @@ import {
   Profile,
   Search,
   UserCreateEdit,
+  UserPasswordEdit,
   UsersControl,
 } from './components/screens';
 import { Auth } from './components/screens/auth';
+import { OrderCompletedView } from './components/screens/profile/order-completed-view';
+import { OrdersCompleted } from './components/screens/profile/orders-completed';
+import { Loading } from './components/ui';
 import { useAppDispatch, useAppSelector } from './hooks/redux';
 import { fetchMe } from './redux/http/userThunk';
 import { TIconName, TTabsName } from './types/navigation';
-import { isAdmin } from './utils/user';
+import { isAdmin } from './utils';
 
 const tabsName: TTabsName = {
   homeGroup: 'home group',
@@ -121,6 +123,24 @@ const ProfileStackGroup = () => {
         component={OrdersCompletedPageStackGroup}
         options={{
           title: 'Պատվերների պատմություն',
+        }}
+      />
+      <MyPageStack.Screen
+        name="userCreateEdit"
+        component={UserCreateEdit}
+        options={{
+          title: 'Փոփոխել հաճախորդին',
+          presentation: 'modal',
+          headerTitleStyle: { fontSize: 14 },
+        }}
+      />
+      <MyPageStack.Screen
+        name="userPasswordEdit"
+        component={UserPasswordEdit}
+        options={{
+          title: 'Փոփոխել գաղտաբառը',
+          presentation: 'modal',
+          headerTitleStyle: { fontSize: 14 },
         }}
       />
     </MyPageStack.Navigator>
@@ -326,7 +346,7 @@ const Tab = createBottomTabNavigator();
 
 const TabGroup = () => {
   const { isAuth, user } = useAppSelector((state) => state.user);
-  const { formData } = useAppSelector((state) => state.basket);
+  const { basket } = useAppSelector((state) => state.order);
 
   return (
     <Tab.Navigator
@@ -349,9 +369,9 @@ const TabGroup = () => {
 
           return route.name === tabsName.basket ? (
             <View className="relative">
-              {formData.items.length > 0 ? (
+              {basket.items.length > 0 ? (
                 <View className="rounded-full bg-red-600 w-4 h-4 justify-center items-center z-50 absolute -right-1.5 -top-1">
-                  <Text className="text-[10px]">{formData.items.length}</Text>
+                  <Text className="text-[10px]">{basket.items.length}</Text>
                 </View>
               ) : null}
               <SimpleLineIcons name="basket" size={26} color={color} />
@@ -420,15 +440,20 @@ const TabGroup = () => {
 
 const Navigation = () => {
   const dispatch = useAppDispatch();
+  const { fetchMe: meStatus } = useAppSelector((state) => state.user);
+
   React.useEffect(() => {
     dispatch(fetchMe());
   }, []);
 
-  return (
+  return meStatus.isLoading ? (
+    <Loading />
+  ) : (
     <NavigationContainer>
       <TabGroup />
       <Toast />
     </NavigationContainer>
   );
 };
+
 export default Navigation;

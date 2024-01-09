@@ -94,7 +94,6 @@ export const updateUserThunk = createAsyncThunk(
 export const createUserThunk = createAsyncThunk(
   'create/user',
   async (formData: FormikValues, { rejectWithValue }) => {
-    console.log(formData);
     try {
       const { data } = await $authHost.post<TPayloadActionUser>('auth/registration', {
         ...formData,
@@ -107,7 +106,28 @@ export const createUserThunk = createAsyncThunk(
     }
   }
 );
-export const fetchMe = createAsyncThunk('me/user', async () => {
-  const { data } = await $authHost.get('auth/me');
-  return data;
+export const updatePasswordThunk = createAsyncThunk(
+  'updatePassword/user',
+  async ({ id, formData }: TUpdateItem<FormikValues>, { rejectWithValue }) => {
+    try {
+      const { data } = await $authHost.put<string>(`user/update/password/${id}`, formData);
+      return data;
+    } catch (err) {
+      const error = err as AxiosError;
+      if (error.response) {
+        return rejectWithValue(error.response.status);
+      }
+    }
+  }
+);
+export const fetchMe = createAsyncThunk('me/user', async (_, { rejectWithValue }) => {
+  try {
+    const { data } = await $authHost.get('auth/me');
+    return data;
+  } catch (err) {
+    const error = err as AxiosError;
+    if (error.response) {
+      return rejectWithValue(error.response.status);
+    }
+  }
 });

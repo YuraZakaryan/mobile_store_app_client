@@ -2,8 +2,8 @@ import { FormikErrors, FormikHandlers, FormikProps, FormikTouched, FormikValues 
 import React, { PropsWithChildren } from 'react';
 import { ObjectSchema } from 'yup';
 
-import { TInitialUserCreateEditFormValue } from '../components/screens/profile/user-create-edit/types';
-import { IOrder, TProduct } from '../redux/types';
+import { TProduct } from '../redux/types';
+import { TOrder } from '../redux/types/order';
 
 export interface IProductItem {
   index: number;
@@ -40,12 +40,14 @@ export interface ICreateItemButton {
 export interface ILabelInput extends PropsWithChildren, TClassName {
   label: string;
   icon?: React.ReactNode;
+  required?: boolean;
 }
 export type TClassName = {
   className?: string;
 };
 export interface IOrderInfo {
-  item: IOrder;
+  item: TOrder;
+  totalAmount: number;
 }
 export interface IFieldWithError<T extends FormikValues> extends PropsWithChildren {
   fieldName: string;
@@ -64,4 +66,21 @@ export interface ICrudMainButton extends PropsWithChildren {
   disabled: boolean;
   isLoading: boolean;
   handleSubmit: FormikHandlers['handleSubmit'];
+}
+export interface ISaleIcon {
+  discount: number;
+}
+export interface IOrderList extends PropsWithChildren {
+  item: TOrder;
+}
+export interface IEmptyOrder {
+  text: string;
+}
+export interface IPaginationButtons {
+  start_show?: number;
+  total_items: number;
+  previousButtonDisable: boolean;
+  nextButtonDisable: boolean;
+  handlePrevPage: () => void;
+  handleNextPage: () => void;
 }

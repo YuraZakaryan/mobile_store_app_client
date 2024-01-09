@@ -1,39 +1,41 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 
-import { EPacking } from '../../../redux/types';
+import { EPackage } from '../../../redux/types/order';
 import { IOrderInfo } from '../../../types';
 import { formatDate } from '../../../utils';
-import { OrderInfoItem } from '../../screens/order-completed-view/wrapper/oreder-info-item';
+import { formattedPrice, getOrderStatus } from '../../../utils/product';
+import { OrderInfoItem } from '../../screens/profile/order-completed-view/wrapper/oreder-info-item';
 
-export const OrderInfo: React.FC<IOrderInfo> = React.memo(({ item }) => {
-  const totalAmount = item?.items.reduce((acc, item) => acc + item.orderCount * item.price, 0);
-  const totalCount = item?.items.reduce((acc, item) => acc + item.orderCount, 0);
+export const OrderInfo: React.FC<IOrderInfo> = React.memo((props) => {
+  const { item, totalAmount } = props;
+  const totalCount = item?.items.reduce((acc, item) => {
+    if (item.product) {
+      return acc + item.itemCount;
+    }
+    return acc;
+  }, 0);
 
-  const formattedTotalAmount = totalAmount?.toLocaleString('en-US');
-  const orderStatus =
-    item.status === 'neutral'
-      ? 'Չեզոք'
-      : item.status === 'onTheRoad'
-        ? 'Ճանապարհին'
-        : item.status === 'completed'
-          ? 'Ավարտված'
-          : 'Անորոշ';
+  const orderStatus = getOrderStatus(item.status);
 
   return (
     <View className="w-full">
       <Text className="text-base font-bold text-gray-500">Ինֆորմացիա</Text>
       <View className="mt-2">
-        <OrderInfoItem label="Պատվիրատու" text={item?.user.firstname + ' ' + item?.user.lastname} />
-        <OrderInfoItem label="Հեռախոսահամար" text={item?.user.phone} />
+        <OrderInfoItem
+          label="Պատվիրատու"
+          text={item.author?.firstname + ' ' + item.author?.lastname}
+        />
+        <OrderInfoItem label="Հեռախոսահամար" text={item.author?.phone as string} />
+        <OrderInfoItem label="Հասցե" text={item.author?.address as string} />
         <OrderInfoItem label="Կարգավիճակը" text={orderStatus} />
-        <OrderInfoItem label="Ընդհանուր գինը" text={`${formattedTotalAmount} ․դր`} />
+        <OrderInfoItem label="Ընդհանուր գինը" text={`${formattedPrice(totalAmount)} ․դր`} />
         <OrderInfoItem
           label="Փաթեթավորման տեսակը"
           text={
-            item?.packaging === EPacking.BAG
+            item?.packaging === EPackage.BAG
               ? 'Տոպրակ'
-              : item?.packaging === EPacking.BOX
+              : item?.packaging === EPackage.BOX
                 ? 'Արկղ'
                 : 'Անորոշ'
           }
@@ -41,23 +43,29 @@ export const OrderInfo: React.FC<IOrderInfo> = React.memo(({ item }) => {
         <OrderInfoItem label="Ընդհանուր քանակը" text={totalCount as number} />
         <OrderInfoItem
           label="Պատվերի ստեղծում"
-          text={formatDate(item?.created_at as string)}
+          text={formatDate(item?.createdAt as string)}
           textClassName="text-[11px]"
         />
-        <OrderInfoItem
-          label="Պատվերի հաստատում"
-          text={formatDate(item?.orderStartTime as string)}
-          textClassName="text-[11px]"
-        />
-        <OrderInfoItem
-          label="Պատվերի ընդունում"
-          text={formatDate(item?.orderStartTime as string)}
-          textClassName="text-[11px]"
-        />
-        {!item?.orderCompletedTime && (
+        {item?.confirmedTime && (
+          <OrderInfoItem
+            label="Պատվերի հաստատում"
+            text={formatDate(item?.confirmedTime as string)}
+            textClassName="text-[11px]"
+          />
+        )}
+
+        {item?.acceptedTime && (
+          <OrderInfoItem
+            label="Պատվերի ընդունում"
+            text={formatDate(item?.acceptedTime as string)}
+            textClassName="text-[11px]"
+          />
+        )}
+
+        {item?.deliveredTime && (
           <OrderInfoItem
             label="Պատվերի առաքում"
-            text={formatDate(item?.orderCompletedTime as string)}
+            text={formatDate(item?.deliveredTime as string)}
             textClassName="text-[11px]"
           />
         )}

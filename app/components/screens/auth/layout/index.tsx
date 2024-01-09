@@ -41,7 +41,7 @@ export const LayoutAuth: React.FC<PropsWithChildren<ILayoutAuth>> = React.memo((
             alignItems: 'center',
             justifyContent: 'center',
           }}>
-          <View className="flex-1 w-full justify-center items-center">
+          <View className="flex-1 m-5 w-full justify-center items-center">
             <View className="items-center w-full">
               <FontAwesome
                 name="user"

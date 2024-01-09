@@ -14,7 +14,14 @@ import {
 import { API_URL, ICON_MAIN_COLOR } from '../../../../utils/constants';
 import { pickImageSetFormik } from '../../../../utils/image';
 import { createAndEditCategoryFormSchema } from '../../../../validation';
-import { CreateEditForm, DeleteButton, FieldWithError, LabelInput, Main } from '../../../wrappers';
+import {
+  CreateEditForm,
+  CrudButtonGroup,
+  DeleteButton,
+  FieldWithError,
+  LabelInput,
+  Main,
+} from '../../../wrappers';
 import { CrudMainButton } from '../../../wrappers/crud-main-button';
 
 export const CategoryCreateEdit = () => {
@@ -95,7 +102,7 @@ export const CategoryCreateEdit = () => {
           } = formikProps;
           return (
             <>
-              <LabelInput label="Անվանում" className="mt-5">
+              <LabelInput label="Անվանում" className="mt-5" required>
                 <FieldWithError fieldName="title" errors={errors} touched={touched}>
                   <TextInput
                     onChangeText={handleChange('title')}
@@ -154,24 +161,23 @@ export const CategoryCreateEdit = () => {
                   </View>
                 )}
               </View>
-              <View>
-                <CrudMainButton
-                  handleSubmit={handleSubmit}
-                  disabled={!isValid || !dirty}
-                  isLoading={update.isLoading || create.isLoading}>
-                  {item ? 'Պահպանել' : 'Ստեղծել'}
-                </CrudMainButton>
-              </View>
-              {item ? (
-                <View className="gap-1">
-                  <DeleteButton handleDelete={handleDelete} isLoading={deleteStatus.isLoading}>
-                    Ջնջել
-                  </DeleteButton>
-                  <Text className="text-red-500 text-[12px] font-bold">
-                    ! Զգուշացում, ջնջելով կատեգորիան, նաև կջնջվեն իր հետ կապված բոլոր ապրանքները !
-                  </Text>
+              <CrudButtonGroup>
+                <View>
+                  <CrudMainButton
+                    handleSubmit={handleSubmit}
+                    disabled={!isValid || !dirty}
+                    isLoading={update.isLoading || create.isLoading}>
+                    {item ? 'Պահպանել' : 'Ստեղծել'}
+                  </CrudMainButton>
                 </View>
-              ) : null}
+                {item ? (
+                  <View>
+                    <DeleteButton handleDelete={handleDelete} isLoading={deleteStatus.isLoading}>
+                      Ջնջել
+                    </DeleteButton>
+                  </View>
+                ) : null}
+              </CrudButtonGroup>
             </>
           );
         }}

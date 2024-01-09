@@ -1,137 +1,229 @@
-import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
+import { FontAwesome } from '@expo/vector-icons';
 import { NavigationProp, ParamListBase, useNavigation, useRoute } from '@react-navigation/native';
 import { FormikValues } from 'formik';
 import React from 'react';
-import { Image, Keyboard, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Image, Keyboard, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
-import { SelectList } from 'react-native-dropdown-select-list';
 
 import { TInitialProductCreateEditFormValue, TProductCreateEditRouteParams } from './types';
-import { ICON_MAIN_COLOR } from '../../../../utils/constants';
+import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
+import { fetchCategoriesThunk } from '../../../../redux/http/categoryThunk';
+import {
+  createProductThunk,
+  deleteProductThunk,
+  updateProductThunk,
+} from '../../../../redux/http/productThunk';
+import { TCategory } from '../../../../redux/types';
+import { API_URL, ICON_MAIN_COLOR } from '../../../../utils/constants';
 import { pickImageSetFormik } from '../../../../utils/image';
-import { CreateEditForm, LabelInput, Main } from '../../../wrappers';
+import { createAndEditProductFormSchema } from '../../../../validation';
+import {
+  CreateEditForm,
+  CrudButtonGroup,
+  DeleteButton,
+  FieldWithError,
+  LabelInput,
+  Main,
+} from '../../../wrappers';
+import { CrudMainButton } from '../../../wrappers/crud-main-button';
 
 export const ProductCreateEdit = () => {
+  const dispatch = useAppDispatch();
   const route = useRoute();
   const { item }: TProductCreateEditRouteParams =
     (route.params as TProductCreateEditRouteParams) || {};
-  const navigation = useNavigation<NavigationProp<ParamListBase>>();
+  const { setOptions, navigate } = useNavigation<NavigationProp<ParamListBase>>();
+
+  const [open, setOpen] = React.useState(false);
+  const { user } = useAppSelector((state) => state.user);
+  const { categories } = useAppSelector((state) => state.category);
+  const { delete: deleteStatus, create, update } = useAppSelector((state) => state.product);
+
+  const categoryData = categories.items.map((category: TCategory) => ({
+    key: category._id,
+    label: category.title,
+    value: category._id,
+  }));
 
   React.useLayoutEffect((): void => {
-    navigation.setOptions({
+    setOptions({
       headerTitle: item ? item.title : 'Ստեղծել ապրանք',
     });
+    dispatch(fetchCategoriesThunk({}));
   }, [item]);
 
   const initialProductCreateEditFormValue: TInitialProductCreateEditFormValue = {
     title: item?.title || '',
-    price: item?.price || 0,
+    information: item?.information || '',
+    price: item?.price || null,
+    count: item?.count || null,
     discount: item?.discount || 0,
-    code: item?.code || 0,
+    code: item?.code || '',
     picture: item?.picture || null,
-    category: item?.category || '',
+    category: item?.category || categoryData[0].value,
+    author: user?._id as string,
   };
-
   const clearPicture = (setFieldValue: FormikValues['setFieldValue']) => {
     setFieldValue('picture', null);
   };
 
-  const data = [
-    { key: '1', value: 'Mobiles' },
-    { key: '2', value: 'Appliances' },
-    { key: '3', value: 'Cameras' },
-    { key: '4', value: 'Computers' },
-    { key: '5', value: 'Vegetables' },
-    { key: '6', value: 'Diary Products' },
-    { key: '7', value: 'Drinks' },
-  ];
   const handleSelectChange = (value: string, setFieldValue: FormikValues['setFieldValue']) => {
     setFieldValue('category', value);
   };
 
-  const handleClick = (values: TInitialProductCreateEditFormValue) => {
-    alert(values.category);
+  const onSubmit = async (values: FormikValues): Promise<void> => {
+    const formData = new FormData();
+    formData.append('title', values.title);
+    formData.append('information', values.information);
+    formData.append('price', values.price);
+    formData.append('count', values.count);
+    formData.append('discount', values.discount);
+    formData.append('code', values.code);
+    formData.append('category', values.category);
+    formData.append('author', values.author);
+
+    if (values.picture) {
+      formData.append('picture', values.picture);
+    }
+    if (item) {
+      await dispatch(updateProductThunk({ id: item?._id as string, formData }));
+    } else {
+      await dispatch(createProductThunk(formData));
+    }
+  };
+  const handleDelete = async () => {
+    await dispatch(deleteProductThunk({ _id: item?._id as string, navigate }));
   };
 
   return (
     <Main>
-      <ScrollView>
-        <CreateEditForm
-          initialCreateEditFormValue={initialProductCreateEditFormValue}
-          icon={
-            <MaterialIcons
-              name="category"
-              size={85}
-              style={{
-                color: ICON_MAIN_COLOR,
-              }}
-            />
-          }
-          item={item}
-          label="ապրանք"
-          renderItemComponent={(values, handleChange, handleBlur, handleSubmit, setFieldValue) => (
+      <CreateEditForm
+        initialCreateEditFormValue={initialProductCreateEditFormValue}
+        icon={
+          <FontAwesome
+            name="product-hunt"
+            size={85}
+            style={{
+              color: ICON_MAIN_COLOR,
+            }}
+          />
+        }
+        onSubmit={onSubmit}
+        item={item}
+        label="ապրանք"
+        validationSchema={createAndEditProductFormSchema}
+        renderItemComponent={(formikProps) => {
+          const {
+            errors,
+            dirty,
+            touched,
+            values,
+            handleChange,
+            handleBlur,
+            setFieldValue,
+            isValid,
+            handleSubmit,
+          } = formikProps;
+          return (
             <>
-              <LabelInput label="Անվանում" className="mt-5">
-                <TextInput
-                  onChangeText={handleChange('title')}
-                  onBlur={handleBlur('title')}
-                  onSubmitEditing={Keyboard.dismiss}
-                  placeholder="Անվանում"
-                  value={values.title}
-                  className="rounded p-3 border border-gray-600"
-                />
+              <LabelInput label="Անվանում" className="mt-5" required>
+                <FieldWithError fieldName="title" errors={errors} touched={touched}>
+                  <TextInput
+                    onChangeText={handleChange('title')}
+                    onBlur={handleBlur('title')}
+                    onSubmitEditing={Keyboard.dismiss}
+                    placeholder="Անվանում"
+                    value={values.title}
+                    className="rounded px-3 py-3 border border-gray-600"
+                  />
+                </FieldWithError>
               </LabelInput>
-              <LabelInput label="Կատեգորիա">
-                <SelectList
-                  setSelected={(val: string) => handleSelectChange(val, setFieldValue)}
-                  data={data}
-                  save="value"
-                  boxStyles={{
+              <LabelInput label="Ինֆորմացիա">
+                <FieldWithError fieldName="information" errors={errors} touched={touched}>
+                  <TextInput
+                    onChangeText={handleChange('information')}
+                    onBlur={handleBlur('information')}
+                    onSubmitEditing={Keyboard.dismiss}
+                    placeholder="Ինֆորմացիա"
+                    value={values.information}
+                    className="rounded px-3 py-3 border border-gray-600"
+                  />
+                </FieldWithError>
+              </LabelInput>
+              <LabelInput label="Կատեգորիա" required>
+                <DropDownPicker
+                  open={open}
+                  value={values.category}
+                  items={categoryData}
+                  setOpen={setOpen}
+                  style={{
                     borderRadius: 4,
-                    borderColor: 'black',
+                    borderColor: 'gray',
                     paddingLeft: 12,
                     paddingRight: 12,
+                    backgroundColor: 'transparent',
                   }}
-                  dropdownStyles={{
-                    borderRadius: 4,
+                  setValue={(val) => handleSelectChange(val(val), setFieldValue)}
+                  listMode="SCROLLVIEW"
+                  scrollViewProps={{
+                    nestedScrollEnabled: true,
                   }}
                 />
               </LabelInput>
               <LabelInput
-                label="Գին"
+                label="Գինը"
+                required
                 icon={<Text className="text-gray-500 text-[12px] font-bold">դրամ</Text>}>
-                <TextInput
-                  onChangeText={handleChange('price')}
-                  onBlur={handleBlur('price')}
-                  onSubmitEditing={Keyboard.dismiss}
-                  placeholder="Գին"
-                  keyboardType="number-pad"
-                  value={values.price.toString()}
-                  className="rounded p-3 border border-gray-600"
-                />
+                <FieldWithError fieldName="price" errors={errors} touched={touched}>
+                  <TextInput
+                    onChangeText={handleChange('price')}
+                    onBlur={handleBlur('price')}
+                    onSubmitEditing={Keyboard.dismiss}
+                    placeholder="Գին"
+                    keyboardType="number-pad"
+                    value={values.price?.toString()}
+                    className="rounded p-3 border border-gray-600"
+                  />
+                </FieldWithError>
               </LabelInput>
-
               <LabelInput label="Զեղչ" icon={<FontAwesome name="percent" size={12} color="gray" />}>
-                <TextInput
-                  onChangeText={handleChange('discount')}
-                  onBlur={handleBlur('discount')}
-                  onSubmitEditing={Keyboard.dismiss}
-                  placeholder="Զեղչ"
-                  keyboardType="number-pad"
-                  value={values.discount.toString()}
-                  className="rounded p-3 border border-gray-600"
-                />
+                <FieldWithError fieldName="discount" errors={errors} touched={touched}>
+                  <TextInput
+                    onChangeText={handleChange('discount')}
+                    onBlur={handleBlur('discount')}
+                    onSubmitEditing={Keyboard.dismiss}
+                    placeholder="Զեղչ"
+                    keyboardType="number-pad"
+                    value={values.discount.toString()}
+                    className="rounded p-3 border border-gray-600"
+                  />
+                </FieldWithError>
               </LabelInput>
-              <LabelInput label="Կոդ">
-                <TextInput
-                  onChangeText={handleChange('code')}
-                  onBlur={handleBlur('code')}
-                  onSubmitEditing={Keyboard.dismiss}
-                  placeholder="Կոդ"
-                  keyboardType="number-pad"
-                  value={values.code.toString()}
-                  className="rounded p-3 border border-gray-600"
-                />
+              <LabelInput label="Քանակը" required>
+                <FieldWithError fieldName="count" errors={errors} touched={touched}>
+                  <TextInput
+                    onChangeText={handleChange('count')}
+                    onBlur={handleBlur('count')}
+                    onSubmitEditing={Keyboard.dismiss}
+                    placeholder="Քանակը"
+                    keyboardType="number-pad"
+                    value={values.count?.toString()}
+                    className="rounded p-3 border border-gray-600"
+                  />
+                </FieldWithError>
+              </LabelInput>
+              <LabelInput label="Կոդ" required>
+                <FieldWithError fieldName="code" errors={errors} touched={touched}>
+                  <TextInput
+                    onChangeText={handleChange('code')}
+                    onBlur={handleBlur('code')}
+                    onSubmitEditing={Keyboard.dismiss}
+                    placeholder="Կոդ"
+                    keyboardType="number-pad"
+                    value={values.code.toString()}
+                    className="rounded p-3 border border-gray-600"
+                  />
+                </FieldWithError>
               </LabelInput>
               <View className="items-center p-5 border-dashed border-orange-500 border-2 rounded">
                 {values.picture ? (
@@ -144,7 +236,14 @@ export const ProductCreateEdit = () => {
                     <View className="h-full w-full justify-center items-center">
                       {values.picture && (
                         <Image
-                          source={{ uri: values.picture ?? '' }}
+                          source={{
+                            uri:
+                              typeof values.picture === 'object'
+                                ? (values.picture as { uri: string })?.uri
+                                : values.picture.includes('file')
+                                  ? values.picture
+                                  : `${API_URL}/${values.picture}` ?? '',
+                          }}
                           className="w-36 h-36 rounded"
                         />
                       )}
@@ -161,17 +260,27 @@ export const ProductCreateEdit = () => {
                   </View>
                 )}
               </View>
-              <TouchableOpacity
-                className="p-4 bg-orange-400 rounded mt-5"
-                onPress={() => handleClick(values)}>
-                <Text className="text-center font-bold text-white">
-                  {item ? 'Պահպանել' : 'Ստեղծել'}
-                </Text>
-              </TouchableOpacity>
+              <CrudButtonGroup>
+                <View>
+                  <CrudMainButton
+                    handleSubmit={handleSubmit}
+                    disabled={!isValid || !dirty}
+                    isLoading={update.isLoading || create.isLoading}>
+                    {item ? 'Պահպանել' : 'Ստեղծել'}
+                  </CrudMainButton>
+                </View>
+                {item ? (
+                  <View>
+                    <DeleteButton handleDelete={handleDelete} isLoading={deleteStatus.isLoading}>
+                      Ջնջել
+                    </DeleteButton>
+                  </View>
+                ) : null}
+              </CrudButtonGroup>
             </>
-          )}
-        />
-      </ScrollView>
+          );
+        }}
+      />
     </Main>
   );
 };

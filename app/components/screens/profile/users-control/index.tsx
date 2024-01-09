@@ -1,6 +1,6 @@
 import { NavigationProp, ParamListBase, useNavigation } from '@react-navigation/native';
 import React from 'react';
-import { ScrollView, View } from 'react-native';
+import { RefreshControl, ScrollView, View } from 'react-native';
 
 import { UserList } from './wrappers/user-list';
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
@@ -13,12 +13,19 @@ export const UsersControl = () => {
   const [currentUserPage, setUserCurrentPage] = React.useState<number>(1);
   const [currentUnConfirmedUserPage, setUserConfirmedCurrentPage] = React.useState<number>(1);
 
-  React.useEffect((): void => {
+  const fetchUsersData = (): void => {
     dispatch(fetchUsersThunk({ page: currentUserPage, limit: LIMIT_NUMBER }));
+  };
+  const fetchUnconfirmedUsersData = (): void => {
+    dispatch(fetchUnconfirmedUsers({ page: currentUnConfirmedUserPage, limit: LIMIT_NUMBER }));
+  };
+
+  React.useEffect((): void => {
+    fetchUsersData();
   }, [currentUserPage]);
 
   React.useEffect((): void => {
-    dispatch(fetchUnconfirmedUsers({ page: currentUnConfirmedUserPage, limit: LIMIT_NUMBER }));
+    fetchUnconfirmedUsersData();
   }, [currentUnConfirmedUserPage]);
 
   const { users, unconfirmedUsers } = useAppSelector((state) => state.user);
@@ -54,9 +61,19 @@ export const UsersControl = () => {
     }
   };
 
+  const handleRefresh = () => {
+    fetchUsersData();
+    fetchUnconfirmedUsersData();
+  };
   return (
     <Main>
-      <ScrollView>
+      <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={users.isLoading && unconfirmedUsers.isLoading}
+            onRefresh={handleRefresh}
+          />
+        }>
         <View className="m-4">
           {users.total_items > 0 ? (
             <UserList
@@ -65,7 +82,7 @@ export const UsersControl = () => {
               handlePreviousPage={handlePrevUserPage}
               handleNextPage={handleNextUserPage}
               previousButtonDisable={currentUserPage <= 1}
-              nextButtonDisable={currentUnConfirmedUserPage * LIMIT_NUMBER >= users.total_items}
+              nextButtonDisable={currentUserPage * LIMIT_NUMBER >= users.total_items}
               totalItems={users.total_items}
             />
           ) : null}

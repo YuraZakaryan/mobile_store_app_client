@@ -1,6 +1,6 @@
 import { NavigationProp, ParamListBase, useNavigation } from '@react-navigation/native';
 import React from 'react';
-import { Image, ScrollView, Text, View } from 'react-native';
+import { Image, RefreshControl, ScrollView, Text, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
 import { fetchCategoriesThunk } from '../../../../redux/http/categoryThunk';
@@ -12,8 +12,12 @@ export const CategoriesControl = () => {
   const dispatch = useAppDispatch();
   const [currentCategoryPage, setCategoryCurrentPage] = React.useState<number>(1);
 
-  React.useEffect((): void => {
+  const fetchData = (): void => {
     dispatch(fetchCategoriesThunk({ page: currentCategoryPage, limit: LIMIT_NUMBER }));
+  };
+
+  React.useEffect((): void => {
+    fetchData();
   }, [currentCategoryPage]);
 
   const { categories } = useAppSelector((state) => state.category);
@@ -36,9 +40,16 @@ export const CategoriesControl = () => {
     }
   };
 
+  const handleRefresh = () => {
+    fetchData();
+  };
+
   return (
     <Main>
-      <ScrollView>
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={categories.isLoading} onRefresh={handleRefresh} />
+        }>
         <View className="m-4">
           {categories.total_items > 0 ? (
             <CrudList
@@ -61,7 +72,7 @@ export const CategoriesControl = () => {
                   <Image
                     source={{ uri: `${API_URL + '/' + item.picture}` }}
                     alt={item.title}
-                    className="w-10 h-10"
+                    className="w-10 h-10 rounded"
                   />
                 </>
               )}

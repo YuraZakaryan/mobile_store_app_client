@@ -1,7 +1,7 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
 
-import { basketReducer } from './reducers/basket/basketSlice';
 import { categoryReducer } from './reducers/category/categorySlice';
+import { orderReducer } from './reducers/order/orderSlice';
 import { productReducer } from './reducers/product/productSlice';
 import { userReducer } from './reducers/user/userSlice';
 
@@ -9,7 +9,7 @@ const rootReducer = combineReducers({
   user: userReducer,
   product: productReducer,
   category: categoryReducer,
-  basket: basketReducer,
+  order: orderReducer,
 });
 
 export const setupStore = () => {

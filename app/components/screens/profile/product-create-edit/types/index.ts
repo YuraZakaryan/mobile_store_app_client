@@ -6,9 +6,12 @@ export interface TProductCreateEditRouteParams {
 
 export type TInitialProductCreateEditFormValue = {
   title: string;
-  category: string;
-  price: number | string;
+  information: string;
+  price: number | string | null;
   discount: number | string;
-  code: number | string;
+  code: string;
+  count: number | string | null;
   picture: string | null;
+  category: string;
+  author: string;
 };

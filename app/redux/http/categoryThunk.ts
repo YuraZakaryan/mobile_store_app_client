@@ -1,4 +1,3 @@
-import { ParamListBase } from '@react-navigation/native';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { AxiosError } from 'axios';
 import { FormikValues } from 'formik';
@@ -69,7 +68,9 @@ export const deleteCategoryThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      return rejectWithValue(error.message || 'Failed to create category');
+      if (error.response) {
+        return rejectWithValue(error.response.status);
+      }
     }
   }
 );
