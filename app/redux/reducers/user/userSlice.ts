@@ -285,8 +285,10 @@ export const userSlice = createSlice({
       .addCase(
         fetchMe.fulfilled,
         (state: TInitialUserState, action: PayloadAction<TUser>): void => {
-          state.user = action.payload;
-          state.isAuth = true;
+          state.user = action.payload;       
+          if(action.payload) {
+            state.isAuth = true;
+          }             
           state.fetchMe.isError = false;
           state.fetchMe.isLoading = false;
         }
