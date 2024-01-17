@@ -63,7 +63,7 @@ export const CategoryCreateEdit = () => {
     if (item) {
       await dispatch(updateCategoryThunk({ id: item?._id as string, formData }));
     } else {
-      await dispatch(createCategoryThunk(formData));
+      await dispatch(createCategoryThunk({ formData, navigate }));
     }
   };
 

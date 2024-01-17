@@ -25,7 +25,9 @@ export const CreateEditForm = <T extends FormikValues>(
         <View className="items-center w-full justify-center my-4">
           <View className="items-center w-full mb-3">
             {icon}
-            <MainTitle>{item ? `Փոփոխել ${label}` : `Ստեղծել ${label}`}</MainTitle>
+            <MainTitle>
+              {item || label === 'գաղտնաբառը' ? `Փոփոխել ${label}` : `Ստեղծել ${label}`}
+            </MainTitle>
           </View>
           <Formik
             initialValues={initialCreateEditFormValue}

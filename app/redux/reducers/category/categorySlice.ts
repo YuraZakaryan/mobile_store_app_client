@@ -77,8 +77,6 @@ const categorySlice = createSlice({
         (state: TInitialCategoryState, action: PayloadAction<TCategory>): void => {
           state.create.isError = false;
           state.create.isLoading = false;
-
-          state.categories.items.unshift(action.payload);
           SHOW_SUCCESS('Կատեգորիան հաջողությամբ ստեղծվեց');
         }
       )
@@ -117,22 +115,10 @@ const categorySlice = createSlice({
         state.update.isLoading = false;
         SHOW_ERROR('Կատեգորիայի փոփոխման հետ կապված խնդիր է առաջացել');
       })
-      .addCase(
-        deleteCategoryThunk.fulfilled,
-        (state: TInitialCategoryState, action: PayloadAction<string | undefined>): void => {
-          state.delete.isError = false;
-          state.delete.isLoading = false;
-
-          if (action.payload) {
-            state.categories.items = state.categories.items.filter(
-              (category: TCategory): boolean => category._id !== action.payload
-            );
-            SHOW_SUCCESS('Կատեգորիան հաջողությամբ ջնջվեց');
-          } else {
-            console.error('deleteCategoryThunk.fulfilled: Payload is undefined');
-          }
-        }
-      )
+      .addCase(deleteCategoryThunk.fulfilled, (state: TInitialCategoryState): void => {
+        state.delete.isError = false;
+        state.delete.isLoading = false;
+      })
       .addCase(deleteCategoryThunk.pending, (state: TInitialCategoryState): void => {
         state.delete.isError = false;
         state.delete.isLoading = true;

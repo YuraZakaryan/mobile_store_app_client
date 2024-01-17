@@ -3,12 +3,15 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { SecureStoreService } from '../../../services';
 import { SHOW_ERROR, SHOW_SUCCESS } from '../../../toasts';
 import {
+  cancelUserThunk,
   createUserThunk,
+  fetchBannedUsers,
   fetchMe,
   fetchUnconfirmedUsers,
   fetchUsersThunk,
   loginThunk,
   registrationThunk,
+  toggleBanThunk,
   updatePasswordThunk,
   updateUserThunk,
 } from '../../http/userThunk';
@@ -30,6 +33,7 @@ const initialState: TInitialUserState = {
     items: [],
   },
   unconfirmedUsers: { isLoading: false, isError: false, total_items: 0, items: [] },
+  bannedUsers: { isLoading: false, isError: false, total_items: 0, items: [] },
   fetchMe: {
     isLoading: false,
     isError: false,
@@ -48,6 +52,14 @@ const initialState: TInitialUserState = {
     isError: false,
   },
   updateUser: {
+    isLoading: false,
+    isError: false,
+  },
+  cancelUser: {
+    isLoading: false,
+    isError: false,
+  },
+  banUser: {
     isLoading: false,
     isError: false,
   },
@@ -152,6 +164,27 @@ export const userSlice = createSlice({
         state.unconfirmedUsers.isError = true;
       })
       .addCase(
+        fetchBannedUsers.fulfilled,
+        (state: TInitialUserState, action: PayloadAction<TItemsWithTotalLength<TUser[]>>) => {
+          const { total_items, items } = action.payload;
+
+          state.bannedUsers = {
+            total_items,
+            items,
+            isError: false,
+            isLoading: false,
+          };
+        }
+      )
+      .addCase(fetchBannedUsers.pending, (state: TInitialUserState): void => {
+        state.bannedUsers.isLoading = true;
+        state.bannedUsers.isError = false;
+      })
+      .addCase(fetchBannedUsers.rejected, (state: TInitialUserState): void => {
+        state.bannedUsers.isLoading = false;
+        state.bannedUsers.isError = true;
+      })
+      .addCase(
         updateUserThunk.fulfilled,
         (state: TInitialUserState, action: PayloadAction<TUser>): void => {
           state.updateUser.isError = false;
@@ -198,17 +231,11 @@ export const userSlice = createSlice({
           SHOW_ERROR('Հին գաղտնաբառը սխալ է');
         }
       })
-      .addCase(
-        createUserThunk.fulfilled,
-        (state: TInitialUserState, action: PayloadAction<TPayloadActionUser>): void => {
-          const { user } = action.payload;
-          state.createUser.isError = false;
-          state.createUser.isLoading = false;
-
-          state.users.items.push(user);
-          SHOW_SUCCESS('Բաժանորդի հաջողությամբ ստեղծվեց');
-        }
-      )
+      .addCase(createUserThunk.fulfilled, (state: TInitialUserState): void => {
+        state.createUser.isError = false;
+        state.createUser.isLoading = false;
+        SHOW_SUCCESS('Բաժանորդի հաջողությամբ ստեղծվեց');
+      })
       .addCase(createUserThunk.pending, (state: TInitialUserState): void => {
         state.createUser.isError = false;
         state.createUser.isLoading = true;
@@ -218,7 +245,43 @@ export const userSlice = createSlice({
         state.createUser.isLoading = false;
         SHOW_ERROR('Բաժանորդի ստեղծման հետ կապված խնդիր է առաջացել');
       })
-
+      .addCase(cancelUserThunk.fulfilled, (state: TInitialUserState): void => {
+        state.cancelUser.isError = false;
+        state.cancelUser.isLoading = false;
+        SHOW_SUCCESS('Բաժանորդը հաջողությամբ չեղարկվեց');
+      })
+      .addCase(cancelUserThunk.pending, (state: TInitialUserState): void => {
+        state.cancelUser.isError = false;
+        state.cancelUser.isLoading = true;
+      })
+      .addCase(cancelUserThunk.rejected, (state: TInitialUserState): void => {
+        state.cancelUser.isError = true;
+        state.cancelUser.isLoading = false;
+        SHOW_ERROR('Բաժանորդի չեղարկման հետ կապված խնդիր է առաջացել');
+      })
+      .addCase(
+        toggleBanThunk.fulfilled,
+        (state: TInitialUserState, action: PayloadAction<{ message: string }>): void => {
+          state.banUser.isError = false;
+          state.banUser.isLoading = false;
+          SHOW_SUCCESS(
+            `${
+              action.payload.message === 'User banned'
+                ? 'Բաժանորդը հաջողությամբ ապաակտիվացվեց'
+                : 'Բաժանորդը հաջողությամբ ակտիվացվեց'
+            }`
+          );
+        }
+      )
+      .addCase(toggleBanThunk.pending, (state: TInitialUserState): void => {
+        state.banUser.isError = false;
+        state.banUser.isLoading = true;
+      })
+      .addCase(toggleBanThunk.rejected, (state: TInitialUserState): void => {
+        state.banUser.isError = true;
+        state.banUser.isLoading = false;
+        SHOW_ERROR('Բաժանորդի ակտիվացման կամ ապաակտիվացման հետ կապված խնդիր է առաջացել');
+      })
       .addCase(
         fetchMe.fulfilled,
         (state: TInitialUserState, action: PayloadAction<TUser>): void => {
@@ -229,13 +292,11 @@ export const userSlice = createSlice({
         }
       )
       .addCase(fetchMe.pending, (state: TInitialUserState): void => {
-        console.log('pending');
         state.fetchMe.isError = false;
         state.fetchMe.isLoading = true;
       })
       .addCase(fetchMe.rejected, (state: TInitialUserState): void => {
         state.isAuth = false;
-        console.log('dwadwa');
         state.fetchMe.isError = true;
         state.fetchMe.isLoading = false;
       }),

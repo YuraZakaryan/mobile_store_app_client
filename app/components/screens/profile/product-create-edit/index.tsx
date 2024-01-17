@@ -88,7 +88,7 @@ export const ProductCreateEdit = () => {
     if (item) {
       await dispatch(updateProductThunk({ id: item?._id as string, formData }));
     } else {
-      await dispatch(createProductThunk(formData));
+      await dispatch(createProductThunk({ formData, navigate }));
     }
   };
   const handleDelete = async () => {

@@ -4,8 +4,11 @@ import { FormikValues } from 'formik';
 
 import { $authHost } from './index';
 import { TInitialLoginFormValue } from '../../components/screens/auth/types';
+import { TInitialUserCreateEditFormValue } from '../../components/screens/profile/user-create-edit/types';
 import { SecureStoreService } from '../../services';
 import {
+  TCreateItemAndNavigate,
+  TDeleteItem,
   TFetchOptions,
   TItemsWithTotalLength,
   TPayloadActionUser,
@@ -78,6 +81,22 @@ export const fetchUnconfirmedUsers = createAsyncThunk(
     }
   }
 );
+export const fetchBannedUsers = createAsyncThunk(
+  'fetchBanned/users',
+  async ({ page = 1, limit = 5 }: TFetchOptions, { rejectWithValue }) => {
+    const skip = (page - 1) * limit;
+
+    try {
+      const { data } = await $authHost.get<TItemsWithTotalLength<TUser[]>>(
+        `user/all?limit=${limit}&skip=${skip}&banned=true`
+      );
+      return data;
+    } catch (err) {
+      const error = err as AxiosError;
+      return rejectWithValue(error.message || 'Failed to fetch banned users');
+    }
+  }
+);
 export const updateUserThunk = createAsyncThunk(
   'update/user',
   async ({ id, formData }: TUpdateItem<FormikValues>, { rejectWithValue }) => {
@@ -93,15 +112,17 @@ export const updateUserThunk = createAsyncThunk(
 
 export const createUserThunk = createAsyncThunk(
   'create/user',
-  async (formData: FormikValues, { rejectWithValue }) => {
+  async ({ formData, navigate }: TCreateItemAndNavigate<FormikValues>, { rejectWithValue }) => {
     try {
       const { data } = await $authHost.post<TPayloadActionUser>('auth/registration', {
         ...formData,
         confirmed: true,
       });
+      navigate('users-control');
       return data;
     } catch (err) {
       const error = err as AxiosError;
+      console.log(error.response);
       return rejectWithValue(error.message || 'Failed to create user');
     }
   }
@@ -131,3 +152,29 @@ export const fetchMe = createAsyncThunk('me/user', async (_, { rejectWithValue }
     }
   }
 });
+export const toggleBanThunk = createAsyncThunk(
+  'toggleBan/user',
+  async ({ _id, navigate }: TDeleteItem, { rejectWithValue }) => {
+    try {
+      const { data } = await $authHost.put<{ message: string }>(`user/ban/${_id}`);
+      navigate('users-control');
+      return data;
+    } catch (err) {
+      const error = err as AxiosError;
+      return rejectWithValue(error.message || 'Failed to toggle bun');
+    }
+  }
+);
+export const cancelUserThunk = createAsyncThunk(
+  'cancel/user',
+  async ({ _id, navigate }: TDeleteItem, { rejectWithValue }) => {
+    try {
+      const { data } = await $authHost.delete<string>(`user/${_id}`);
+      navigate('users-control');
+      return data;
+    } catch (err) {
+      const error = err as AxiosError;
+      return rejectWithValue(error.message || 'Failed to cancel user');
+    }
+  }
+);

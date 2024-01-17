@@ -4,11 +4,13 @@ import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 import { IDeleteButton } from '../../../types';
 
 export const DeleteButton: React.FC<IDeleteButton> = (props) => {
-  const { children, handleDelete, isLoading } = props;
+  const { children, handleDelete, isLoading, className } = props;
   return (
     <View>
       <TouchableOpacity
-        className="min-h-[40px] items-center justify-center p-2 rounded bg-red-500"
+        className={`min-h-[40px] items-center justify-center p-2 rounded bg-red-500 ${
+          className ? className : ''
+        }`}
         onPress={handleDelete}>
         {isLoading ? (
           <ActivityIndicator size="small" />

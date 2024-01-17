@@ -10,7 +10,10 @@ import { CreateItemButton, CrudList, Main } from '../../../wrappers';
 
 export const CategoriesControl = () => {
   const dispatch = useAppDispatch();
+  const { create, update, delete: deleteCategory } = useAppSelector((state) => state.category);
   const [currentCategoryPage, setCategoryCurrentPage] = React.useState<number>(1);
+
+  const isLoading = create.isLoading || update.isLoading || deleteCategory.isLoading;
 
   const fetchData = (): void => {
     dispatch(fetchCategoriesThunk({ page: currentCategoryPage, limit: LIMIT_NUMBER }));
@@ -18,7 +21,7 @@ export const CategoriesControl = () => {
 
   React.useEffect((): void => {
     fetchData();
-  }, [currentCategoryPage]);
+  }, [currentCategoryPage, isLoading]);
 
   const { categories } = useAppSelector((state) => state.category);
   const { navigate } = useNavigation<NavigationProp<ParamListBase>>();

@@ -58,7 +58,7 @@ export type TRoleSelect = {
   label: string;
   value: string;
 };
-export interface IDeleteButton extends PropsWithChildren {
+export interface IDeleteButton extends PropsWithChildren, TClassName {
   isLoading: boolean;
   handleDelete: () => void;
 }

@@ -22,3 +22,4 @@ export type TUpdateItem<T> = {
   formData: T;
 };
 export type TDeleteItem = { _id: string; navigate: (route: string) => void };
+export type TCreateItemAndNavigate<T> = { formData: T; navigate: (route: string) => void };

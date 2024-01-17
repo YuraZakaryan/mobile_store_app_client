@@ -4,14 +4,22 @@ import { RefreshControl, ScrollView, View } from 'react-native';
 
 import { UserList } from './wrappers/user-list';
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
-import { fetchUnconfirmedUsers, fetchUsersThunk } from '../../../../redux/http/userThunk';
+import {
+  fetchBannedUsers,
+  fetchUnconfirmedUsers,
+  fetchUsersThunk,
+} from '../../../../redux/http/userThunk';
 import { LIMIT_NUMBER } from '../../../../utils/constants';
 import { CreateItemButton, Main } from '../../../wrappers';
 
 export const UsersControl = () => {
   const dispatch = useAppDispatch();
+  const { createUser, updateUser, cancelUser, banUser } = useAppSelector((state) => state.user);
   const [currentUserPage, setUserCurrentPage] = React.useState<number>(1);
   const [currentUnConfirmedUserPage, setUserConfirmedCurrentPage] = React.useState<number>(1);
+  const [currentBannedUserPage, setUserBannedCurrentPage] = React.useState<number>(1);
+  const isLoading =
+    createUser.isLoading || updateUser.isLoading || cancelUser.isLoading || banUser.isLoading;
 
   const fetchUsersData = (): void => {
     dispatch(fetchUsersThunk({ page: currentUserPage, limit: LIMIT_NUMBER }));
@@ -19,16 +27,22 @@ export const UsersControl = () => {
   const fetchUnconfirmedUsersData = (): void => {
     dispatch(fetchUnconfirmedUsers({ page: currentUnConfirmedUserPage, limit: LIMIT_NUMBER }));
   };
-
+  const fetchBannedUsersData = (): void => {
+    dispatch(fetchBannedUsers({ page: currentBannedUserPage, limit: LIMIT_NUMBER }));
+  };
   React.useEffect((): void => {
     fetchUsersData();
-  }, [currentUserPage]);
+  }, [currentUserPage, isLoading]);
 
   React.useEffect((): void => {
     fetchUnconfirmedUsersData();
-  }, [currentUnConfirmedUserPage]);
+  }, [currentUnConfirmedUserPage, isLoading]);
 
-  const { users, unconfirmedUsers } = useAppSelector((state) => state.user);
+  React.useEffect((): void => {
+    fetchBannedUsersData();
+  }, [currentBannedUserPage, isLoading]);
+
+  const { users, unconfirmedUsers, bannedUsers } = useAppSelector((state) => state.user);
   const { navigate } = useNavigation<NavigationProp<ParamListBase>>();
 
   const handleClick = (): void => {
@@ -61,9 +75,23 @@ export const UsersControl = () => {
     }
   };
 
+  const handlePrevBannedUserPage = (): void => {
+    if (currentBannedUserPage > 1) {
+      setUserBannedCurrentPage((prevPage: number) => prevPage - 1);
+    }
+  };
+
+  const handleNextBannedUserPage = (): void => {
+    const totalBannedUsers: number = unconfirmedUsers.total_items;
+    if (currentBannedUserPage * LIMIT_NUMBER < totalBannedUsers) {
+      setUserBannedCurrentPage((prevPage: number) => prevPage + 1);
+    }
+  };
+
   const handleRefresh = () => {
     fetchUsersData();
     fetchUnconfirmedUsersData();
+    fetchBannedUsersData();
   };
   return (
     <Main>
@@ -99,7 +127,17 @@ export const UsersControl = () => {
               totalItems={unconfirmedUsers.total_items}
             />
           ) : null}
-
+          {bannedUsers.total_items > 0 ? (
+            <UserList
+              users={bannedUsers.items}
+              label="Ապաակտիվացված հաճախորդներ"
+              handlePreviousPage={handlePrevBannedUserPage}
+              handleNextPage={handleNextBannedUserPage}
+              previousButtonDisable={currentBannedUserPage <= 1}
+              nextButtonDisable={currentBannedUserPage * LIMIT_NUMBER >= bannedUsers.total_items}
+              totalItems={bannedUsers.total_items}
+            />
+          ) : null}
           <CreateItemButton handleClick={handleClick} createButtonLabel="Ստեղծել հաճախորդ" />
         </View>
       </ScrollView>

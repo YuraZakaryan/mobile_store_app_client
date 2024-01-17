@@ -16,6 +16,7 @@ export type TUser = {
   phone: string;
   role: TRole;
   confirmed: boolean;
+  banned: boolean;
 };
 
 export type TStateStatus = {
@@ -29,11 +30,14 @@ export type TInitialUserState = {
   user: TUser | null;
   users: TItemsWithTotalLength<TUser[]>;
   unconfirmedUsers: TItemsWithTotalLength<TUser[]>;
+  bannedUsers: TItemsWithTotalLength<TUser[]>;
   login: TStateStatus;
   registration: TStateStatus;
   fetchMe: TStateStatus;
   createUser: TStateStatus;
   updateUser: TStateStatus;
+  cancelUser: TStateStatus;
+  banUser: TStateStatus;
   updatePassword: TStateStatus;
 };
 

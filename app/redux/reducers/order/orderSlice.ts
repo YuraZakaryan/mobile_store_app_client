@@ -134,6 +134,8 @@ const orderSlice = createSlice({
         if (action.payload) {
           if (action.payload === 409) {
             SHOW_ERROR('Ձեր էջը հաստատված չէ, փորձել մի փոքր ուշ');
+          } else if (action.payload === 410) {
+            SHOW_ERROR('Ձեր հաշիվը արգելափակված է');
           } else if (action.payload === 401) {
             SHOW_ERROR('Կխնդրեինք առաջին հերթին մուտք գործել');
           } else {

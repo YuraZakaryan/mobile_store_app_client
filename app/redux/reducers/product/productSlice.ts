@@ -237,8 +237,6 @@ export const productSlice = createSlice({
         (state: TInitialProductState, action: PayloadAction<TProduct>): void => {
           state.create.isError = false;
           state.create.isLoading = false;
-
-          state.products.items.unshift(action.payload);
           SHOW_SUCCESS('Ապրանքը հաջողությամբ ստեղծվեց');
         }
       )
@@ -277,18 +275,11 @@ export const productSlice = createSlice({
         state.update.isLoading = false;
         SHOW_ERROR('Ապրանքի փոփոխման հետ կապված խնդիր է առաջացել');
       })
-      .addCase(
-        deleteProductThunk.fulfilled,
-        (state: TInitialProductState, action: PayloadAction<string>): void => {
-          state.delete.isError = false;
-          state.delete.isLoading = false;
-
-          state.products.items = state.products.items.filter(
-            (category: TProduct): boolean => category._id !== action.payload
-          );
-          SHOW_SUCCESS('Ապրանքը հաջողությամբ ջնջվեց');
-        }
-      )
+      .addCase(deleteProductThunk.fulfilled, (state: TInitialProductState): void => {
+        state.delete.isError = false;
+        state.delete.isLoading = false;
+        SHOW_SUCCESS('Ապրանքը հաջողությամբ ջնջվեց');
+      })
       .addCase(deleteProductThunk.pending, (state: TInitialProductState): void => {
         state.delete.isError = false;
         state.delete.isLoading = true;

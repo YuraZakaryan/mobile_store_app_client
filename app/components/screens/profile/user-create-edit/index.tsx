@@ -8,13 +8,20 @@ import MaskInput from 'react-native-mask-input';
 
 import { TInitialUserCreateEditFormValue, TUserCreateEditRouteParams } from './types';
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
-import { createUserThunk, updateUserThunk } from '../../../../redux/http/userThunk';
+import { deleteProductThunk } from '../../../../redux/http/productThunk';
+import {
+  cancelUserThunk,
+  createUserThunk,
+  toggleBanThunk,
+  updateUserThunk,
+} from '../../../../redux/http/userThunk';
 import { selectRoles } from '../../../../utils';
 import { ICON_MAIN_COLOR } from '../../../../utils/constants';
 import { registrationFormSchema, updateUserFormSchema } from '../../../../validation';
 import {
   CreateEditForm,
   CrudButtonGroup,
+  DeleteButton,
   FieldWithError,
   LabelInput,
   Main,
@@ -25,13 +32,13 @@ export const UserCreateEdit = () => {
   const dispatch = useAppDispatch();
   const [open, setOpen] = React.useState(false);
   const route = useRoute();
-  const { createUser, updateUser } = useAppSelector((state) => state.user);
+  const { createUser, updateUser, cancelUser, banUser } = useAppSelector((state) => state.user);
   const { item, isUser }: TUserCreateEditRouteParams =
     (route.params as TUserCreateEditRouteParams) || {};
-  const navigation = useNavigation<NavigationProp<ParamListBase>>();
+  const { setOptions, navigate } = useNavigation<NavigationProp<ParamListBase>>();
 
   React.useLayoutEffect((): void => {
-    navigation.setOptions({
+    setOptions({
       headerTitle: item ? `${item.firstname} ${item.lastname}` : 'Ստեղծել բաժանորդ',
     });
   }, [item]);
@@ -51,12 +58,20 @@ export const UserCreateEdit = () => {
     setFieldValue('role', value);
   };
 
-  const onSubmit = async (values: FormikValues) => {
+  const onSubmit = async (values: FormikValues): Promise<void> => {
     if (item) {
       await dispatch(updateUserThunk({ id: item?._id as string, formData: values }));
     } else {
-      await dispatch(createUserThunk(values));
+      await dispatch(createUserThunk({ formData: values, navigate }));
     }
+  };
+
+  const toggleBan = async (): Promise<void> => {
+    await dispatch(toggleBanThunk({ _id: item?._id as string, navigate }));
+  };
+
+  const handleCancel = async (): Promise<void> => {
+    await dispatch(cancelUserThunk({ _id: item?._id as string, navigate }));
   };
 
   return (
@@ -222,18 +237,22 @@ export const UserCreateEdit = () => {
                   <CrudMainButton
                     handleSubmit={handleSubmit}
                     isLoading={createUser.isLoading || updateUser.isLoading}
-                    disabled={
-                      ((item?.confirmed && !isValid) as boolean) ||
-                      ((item?.confirmed && !dirty) as boolean)
-                    }>
+                    disabled={!isValid || !dirty}>
                     {item ? (item.confirmed ? 'Պահպանել' : 'Հաստատել') : 'Ստեղծել'}
                   </CrudMainButton>
                 </View>
-                {/*{item ? (*/}
-                {/*  <View>*/}
-                {/*    <DeleteButton>{item && (item.confirmed ? 'Ջնջել' : 'Չեղարկել')}</DeleteButton>*/}
-                {/*  </View>*/}
-                {/*) : null}*/}
+                {item ? (
+                  <View>
+                    <DeleteButton
+                      handleDelete={!item.confirmed ? handleCancel : toggleBan}
+                      className={`${item.banned && 'bg-green-500'}`}
+                      isLoading={cancelUser.isLoading || banUser.isLoading}>
+                      {(item &&
+                        (item.confirmed && !item.banned ? 'Ապաակտիվացնել' : 'Ակտիվացնել')) ||
+                        'Չեղարկել'}
+                    </DeleteButton>
+                  </View>
+                ) : null}
               </CrudButtonGroup>
             </>
           );

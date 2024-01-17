@@ -10,7 +10,9 @@ import { CreateItemButton, CrudList, Main } from '../../../wrappers';
 
 export const ProductsControl = () => {
   const dispatch = useAppDispatch();
+  const { create, update, delete: deleteProduct } = useAppSelector((state) => state.product);
   const [currentProductPage, setProductCurrentPage] = React.useState<number>(1);
+  const isLoading = create.isLoading || update.isLoading || deleteProduct.isLoading;
 
   const fetchData = (): void => {
     dispatch(fetchProductsThunk({ page: currentProductPage, limit: LIMIT_NUMBER }));
@@ -18,7 +20,7 @@ export const ProductsControl = () => {
 
   React.useEffect((): void => {
     fetchData();
-  }, [currentProductPage]);
+  }, [currentProductPage, isLoading]);
 
   const { products } = useAppSelector((state) => state.product);
   const { navigate } = useNavigation<NavigationProp<ParamListBase>>();

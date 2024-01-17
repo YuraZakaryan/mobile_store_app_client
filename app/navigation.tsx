@@ -221,7 +221,7 @@ const UsersControlPageStackGroup = () => {
   return (
     <MyPageStack.Navigator>
       <MyPageStack.Screen
-        name="users-contol"
+        name="users-control"
         component={UsersControl}
         options={{
           headerShown: false,

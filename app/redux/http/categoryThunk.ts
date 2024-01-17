@@ -5,6 +5,7 @@ import { FormikValues } from 'formik';
 import { $authHost } from './index';
 import {
   TCategory,
+  TCreateItemAndNavigate,
   TDeleteItem,
   TFetchOptions,
   TItemsWithTotalLength,
@@ -29,13 +30,14 @@ export const fetchCategoriesThunk = createAsyncThunk(
 );
 export const createCategoryThunk = createAsyncThunk(
   'create/category',
-  async (formData: FormData, { rejectWithValue }) => {
+  async ({ formData, navigate }: TCreateItemAndNavigate<FormData>, { rejectWithValue }) => {
     try {
       const { data } = await $authHost.post<TCategory>('category/create', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
+      navigate('categories-control');
       return data;
     } catch (err) {
       const error = err as AxiosError;

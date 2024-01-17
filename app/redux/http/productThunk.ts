@@ -6,6 +6,7 @@ import { $authHost } from './index';
 import {
   IFetchByCategoryOptions,
   ISearchProductOptions,
+  TCreateItemAndNavigate,
   TDeleteItem,
   TFetchOptions,
   TItemsWithTotalLength,
@@ -111,13 +112,14 @@ export const searchProductsThunk = createAsyncThunk(
 );
 export const createProductThunk = createAsyncThunk(
   'create/product',
-  async (formData: FormData, { rejectWithValue }) => {
+  async ({ formData, navigate }: TCreateItemAndNavigate<FormData>, { rejectWithValue }) => {
     try {
       const { data } = await $authHost.post<TProduct>('product/create', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
+      navigate('products-control');
       return data;
     } catch (err) {
       const error = err as AxiosError;
