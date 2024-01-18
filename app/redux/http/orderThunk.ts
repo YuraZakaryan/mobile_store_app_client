@@ -8,7 +8,7 @@ import {
   TItemsWithTotalLength,
   TNewItemForm,
 } from '../types';
-import { EOrderStatus, TOrder } from '../types/order';
+import { EOrderStatus, TOrder, TOrderItem } from '../types/order';
 
 export const createOrAddOrderThunk = createAsyncThunk(
   'createOrAdd/order',
@@ -71,7 +71,7 @@ export const fetchDeliveredOrdersThunk = createAsyncThunk(
 
     try {
       const { data } = await $authHost.get<TItemsWithTotalLength<TOrder[]>>(
-        `order/delivered?status=${skip}&limit=${limit}`
+        `order/history?status=${skip}&limit=${limit}`
       );
       return data;
     } catch (err) {
@@ -120,11 +120,21 @@ export const changeOrderStatusThunk = createAsyncThunk(
       status,
       navigateTo,
       navigate,
-    }: { _id: string; status: EOrderStatus; navigate: (route: string) => void; navigateTo: string },
+      items,
+    }: {
+      _id: string;
+      status: EOrderStatus;
+      navigate: (route: string) => void;
+      navigateTo: string;
+      items: TOrderItem[];
+    },
     { rejectWithValue }
   ) => {
     try {
-      const { data } = await $authHost.put<TOrder>(`order/status/${_id}`, { status });
+      const { data } = await $authHost.put<TOrder>(`order/status/${_id}`, {
+        status,
+        items,
+      });
       navigate(navigateTo);
       return data;
     } catch (err) {
@@ -154,12 +164,17 @@ export const cancelOrderThunk = createAsyncThunk(
 export const deliverOrderThunk = createAsyncThunk(
   'deliver/order',
   async (
-    { _id, navigate }: { _id: string; navigate: (route: string) => void },
+    {
+      _id,
+      navigate,
+      items,
+    }: { _id: string; navigate: (route: string) => void; items: TOrderItem[] },
     { rejectWithValue }
   ) => {
     try {
       const { data } = await $authHost.put<TOrder>(`order/status/${_id}`, {
         status: EOrderStatus.DELIVERED,
+        items,
       });
       navigate('orders-control');
       return data;

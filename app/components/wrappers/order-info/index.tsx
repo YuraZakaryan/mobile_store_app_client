@@ -70,6 +70,14 @@ export const OrderInfo: React.FC<IOrderInfo> = React.memo((props) => {
           />
         )}
 
+        {item?.rejectedTime && (
+          <OrderInfoItem
+            label="Պատվերի մերժում"
+            text={formatDate(item?.rejectedTime as string)}
+            textClassName="text-[11px]"
+          />
+        )}
+
         {item?.necessaryNotes ? (
           <View className="bg-white mb-2 p-3 w-full rounded-lg">
             <Text className="text-gray-400">Գրառում պատվիրատուի կողմից</Text>

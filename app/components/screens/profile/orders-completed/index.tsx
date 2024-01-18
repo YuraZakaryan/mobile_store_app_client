@@ -1,9 +1,9 @@
 import React from 'react';
-import { ScrollView, Text, View, RefreshControl } from 'react-native';
+import { RefreshControl, ScrollView, Text, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
 import { fetchDeliveredOrdersThunk } from '../../../../redux/http/orderThunk';
-import { TOrder } from '../../../../redux/types/order';
+import { EOrderStatus, TOrder } from '../../../../redux/types/order';
 import { formatDate } from '../../../../utils';
 import { LIMIT_NUMBER } from '../../../../utils/constants';
 import { EmptyOrder, Loading } from '../../../ui';
@@ -11,10 +11,10 @@ import { CrudList, Main } from '../../../wrappers';
 
 export const OrdersCompleted = () => {
   const dispatch = useAppDispatch();
-  const { ordersHistory } = useAppSelector((state) => state.order);
+  const { ordersHistory, cancelOrder } = useAppSelector((state) => state.order);
   const [currentStatusOrderPage, setStatusOrderCurrentPage] = React.useState<number>(1);
-
-  const fetchData = () => {
+  const isLoading = cancelOrder.isLoading;
+  const fetchData = (): void => {
     dispatch(
       fetchDeliveredOrdersThunk({
         page: currentStatusOrderPage,
@@ -23,9 +23,9 @@ export const OrdersCompleted = () => {
     );
   };
 
-  React.useEffect(() => {
+  React.useEffect((): void => {
     fetchData();
-  }, [currentStatusOrderPage]);
+  }, [currentStatusOrderPage, isLoading]);
 
   const handlePrevUserPage = (): void => {
     if (currentStatusOrderPage > 1) {
@@ -40,7 +40,7 @@ export const OrdersCompleted = () => {
     }
   };
 
-  const handleRefresh = () => {
+  const handleRefresh = (): void => {
     fetchData();
   };
 
@@ -69,11 +69,25 @@ export const OrdersCompleted = () => {
                 <>
                   <View className="flex-row items-center gap-2">
                     <Text className="font-semibold">{index + 1}.</Text>
-                    <Text className="min-w-[85px] w-24" numberOfLines={1} ellipsizeMode="tail">
+                    <Text
+                      className={`min-w-[85px] w-24 ${
+                        item.status === EOrderStatus.REJECTED ? 'text-red-800 font-semibold' : ''
+                      }`}
+                      numberOfLines={1}
+                      ellipsizeMode="tail">
                       {item.author?.firstname + ' ' + item.author?.lastname}
                     </Text>
                   </View>
-                  <Text>{formatDate(item.deliveredTime as string)}</Text>
+                  <Text
+                    className={`${
+                      item.status === EOrderStatus.REJECTED ? 'text-red-800 font-semibold' : ''
+                    }`}>
+                    {formatDate(
+                      item.status === EOrderStatus.DELIVERED
+                        ? (item.deliveredTime as string)
+                        : (item.rejectedTime as string)
+                    )}
+                  </Text>
                 </>
               )}
             />

@@ -10,16 +10,16 @@ import { CrudList, Main } from '../../../wrappers';
 
 export const OrdersControl = () => {
   const dispatch = useAppDispatch();
-  const { orders } = useAppSelector((state) => state.order);
+  const { orders, deliverOrder, changeStatus } = useAppSelector((state) => state.order);
   const [currentOrderPage, setOrderCurrentPage] = React.useState<number>(1);
-
+  const isLoading = deliverOrder.isLoading || changeStatus.isLoading;
   const fetchData = () => {
     dispatch(fetchAllOrdersThunk({ page: currentOrderPage, limit: LIMIT_NUMBER }));
   };
 
   React.useEffect(() => {
     fetchData();
-  }, [currentOrderPage]);
+  }, [currentOrderPage, isLoading]);
 
   const handlePrevUserPage = (): void => {
     if (currentOrderPage > 1) {

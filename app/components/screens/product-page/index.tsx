@@ -1,4 +1,4 @@
-import { NavigationProp, useNavigation, useRoute } from '@react-navigation/native';
+import { NavigationProp, ParamListBase, useNavigation, useRoute } from '@react-navigation/native';
 import React from 'react';
 import {
   ActivityIndicator,
@@ -20,7 +20,7 @@ import { API_URL } from '../../../utils/constants';
 import { SaleIcon } from '../../wrappers';
 
 export const ProductPage = () => {
-  const navigation = useNavigation<NavigationProp<any, any>>();
+  const { setOptions, setParams } = useNavigation<NavigationProp<any, any>>();
   const dispatch = useAppDispatch();
   const route = useRoute();
   const { item }: TProductRouteParams = route.params as TProductRouteParams;
@@ -28,22 +28,28 @@ export const ProductPage = () => {
   const { user } = useAppSelector((state) => state.user);
 
   React.useLayoutEffect((): void => {
-    navigation.setOptions({
+    setOptions({
       headerTitle: item.title,
     });
   }, []);
 
   React.useEffect((): void => {
     dispatch(setProductId({ product: item._id, author: user?._id as string, itemCount: 0 }));
-  }, [item._id, navigation]);
+  }, [item._id]);
 
   const handleChange = (name: string, value: string | number | null): void => {
     dispatch(changeForm({ name, value }));
   };
 
   const handleClick = (): void => {
-    dispatch(createOrAddOrderThunk(newItemForm));
+    dispatch(createOrAddOrderThunk(newItemForm))
+      .unwrap()
+      .then((res): void => {
+        setParams({ item: res });
+      })
+      .catch((err) => console.log(err));
   };
+
   const isButtonDisable: boolean = newItemForm.itemCount === 0 || create.isLoading;
   const checkDiscount: boolean = item.discount > 0;
 
@@ -76,7 +82,7 @@ export const ProductPage = () => {
               </View>
             </View>
             <InfoItem label="Անվանում" content={item.title} />
-            <InfoItem label="Քանակը" content={item.count} />
+            <InfoItem label="Ընդհանուր քանակը" content={item.count} />
             <InfoItem label="Կոդ" content={item.code} />
             <InfoItem
               label="Գին"

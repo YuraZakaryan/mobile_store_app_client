@@ -25,10 +25,10 @@ import {
   UserCreateEdit,
   UserPasswordEdit,
   UsersControl,
+  OrderCompletedView,
+  OrdersCompleted,
 } from './components/screens';
 import { Auth } from './components/screens/auth';
-import { OrderCompletedView } from './components/screens/profile/order-completed-view';
-import { OrdersCompleted } from './components/screens/profile/orders-completed';
 import { Loading } from './components/ui';
 import { useAppDispatch, useAppSelector } from './hooks/redux';
 import { fetchMe } from './redux/http/userThunk';

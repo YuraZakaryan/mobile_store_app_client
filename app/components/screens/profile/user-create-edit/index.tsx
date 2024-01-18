@@ -2,13 +2,12 @@ import { FontAwesome } from '@expo/vector-icons';
 import { NavigationProp, ParamListBase, useNavigation, useRoute } from '@react-navigation/native';
 import { FormikValues } from 'formik';
 import React from 'react';
-import { Keyboard, Text, TextInput, View } from 'react-native';
+import { Keyboard, TextInput, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import MaskInput from 'react-native-mask-input';
 
 import { TInitialUserCreateEditFormValue, TUserCreateEditRouteParams } from './types';
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
-import { deleteProductThunk } from '../../../../redux/http/productThunk';
 import {
   cancelUserThunk,
   createUserThunk,

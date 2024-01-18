@@ -15,12 +15,13 @@ import { CreateItemButton, Main } from '../../../wrappers';
 export const UsersControl = () => {
   const dispatch = useAppDispatch();
   const { createUser, updateUser, cancelUser, banUser } = useAppSelector((state) => state.user);
+  const { users, unconfirmedUsers, bannedUsers } = useAppSelector((state) => state.user);
+  const { navigate } = useNavigation<NavigationProp<ParamListBase>>();
   const [currentUserPage, setUserCurrentPage] = React.useState<number>(1);
   const [currentUnConfirmedUserPage, setUserConfirmedCurrentPage] = React.useState<number>(1);
   const [currentBannedUserPage, setUserBannedCurrentPage] = React.useState<number>(1);
   const isLoading =
     createUser.isLoading || updateUser.isLoading || cancelUser.isLoading || banUser.isLoading;
-
   const fetchUsersData = (): void => {
     dispatch(fetchUsersThunk({ page: currentUserPage, limit: LIMIT_NUMBER }));
   };
@@ -41,9 +42,6 @@ export const UsersControl = () => {
   React.useEffect((): void => {
     fetchBannedUsersData();
   }, [currentBannedUserPage, isLoading]);
-
-  const { users, unconfirmedUsers, bannedUsers } = useAppSelector((state) => state.user);
-  const { navigate } = useNavigation<NavigationProp<ParamListBase>>();
 
   const handleClick = (): void => {
     navigate('userCreateEdit');

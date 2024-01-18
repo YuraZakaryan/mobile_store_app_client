@@ -12,15 +12,24 @@ import { categoryHome } from '../../../utils/product';
 export const Home = () => {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.user);
+  const { deleteItem, create, changeStatus } = useAppSelector((state) => state.order);
+  const isLoading: boolean = create.isLoading || deleteItem.isLoading || changeStatus.isLoading;
+
   const fetchData = (): void => {
     dispatch(fetchProductsThunk({ limit: LIMIT_NUMBER }));
     dispatch(fetchDiscountedProductsThunk({ limit: LIMIT_NUMBER }));
+  };
+  const fetchDataInProgress = () => {
     dispatch(getOrderByUserInProgressThunk(user?._id as string));
   };
 
   React.useEffect((): void => {
     fetchData();
-  }, []);
+  }, [isLoading]);
+
+  React.useEffect((): void => {
+    fetchDataInProgress();
+  }, [create.isLoading]);
 
   const { products, discountedProducts } = useAppSelector((state) => state.product);
 

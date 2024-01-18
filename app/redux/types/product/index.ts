@@ -1,4 +1,3 @@
-import { TCategory } from '../category';
 import { TItemsWithTotalLength } from '../global';
 import { TStateStatus } from '../user';
 

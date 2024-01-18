@@ -254,15 +254,6 @@ export const productSlice = createSlice({
         (state: TInitialProductState, action: PayloadAction<TProduct>): void => {
           state.update.isError = false;
           state.update.isLoading = false;
-
-          const userIndex: number = state.products.items.findIndex(
-            (category: TProduct): boolean => category._id === action.payload._id
-          );
-
-          if (userIndex !== -1) {
-            state.products.items[userIndex] = action.payload;
-          }
-
           SHOW_SUCCESS('Ապրանքը հաջողությամբ փոփոխվեց');
         }
       )

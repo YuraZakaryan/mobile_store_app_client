@@ -141,6 +141,7 @@ export const userSlice = createSlice({
       .addCase(fetchUsersThunk.rejected, (state: TInitialUserState): void => {
         state.users.isLoading = false;
         state.users.isError = true;
+        state.users.items = [];
       })
       .addCase(
         fetchUnconfirmedUsers.fulfilled,
@@ -162,6 +163,7 @@ export const userSlice = createSlice({
       .addCase(fetchUnconfirmedUsers.rejected, (state: TInitialUserState): void => {
         state.unconfirmedUsers.isLoading = false;
         state.unconfirmedUsers.isError = true;
+        state.unconfirmedUsers.items = [];
       })
       .addCase(
         fetchBannedUsers.fulfilled,
@@ -183,25 +185,13 @@ export const userSlice = createSlice({
       .addCase(fetchBannedUsers.rejected, (state: TInitialUserState): void => {
         state.bannedUsers.isLoading = false;
         state.bannedUsers.isError = true;
+        state.bannedUsers.items = [];
       })
       .addCase(
         updateUserThunk.fulfilled,
         (state: TInitialUserState, action: PayloadAction<TUser>): void => {
           state.updateUser.isError = false;
           state.updateUser.isLoading = false;
-
-          const userIndex: number = state.users.items.findIndex(
-            (user: TUser): boolean => user._id === action.payload._id
-          );
-          if (userIndex !== -1) {
-            state.users.items[userIndex] = action.payload;
-          } else {
-            state.unconfirmedUsers.items = state.unconfirmedUsers.items.filter(
-              (item: TUser): boolean => item._id !== action.payload._id
-            );
-            state.users.items.push(action.payload);
-          }
-
           SHOW_SUCCESS('Բաժանորդի տվյալները հաջողությամբ փոխվեցին');
         }
       )
@@ -285,10 +275,10 @@ export const userSlice = createSlice({
       .addCase(
         fetchMe.fulfilled,
         (state: TInitialUserState, action: PayloadAction<TUser>): void => {
-          state.user = action.payload;       
-          if(action.payload) {
+          state.user = action.payload;
+          if (action.payload) {
             state.isAuth = true;
-          }             
+          }
           state.fetchMe.isError = false;
           state.fetchMe.isLoading = false;
         }

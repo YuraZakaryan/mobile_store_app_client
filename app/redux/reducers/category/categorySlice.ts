@@ -72,14 +72,11 @@ const categorySlice = createSlice({
         state.categories.isLoading = false;
         state.categories.isError = true;
       })
-      .addCase(
-        createCategoryThunk.fulfilled,
-        (state: TInitialCategoryState, action: PayloadAction<TCategory>): void => {
-          state.create.isError = false;
-          state.create.isLoading = false;
-          SHOW_SUCCESS('Կատեգորիան հաջողությամբ ստեղծվեց');
-        }
-      )
+      .addCase(createCategoryThunk.fulfilled, (state: TInitialCategoryState): void => {
+        state.create.isError = false;
+        state.create.isLoading = false;
+        SHOW_SUCCESS('Կատեգորիան հաջողությամբ ստեղծվեց');
+      })
       .addCase(createCategoryThunk.pending, (state: TInitialCategoryState): void => {
         state.create.isError = false;
         state.create.isLoading = true;
@@ -89,23 +86,11 @@ const categorySlice = createSlice({
         state.create.isLoading = false;
         SHOW_ERROR('Կատեգորիայի ստեղծման հետ կապված խնդիր է առաջացել');
       })
-      .addCase(
-        updateCategoryThunk.fulfilled,
-        (state: TInitialCategoryState, action: PayloadAction<TCategory>): void => {
-          state.update.isError = false;
-          state.update.isLoading = false;
-
-          const userIndex: number = state.categories.items.findIndex(
-            (category: TCategory): boolean => category._id === action.payload._id
-          );
-
-          if (userIndex !== -1) {
-            state.categories.items[userIndex] = action.payload;
-          }
-
-          SHOW_SUCCESS('Կատեգորիան հաջողությամբ փոփոխվեց');
-        }
-      )
+      .addCase(updateCategoryThunk.fulfilled, (state: TInitialCategoryState): void => {
+        state.update.isError = false;
+        state.update.isLoading = false;
+        SHOW_SUCCESS('Կատեգորիան հաջողությամբ փոփոխվեց');
+      })
       .addCase(updateCategoryThunk.pending, (state: TInitialCategoryState): void => {
         state.update.isError = false;
         state.update.isLoading = true;

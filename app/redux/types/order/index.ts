@@ -6,6 +6,7 @@ export enum EOrderStatus {
   ORDERED = 'ordered',
   ACCEPTED = 'accepted',
   DELIVERED = 'delivered',
+  REJECTED = 'rejected',
 }
 
 export enum EPackage {
@@ -32,4 +33,5 @@ export type TOrder = {
   confirmedTime: string | null;
   acceptedTime: string | null;
   deliveredTime: string | null;
+  rejectedTime: string | null;
 };

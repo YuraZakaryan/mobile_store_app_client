@@ -4,6 +4,7 @@ import {
   ActivityIndicator,
   FlatList,
   Image,
+  RefreshControl,
   ScrollView,
   Text,
   TextInput,
@@ -31,12 +32,16 @@ import { Main } from '../../wrappers';
 
 export const Basket = () => {
   const dispatch = useAppDispatch();
-  const { basket, fetchBasketOrder, toOrder } = useAppSelector((state) => state.order);
+  const { basket, fetchBasketOrder, toOrder, create } = useAppSelector((state) => state.order);
   const { user } = useAppSelector((state) => state.user);
+  const isLoading: boolean = create.isLoading;
 
-  React.useEffect((): void => {
+  const fetchData = (): void => {
     dispatch(getOrderByUserInProgressThunk(user?._id as string));
-  }, []);
+  };
+  React.useEffect((): void => {
+    fetchData();
+  }, [isLoading]);
 
   const sumItemsPrice: number = basket.items.reduce((acc, item) => {
     if (item.product && item.product.price) {
@@ -63,6 +68,10 @@ export const Basket = () => {
   const handleClick = (): void => {
     dispatch(toOrderThunk(basket));
   };
+
+  const handleRefresh = (): void => {
+    fetchData();
+  };
   return (
     <Main>
       {fetchBasketOrder.isLoading ? (
@@ -70,7 +79,10 @@ export const Basket = () => {
       ) : !basket.items.length || basket.items.length === 0 ? (
         <EmptyOrder text="Զամբյուղը դատարկ է" />
       ) : (
-        <ScrollView>
+        <ScrollView
+          refreshControl={
+            <RefreshControl refreshing={fetchBasketOrder.isLoading} onRefresh={handleRefresh} />
+          }>
           <View className="w-full p-4 gap-6">
             <View className="w-full">
               <FlatList

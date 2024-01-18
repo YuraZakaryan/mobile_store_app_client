@@ -55,7 +55,7 @@ export const fetchUsersThunk = createAsyncThunk(
 
     try {
       const { data } = await $authHost.get<TItemsWithTotalLength<TUser[]>>(
-        `user/all?limit=${limit}&skip=${skip}&confirmed=true`
+        `user/all?limit=${limit}&skip=${skip}&confirmed=true&banned=false`
       );
       return data;
     } catch (err) {

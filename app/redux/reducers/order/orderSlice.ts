@@ -115,15 +115,11 @@ const orderSlice = createSlice({
   },
   extraReducers: (builder) =>
     builder
-      .addCase(
-        createOrAddOrderThunk.fulfilled,
-        (state: TInitialBasketState, action: PayloadAction<TOrder>): void => {
-          state.basket = action.payload;
-          state.create.isLoading = false;
-          state.create.isError = false;
-          SHOW_SUCCESS('Ապրանքը հաջողությամբ ավելացվեց զամբյուղում');
-        }
-      )
+      .addCase(createOrAddOrderThunk.fulfilled, (state: TInitialBasketState): void => {
+        state.create.isLoading = false;
+        state.create.isError = false;
+        SHOW_SUCCESS('Ապրանքը հաջողությամբ ավելացվեց զամբյուղում');
+      })
       .addCase(createOrAddOrderThunk.pending, (state: TInitialBasketState): void => {
         state.create.isLoading = true;
         state.create.isError = false;
@@ -136,6 +132,8 @@ const orderSlice = createSlice({
             SHOW_ERROR('Ձեր էջը հաստատված չէ, փորձել մի փոքր ուշ');
           } else if (action.payload === 410) {
             SHOW_ERROR('Ձեր հաշիվը արգելափակված է');
+          } else if (action.payload === 502) {
+            SHOW_ERROR('Ոչ բավարար ապրանքի քանակ');
           } else if (action.payload === 401) {
             SHOW_ERROR('Կխնդրեինք առաջին հերթին մուտք գործել');
           } else {
@@ -235,6 +233,7 @@ const orderSlice = createSlice({
       .addCase(fetchDeliveredOrdersThunk.rejected, (state: TInitialBasketState): void => {
         state.ordersHistory.isLoading = false;
         state.ordersHistory.isError = true;
+        state.ordersHistory.items = [];
       })
       .addCase(
         fetchOrdersByAuthorThunk.fulfilled,
@@ -259,20 +258,11 @@ const orderSlice = createSlice({
         state.ordersHistory.isLoading = false;
         state.ordersHistory.isError = true;
       })
-      .addCase(
-        changeOrderStatusThunk.fulfilled,
-        (state: TInitialBasketState, action: PayloadAction<TOrder>): void => {
-          const orderIndex: number = state.orders.items.findIndex(
-            (order: TOrder): boolean => order._id === action.payload._id
-          );
-          if (orderIndex !== -1) {
-            state.orders.items[orderIndex] = action.payload;
-          }
-          state.changeStatus.isLoading = false;
-          state.changeStatus.isError = false;
-          SHOW_SUCCESS('Պատվերի կարգավիճակը փոխվեց');
-        }
-      )
+      .addCase(changeOrderStatusThunk.fulfilled, (state: TInitialBasketState): void => {
+        state.changeStatus.isLoading = false;
+        state.changeStatus.isError = false;
+        SHOW_SUCCESS('Պատվերի կարգավիճակը փոխվեց');
+      })
       .addCase(changeOrderStatusThunk.pending, (state: TInitialBasketState): void => {
         state.changeStatus.isLoading = true;
         state.changeStatus.isError = false;
@@ -284,9 +274,6 @@ const orderSlice = createSlice({
       .addCase(
         cancelOrderThunk.fulfilled,
         (state: TInitialBasketState, action: PayloadAction<TOrder>): void => {
-          state.ordersHistory.items = state.ordersHistory.items.filter(
-            (item: TOrder): boolean => item._id !== action.payload._id
-          );
           state.cancelOrder.isLoading = false;
           state.cancelOrder.isError = false;
           SHOW_SUCCESS('Պատվերը հաջողությամբ չեղարկվեց');
@@ -300,17 +287,11 @@ const orderSlice = createSlice({
         state.cancelOrder.isLoading = false;
         state.cancelOrder.isError = true;
       })
-      .addCase(
-        deliverOrderThunk.fulfilled,
-        (state: TInitialBasketState, action: PayloadAction<TOrder>): void => {
-          state.orders.items = state.orders.items.filter(
-            (item: TOrder): boolean => item._id !== action.payload._id
-          );
-          state.deliverOrder.isLoading = false;
-          state.deliverOrder.isError = false;
-          SHOW_SUCCESS('Պատվերը նշվեց որպես առաքված');
-        }
-      )
+      .addCase(deliverOrderThunk.fulfilled, (state: TInitialBasketState): void => {
+        state.deliverOrder.isLoading = false;
+        state.deliverOrder.isError = false;
+        SHOW_SUCCESS('Պատվերը նշվեց որպես առաքված');
+      })
       .addCase(deliverOrderThunk.pending, (state: TInitialBasketState): void => {
         state.deliverOrder.isLoading = true;
         state.deliverOrder.isError = false;

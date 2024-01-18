@@ -6,7 +6,7 @@ import { TOrderViewRouteParams } from './types';
 import { ButtonStatusViewOrder } from './wrappers';
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
 import { changeOrderStatusThunk, deliverOrderThunk } from '../../../../redux/http/orderThunk';
-import { EOrderStatus, TOrder } from '../../../../redux/types/order';
+import { EOrderStatus, TOrder, TOrderItem } from '../../../../redux/types/order';
 import { Main, OrdersList } from '../../../wrappers';
 
 export const OrderView = () => {
@@ -24,6 +24,7 @@ export const OrderView = () => {
           status,
           navigate,
           navigateTo: 'orders-control',
+          items: item?.items as TOrderItem[],
         })
       );
     },
@@ -35,6 +36,7 @@ export const OrderView = () => {
       deliverOrderThunk({
         _id: item?._id as string,
         navigate,
+        items: item?.items as TOrderItem[],
       })
     );
   };
@@ -62,6 +64,13 @@ export const OrderView = () => {
             active={item?.status === EOrderStatus.DELIVERED}
             status={EOrderStatus.DELIVERED}
             handleChangeStatus={handleDeliverOrder}
+            isLoading={changeStatus.isLoading}
+          />
+          <ButtonStatusViewOrder
+            label="Մերժել"
+            active={item?.status === EOrderStatus.REJECTED}
+            status={EOrderStatus.REJECTED}
+            handleChangeStatus={handleChangeStatus}
             isLoading={changeStatus.isLoading}
           />
         </View>
