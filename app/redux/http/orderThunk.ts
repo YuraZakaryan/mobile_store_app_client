@@ -60,18 +60,20 @@ export const toOrderThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      return rejectWithValue(error.message || 'Failed to delete order item');
+      if (error.response) {
+        return rejectWithValue(error.response.status);
+      }
     }
   }
 );
 export const fetchDeliveredOrdersThunk = createAsyncThunk(
   'fetchDelivered/order',
   async ({ page = 1, limit = 5 }: TFetchOptions, { rejectWithValue }) => {
-    const skip = (page - 1) * limit;
+    const skip: number = (page - 1) * limit;
 
     try {
       const { data } = await $authHost.get<TItemsWithTotalLength<TOrder[]>>(
-        `order/history?status=${skip}&limit=${limit}`
+        `order/history?skip=${skip}&limit=${limit}`
       );
       return data;
     } catch (err) {

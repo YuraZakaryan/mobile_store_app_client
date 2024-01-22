@@ -11,13 +11,16 @@ import { initialLoginFormValue } from '../../data';
 import { LayoutAuth } from '../../layout';
 import { TInitialLoginFormValue } from '../../types';
 import { SignButton } from '../../wrappers';
+import { ResetPasswordButton } from '../reset-password-button';
 
 export const Login = () => {
   const dispatch = useAppDispatch();
+
   const { login } = useAppSelector((state) => state.user);
   const onSubmit = async (values: TInitialLoginFormValue) => {
     await dispatch(loginThunk(values));
   };
+
   return (
     <LayoutAuth title="Մուտք գործել" buttonTitle="Գրանցվել" switchTo={EAuthMode.REGISTRATION}>
       <Formik
@@ -39,16 +42,23 @@ export const Login = () => {
               </FieldWithError>
             </LabelInput>
             <LabelInput label="Գաղտնաբառ" required>
-              <FieldWithError fieldName="password" errors={errors} touched={touched}>
-                <TextInput
-                  onChangeText={handleChange('password')}
-                  onBlur={handleBlur('password')}
-                  onSubmitEditing={Keyboard.dismiss}
-                  value={values.password}
-                  placeholder="Գաղտնաբառ"
-                  className="rounded px-3 py-4 border border-gray-600"
-                  secureTextEntry
-                />
+              <FieldWithError
+                fieldName="password"
+                errors={errors}
+                touched={touched}
+                className="relative">
+                <View className="justify-center">
+                  <ResetPasswordButton />
+                  <TextInput
+                    onChangeText={handleChange('password')}
+                    onBlur={handleBlur('password')}
+                    onSubmitEditing={Keyboard.dismiss}
+                    value={values.password}
+                    placeholder="Գաղտնաբառ"
+                    className="rounded px-3 py-4 border border-gray-600 z-5"
+                    secureTextEntry
+                  />
+                </View>
               </FieldWithError>
             </LabelInput>
             <View>

@@ -13,8 +13,13 @@ import { PaginationButtons, ProductItem } from '../../wrappers';
 export const Products = () => {
   const { chosen } = useAppSelector((state) => state.category);
   const { categories } = useAppSelector((state) => state.category);
+  const { deleteItem, create, changeStatus, toOrder } = useAppSelector((state) => state.order);
+
   const { productsByCategory } = useAppSelector((state) => state.product);
   const [currentProductPage, setProductCurrentPage] = React.useState<number>(1);
+
+  const isLoading: boolean =
+    create.isLoading || deleteItem.isLoading || changeStatus.isLoading || toOrder.isLoading;
 
   const dispatch = useAppDispatch();
   const navigation = useNavigation<NavigationProp<any, any>>();
@@ -31,11 +36,11 @@ export const Products = () => {
     );
   };
 
-  React.useEffect(() => {
+  React.useEffect((): void => {
     fetchCategoriesData();
   }, []);
 
-  React.useLayoutEffect(() => {
+  React.useLayoutEffect((): void => {
     navigation.setOptions({
       headerTitle: chosen.title || 'Ապրանքներ',
     });
@@ -43,9 +48,9 @@ export const Products = () => {
     setProductCurrentPage(1);
   }, [chosen]);
 
-  React.useEffect(() => {
+  React.useEffect((): void => {
     fetchProductsByCategoryData();
-  }, [currentProductPage]);
+  }, [currentProductPage, isLoading]);
 
   const handlePrevProductPage = (): void => {
     if (currentProductPage > 1) {
@@ -62,7 +67,7 @@ export const Products = () => {
   const nextButtonDisable: boolean =
     currentProductPage * LIMIT_NUMBER >= productsByCategory.total_items;
 
-  const handleRefresh = () => {
+  const handleRefresh = (): void => {
     fetchProductsByCategoryData();
   };
 
@@ -90,7 +95,7 @@ export const Products = () => {
               <ProductItem
                 index={index}
                 item={item}
-                imageClassName="w-[136px] h-[136px]"
+                imageClassName="w-28 h-28 mt-[20px]"
                 height={24}
                 isLastInRow={
                   productsByCategory.items.length % 2 === 0 ||

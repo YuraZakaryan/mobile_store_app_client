@@ -29,7 +29,7 @@ export const ProductItem: React.FC<IProductItem> = React.memo((props) => {
           <Image
             source={{ uri: `${API_URL}/${item.picture}` ?? '' }}
             alt={item._id}
-            className={`w-36 h-36 ${imageClassName}`}
+            className={`w-32 h-32 ${imageClassName}`}
           />
           {checkDiscount ? <SaleIcon discount={item.discount} /> : null}
         </View>

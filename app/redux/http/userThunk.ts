@@ -11,6 +11,7 @@ import {
   TDeleteItem,
   TFetchOptions,
   TItemsWithTotalLength,
+  TOtpData,
   TPayloadActionUser,
   TUpdateItem,
   TUser,
@@ -109,7 +110,61 @@ export const updateUserThunk = createAsyncThunk(
     }
   }
 );
-
+export const sendOtpToMailThunk = createAsyncThunk(
+  'sendOtp/user',
+  async (mail: string, { rejectWithValue }) => {
+    try {
+      const { data } = await $authHost.put<TOtpData>(`user/mail/otp`, { mail });
+      return data;
+    } catch (err) {
+      const error = err as AxiosError;
+      if (error.response) {
+        return rejectWithValue(error.response.status);
+      }
+    }
+  }
+);
+export const confirmOtpThunk = createAsyncThunk(
+  'confirmOtp/user',
+  async ({ mail, otp }: { mail: string; otp: string }, { rejectWithValue }) => {
+    try {
+      const { data } = await $authHost.post<TOtpData>(`user/confirm/otp`, { mail, otp });
+      return data;
+    } catch (err) {
+      const error = err as AxiosError;
+      if (error.response) {
+        return rejectWithValue(error.response.status);
+      }
+    }
+  }
+);
+export const resetPasswordThunk = createAsyncThunk(
+  'resetPassword/user',
+  async (
+    {
+      mail,
+      newPassword,
+      otp,
+      navigate,
+    }: { mail: string; newPassword: string; otp: string; navigate: (navigateTo: string) => void },
+    { rejectWithValue }
+  ) => {
+    try {
+      const { data } = await $authHost.put<TOtpData>(`user/reset/password`, {
+        mail,
+        newPassword,
+        otp,
+      });
+      navigate('auth-screen');
+      return data;
+    } catch (err) {
+      const error = err as AxiosError;
+      if (error.response) {
+        return rejectWithValue(error.response.status);
+      }
+    }
+  }
+);
 export const createUserThunk = createAsyncThunk(
   'create/user',
   async ({ formData, navigate }: TCreateItemAndNavigate<FormikValues>, { rejectWithValue }) => {

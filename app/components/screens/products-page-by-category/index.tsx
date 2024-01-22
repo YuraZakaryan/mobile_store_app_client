@@ -89,7 +89,7 @@ export const ProductsPageByCategory = () => {
               <ProductItem
                 item={item}
                 index={index}
-                isLastInRow={products.total_items % 2 === 1 || index === products.total_items - 1}
+                isLastInRow={products.total_items % 2 === 0 || index === products.total_items - 1}
                 key={item._id}
               />
             )}

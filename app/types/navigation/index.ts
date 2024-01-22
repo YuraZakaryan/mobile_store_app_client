@@ -5,5 +5,5 @@ export type TTabsName = {
   searchGroup: string;
   basket: string;
   profileGroup: string;
-  authorization: string;
+  authorizationGroup: string;
 };

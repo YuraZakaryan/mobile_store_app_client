@@ -31,7 +31,9 @@ export const UserCreateEdit = () => {
   const dispatch = useAppDispatch();
   const [open, setOpen] = React.useState(false);
   const route = useRoute();
-  const { createUser, updateUser, cancelUser, banUser } = useAppSelector((state) => state.user);
+  const { user, createUser, updateUser, cancelUser, banUser } = useAppSelector(
+    (state) => state.user
+  );
   const { item, isUser }: TUserCreateEditRouteParams =
     (route.params as TUserCreateEditRouteParams) || {};
   const { setOptions, navigate } = useNavigation<NavigationProp<ParamListBase>>();
@@ -46,6 +48,7 @@ export const UserCreateEdit = () => {
     firstname: item?.firstname || '',
     lastname: item?.lastname || '',
     username: item?.username || '',
+    mail: item?.mail || '',
     address: item?.address || '',
     password: '',
     phone: item?.phone || '',
@@ -136,6 +139,18 @@ export const UserCreateEdit = () => {
                     onSubmitEditing={Keyboard.dismiss}
                     placeholder="Մուտքանուն"
                     value={values.username}
+                    className="rounded px-3 py-3 border border-gray-600"
+                  />
+                </FieldWithError>
+              </LabelInput>
+              <LabelInput label="Էլ․ փոստ" required>
+                <FieldWithError fieldName="mail" errors={errors} touched={touched}>
+                  <TextInput
+                    onChangeText={handleChange('mail')}
+                    onBlur={handleBlur('mail')}
+                    onSubmitEditing={Keyboard.dismiss}
+                    placeholder="Էլ․ փոստ"
+                    value={values.mail}
                     className="rounded px-3 py-3 border border-gray-600"
                   />
                 </FieldWithError>
@@ -236,18 +251,17 @@ export const UserCreateEdit = () => {
                   <CrudMainButton
                     handleSubmit={handleSubmit}
                     isLoading={createUser.isLoading || updateUser.isLoading}
-                    disabled={!isValid || !dirty}>
+                    disabled={!isValid || ((item?.confirmed && !dirty) as boolean)}>
                     {item ? (item.confirmed ? 'Պահպանել' : 'Հաստատել') : 'Ստեղծել'}
                   </CrudMainButton>
                 </View>
-                {item ? (
+                {item && user?.role === 'ADMIN' ? (
                   <View>
                     <DeleteButton
                       handleDelete={!item.confirmed ? handleCancel : toggleBan}
                       className={`${item.banned && 'bg-green-500'}`}
                       isLoading={cancelUser.isLoading || banUser.isLoading}>
-                      {(item &&
-                        (item.confirmed && !item.banned ? 'Ապաակտիվացնել' : 'Ակտիվացնել')) ||
+                      {(item.confirmed && (!item.banned ? 'Ապաակտիվացնել' : 'Ակտիվացնել')) ||
                         'Չեղարկել'}
                     </DeleteButton>
                   </View>

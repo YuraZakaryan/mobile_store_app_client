@@ -9,7 +9,6 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useAppDispatch } from '../../../../hooks/redux';
 import { setAuthMode } from '../../../../redux/reducers/user/userSlice';

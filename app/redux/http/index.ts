@@ -48,7 +48,7 @@ $authHost.interceptors.response.use(
         } catch (e) {
           const error = e as AxiosError;
           if (error.response) {
-            console.log(error.response.status);
+            console.log(error.response);
           }
         }
       }

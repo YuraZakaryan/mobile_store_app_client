@@ -8,6 +8,7 @@ export const initialRegistrationFormValue: TInitialRegistrationFormValue = {
   firstname: '',
   lastname: '',
   username: '',
+  mail: '',
   address: '',
   phone: '',
   password: '',

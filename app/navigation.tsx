@@ -27,6 +27,8 @@ import {
   UsersControl,
   OrderCompletedView,
   OrdersCompleted,
+  AboutApp,
+  ResetPassword,
 } from './components/screens';
 import { Auth } from './components/screens/auth';
 import { Loading } from './components/ui';
@@ -41,7 +43,7 @@ const tabsName: TTabsName = {
   searchGroup: 'search group',
   basket: 'basket',
   profileGroup: 'profile group',
-  authorization: 'auth',
+  authorizationGroup: 'auth group',
 };
 
 // Stack
@@ -158,6 +160,13 @@ const HomePageStackGroup = () => {
         }}
       />
       <MyPageStack.Screen
+        name="about-app"
+        component={AboutApp}
+        options={{
+          title: 'Ծրագրի մասին',
+        }}
+      />
+      <MyPageStack.Screen
         name="product"
         component={ProductPage}
         options={{
@@ -212,6 +221,26 @@ const SearchPageStackGroup = () => {
         component={ProductPage}
         options={{
           title: 'Ապրանք',
+        }}
+      />
+    </MyPageStack.Navigator>
+  );
+};
+const AuthPageStackGroup = () => {
+  return (
+    <MyPageStack.Navigator>
+      <MyPageStack.Screen
+        name="auth-screen"
+        component={Auth}
+        options={{
+          title: 'Մուտք գործել',
+        }}
+      />
+      <MyPageStack.Screen
+        name="reset-password"
+        component={ResetPassword}
+        options={{
+          title: 'Վերականգնել գաղտնաբառը',
         }}
       />
     </MyPageStack.Navigator>
@@ -363,7 +392,7 @@ const TabGroup = () => {
             iconName = 'retweet';
           } else if (route.name === tabsName.profileGroup) {
             iconName = 'user';
-          } else if (route.name === tabsName.authorization) {
+          } else if (route.name === tabsName.authorizationGroup) {
             iconName = 'user';
           }
 
@@ -427,9 +456,10 @@ const TabGroup = () => {
         />
       ) : (
         <Tab.Screen
-          name={tabsName.authorization}
-          component={Auth}
+          name={tabsName.authorizationGroup}
+          component={AuthPageStackGroup}
           options={{
+            headerShown: false,
             title: 'Մուտք գործել',
           }}
         />
@@ -442,7 +472,7 @@ const Navigation = () => {
   const dispatch = useAppDispatch();
   const { fetchMe: meStatus } = useAppSelector((state) => state.user);
 
-  React.useEffect(() => {
+  React.useEffect((): void => {
     dispatch(fetchMe());
   }, []);
 

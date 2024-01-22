@@ -22,7 +22,9 @@ const getOrderStatus = (status: EOrderStatus) => {
       ? 'Ընդունված'
       : status === EOrderStatus.DELIVERED
         ? 'Առաքված'
-        : 'Ակտիվ';
+        : status === EOrderStatus.REJECTED
+          ? 'Մերժված'
+          : 'Ակտիվ';
 };
 
 const categoryHome = {

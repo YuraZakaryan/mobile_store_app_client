@@ -13,7 +13,7 @@ export const OrdersCompleted = () => {
   const dispatch = useAppDispatch();
   const { ordersHistory, cancelOrder } = useAppSelector((state) => state.order);
   const [currentStatusOrderPage, setStatusOrderCurrentPage] = React.useState<number>(1);
-  const isLoading = cancelOrder.isLoading;
+  const isLoading: boolean = cancelOrder.isLoading;
   const fetchData = (): void => {
     dispatch(
       fetchDeliveredOrdersThunk({

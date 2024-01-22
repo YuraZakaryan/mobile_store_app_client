@@ -69,8 +69,12 @@ const categorySlice = createSlice({
         state.categories.isError = false;
       })
       .addCase(fetchCategoriesThunk.rejected, (state: TInitialCategoryState): void => {
-        state.categories.isLoading = false;
-        state.categories.isError = true;
+        state.categories = {
+          total_items: 0,
+          items: [],
+          isError: true,
+          isLoading: false,
+        };
       })
       .addCase(createCategoryThunk.fulfilled, (state: TInitialCategoryState): void => {
         state.create.isError = false;

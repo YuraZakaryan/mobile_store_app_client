@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import NumericInput from 'react-native-numeric-input';
 
+import { TInitialItemCounts } from './types';
 import { useAppDispatch, useAppSelector } from '../../../hooks/redux';
 import {
   deleteOrderItemThunk,
@@ -32,8 +33,10 @@ import { Main } from '../../wrappers';
 
 export const Basket = () => {
   const dispatch = useAppDispatch();
+  const [initialItemCounts, setInitialItemCounts] = React.useState<TInitialItemCounts>({});
   const { basket, fetchBasketOrder, toOrder, create } = useAppSelector((state) => state.order);
   const { user } = useAppSelector((state) => state.user);
+  const isAnyItemCountZero = basket.items.some((item) => item.itemCount === 0);
   const isLoading: boolean = create.isLoading;
 
   const fetchData = (): void => {
@@ -43,9 +46,9 @@ export const Basket = () => {
     fetchData();
   }, [isLoading]);
 
-  const sumItemsPrice: number = basket.items.reduce((acc, item) => {
+  const sumItemsPrice: number = basket.items.reduce((acc: number, item: TOrderItem): number => {
     if (item.product && item.product.price) {
-      const itemPrice = item.product.discount
+      const itemPrice: number = item.product.discount
         ? calculateDiscountedPrice(item.product.price, item.product.discount)
         : item.product.price;
       return acc + itemPrice * item.itemCount;
@@ -89,82 +92,99 @@ export const Basket = () => {
                 data={basket.items}
                 scrollEnabled={false}
                 ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-                renderItem={({ item }) => (
-                  <>
-                    {item.product && (
-                      <View className="flex-row flex-1 min-h-[140px] bg-white shadow rounded-lg relative">
-                        <TouchableOpacity
-                          className="absolute right-2 top-2"
-                          onPress={() => handleDelete(item._id)}>
-                          <FontAwesome name="window-close" size={23} color="red" />
-                        </TouchableOpacity>
-                        <View>
-                          {item.product && item.product.picture && (
-                            <Image
-                              source={{ uri: API_URL + '/' + item.product.picture }}
-                              className="w-24 h-24 rounded-lg"
-                              alt={item.product.title}
-                            />
-                          )}
-                        </View>
-                        <View className="m-3 justify-between">
+                renderItem={({ item }) => {
+                  const initialItemCount: number = initialItemCounts[item._id] || 0;
+
+                  return (
+                    <>
+                      {item.product && (
+                        <View className="flex-row flex-1 min-h-[150px] bg-white shadow rounded-lg relative">
+                          <TouchableOpacity
+                            className="absolute right-2 top-2"
+                            onPress={() => handleDelete(item._id)}>
+                            <FontAwesome name="window-close" size={23} color="red" />
+                          </TouchableOpacity>
                           <View>
-                            {item.product && (
-                              <Text className="text-blue-600">{item.product.title}</Text>
+                            {item.product && item.product.picture && (
+                              <Image
+                                source={{ uri: API_URL + '/' + item.product.picture }}
+                                className="w-24 h-24 rounded-lg"
+                                alt={item.product.title}
+                              />
                             )}
                           </View>
-                          <View className="gap-1">
-                            {item.product && (
-                              <Text className="text-gray-600">Կոդ։ {item.product.code}</Text>
-                            )}
-                            <View className="flex-row items-center mt-2 ">
-                              <Text className="text-orange-500 font-semibold ">Գին։</Text>
-                              {item.product && (
-                                <View className="ml-1 flex-row items-center">
-                                  <Text
-                                    className={`text-orange-500  ${
-                                      item.product.discount ? 'line-through text-gray-600' : ''
-                                    }`}>
-                                    {item.product.price}
-                                    &nbsp;․դր
-                                  </Text>
-                                  {item.product.discount ? (
-                                    <Text className="text-sm text-orange-500 ml-1">
-                                      {formattedPrice(
-                                        calculateDiscountedPrice(
-                                          item.product.price,
-                                          item.product.discount
-                                        )
-                                      )}
-                                      &nbsp;․դր
-                                    </Text>
-                                  ) : null}
-                                </View>
-                              )}
-                            </View>
+                          <View className="m-3 justify-between">
                             <View>
                               {item.product && (
-                                <NumericInput
-                                  onChange={(value) =>
-                                    dispatch(updateItemCount({ itemId: item._id, newValue: value }))
-                                  }
-                                  totalWidth={100}
-                                  type="plus-minus"
-                                  valueType="real"
-                                  rounded
-                                  totalHeight={25}
-                                  value={item.itemCount}
-                                  minValue={0}
-                                  maxValue={99}
-                                />
+                                <Text className="text-blue-600">{item.product.title}</Text>
                               )}
+                            </View>
+                            <View className="gap-1">
+                              {item.product && (
+                                <Text className="text-gray-600">Կոդ։ {item.product.code}</Text>
+                              )}
+                              {item.product && (
+                                <Text className="text-gray-600 font-semibold">
+                                  Հասանելի քանակը։ {item.product.count}
+                                </Text>
+                              )}
+                              <View className="flex-row items-center mt-2 ">
+                                <Text className="text-orange-500 font-semibold ">Գին։</Text>
+                                {item.product && (
+                                  <View className="ml-1 flex-row items-center">
+                                    <Text
+                                      className={`text-orange-500  ${
+                                        item.product.discount ? 'line-through text-gray-600' : ''
+                                      }`}>
+                                      {item.product.price}
+                                      &nbsp;․դր
+                                    </Text>
+                                    {item.product.discount ? (
+                                      <Text className="text-sm text-orange-500 ml-1">
+                                        {formattedPrice(
+                                          calculateDiscountedPrice(
+                                            item.product.price,
+                                            item.product.discount
+                                          )
+                                        )}
+                                        &nbsp;․դր
+                                      </Text>
+                                    ) : null}
+                                  </View>
+                                )}
+                              </View>
+                              <View>
+                                {item.product && (
+                                  <NumericInput
+                                    onChange={(value: number): void => {
+                                      if (!initialItemCounts[item._id]) {
+                                        setInitialItemCounts({
+                                          ...initialItemCounts,
+                                          [item._id]: item.itemCount,
+                                        });
+                                      }
+                                      dispatch(
+                                        updateItemCount({ itemId: item._id, newValue: value })
+                                      );
+                                    }}
+                                    totalWidth={100}
+                                    type="plus-minus"
+                                    valueType="real"
+                                    rounded
+                                    totalHeight={25}
+                                    value={item.itemCount}
+                                    minValue={0}
+                                    maxValue={item.product.count + initialItemCount}
+                                  />
+                                )}
+                              </View>
                             </View>
                           </View>
                         </View>
-                      </View>
-                    )}
-                  </>
-                )}
+                      )}
+                    </>
+                  );
+                }}
                 horizontal={false}
                 keyExtractor={(item: TOrderItem) => item._id}
               />
@@ -215,9 +235,11 @@ export const Basket = () => {
               </View>
               <View className="w-full mt-6">
                 <TouchableOpacity
-                  className="min-h-[40px] p-4 items-center justify-center rounded-lg bg-orange-400"
+                  className={`min-h-[40px] p-4 items-center justify-center rounded-lg bg-orange-400 ${
+                    isAnyItemCountZero ? 'bg-gray-400' : ''
+                  }`}
                   onPress={handleClick}
-                  disabled={toOrder.isLoading}>
+                  disabled={toOrder.isLoading || isAnyItemCountZero}>
                   {toOrder.isLoading ? (
                     <ActivityIndicator size="small" />
                   ) : (

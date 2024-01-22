@@ -102,8 +102,12 @@ export const productSlice = createSlice({
         state.products.isError = false;
       })
       .addCase(fetchProductsThunk.rejected, (state: TInitialProductState): void => {
-        state.products.isLoading = false;
-        state.products.isError = true;
+        state.products = {
+          total_items: 0,
+          items: [],
+          isError: true,
+          isLoading: false,
+        };
       })
       .addCase(
         fetchDiscountedProductsThunk.fulfilled,
@@ -126,8 +130,12 @@ export const productSlice = createSlice({
         state.discountedProducts.isError = false;
       })
       .addCase(fetchDiscountedProductsThunk.rejected, (state: TInitialProductState): void => {
-        state.discountedProducts.isLoading = false;
-        state.discountedProducts.isError = true;
+        state.discountedProducts = {
+          total_items: 0,
+          items: [],
+          isError: true,
+          isLoading: false,
+        };
       })
       .addCase(
         fetchProductsForHomeCategoryThunk.fulfilled,
@@ -150,8 +158,12 @@ export const productSlice = createSlice({
         state.productsForHomeScreen.isError = false;
       })
       .addCase(fetchProductsForHomeCategoryThunk.rejected, (state: TInitialProductState): void => {
-        state.productsForHomeScreen.isLoading = false;
-        state.productsForHomeScreen.isError = true;
+        state.productsForHomeScreen = {
+          total_items: 0,
+          items: [],
+          isError: true,
+          isLoading: false,
+        };
       })
       .addCase(
         fetchDiscountedProductsForHomeCategoryThunk.fulfilled,
@@ -179,8 +191,12 @@ export const productSlice = createSlice({
       .addCase(
         fetchDiscountedProductsForHomeCategoryThunk.rejected,
         (state: TInitialProductState): void => {
-          state.discountedProductsForHomeScreen.isLoading = false;
-          state.discountedProductsForHomeScreen.isError = true;
+          state.discountedProductsForHomeScreen = {
+            total_items: 0,
+            items: [],
+            isError: true,
+            isLoading: false,
+          };
         }
       )
       .addCase(
@@ -204,8 +220,12 @@ export const productSlice = createSlice({
         state.search.isError = false;
       })
       .addCase(searchProductsThunk.rejected, (state: TInitialProductState): void => {
-        state.search.isLoading = false;
-        state.search.isError = true;
+        state.search = {
+          total_items: 0,
+          items: [],
+          isError: true,
+          isLoading: false,
+        };
       })
       .addCase(
         fetchProductsByCategoryThunk.fulfilled,
@@ -228,9 +248,12 @@ export const productSlice = createSlice({
         state.productsByCategory.isError = false;
       })
       .addCase(fetchProductsByCategoryThunk.rejected, (state: TInitialProductState): void => {
-        state.productsByCategory.isLoading = false;
-        state.productsByCategory.isError = true;
-        state.productsByCategory.items = initialState.productsByCategory.items;
+        state.productsByCategory = {
+          total_items: 0,
+          items: [],
+          isError: true,
+          isLoading: false,
+        };
       })
       .addCase(
         createProductThunk.fulfilled,

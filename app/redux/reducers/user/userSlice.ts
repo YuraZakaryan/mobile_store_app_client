@@ -4,6 +4,7 @@ import { SecureStoreService } from '../../../services';
 import { SHOW_ERROR, SHOW_SUCCESS } from '../../../toasts';
 import {
   cancelUserThunk,
+  confirmOtpThunk,
   createUserThunk,
   fetchBannedUsers,
   fetchMe,
@@ -11,14 +12,18 @@ import {
   fetchUsersThunk,
   loginThunk,
   registrationThunk,
+  resetPasswordThunk,
+  sendOtpToMailThunk,
   toggleBanThunk,
   updatePasswordThunk,
   updateUserThunk,
 } from '../../http/userThunk';
 import {
   EAuthMode,
+  EResetPasswordMode,
   TInitialUserState,
   TItemsWithTotalLength,
+  TOtpData,
   TPayloadActionUser,
   TUser,
 } from '../../types';
@@ -39,6 +44,13 @@ const initialState: TInitialUserState = {
     isError: false,
   },
   authMode: EAuthMode.LOGIN,
+  resetPassword: {
+    mode: EResetPasswordMode.MAIL_SECTION,
+    mail: '',
+    otp: '',
+    isLoading: false,
+    isError: false,
+  },
   login: {
     isLoading: false,
     isError: false,
@@ -73,8 +85,17 @@ export const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    setAuthMode(state: TInitialUserState, action: PayloadAction<EAuthMode>) {
+    setAuthMode(state: TInitialUserState, action: PayloadAction<EAuthMode>): void {
       state.authMode = action.payload;
+    },
+    setResetPasswordMode(
+      state: TInitialUserState,
+      action: PayloadAction<EResetPasswordMode>
+    ): void {
+      state.resetPassword.mode = action.payload;
+    },
+    clearResetPassword(state: TInitialUserState): void {
+      state.resetPassword = initialState.resetPassword;
     },
     logOut: (state: TInitialUserState) => {
       SecureStoreService.deleteAccessToken();
@@ -105,7 +126,7 @@ export const userSlice = createSlice({
       })
       .addCase(
         registrationThunk.fulfilled,
-        (state: TInitialUserState, action: PayloadAction<TPayloadActionUser>) => {
+        (state: TInitialUserState, action: PayloadAction<TPayloadActionUser>): void => {
           const { user } = action.payload;
           state.user = user;
           state.isAuth = true;
@@ -141,7 +162,12 @@ export const userSlice = createSlice({
       .addCase(fetchUsersThunk.rejected, (state: TInitialUserState): void => {
         state.users.isLoading = false;
         state.users.isError = true;
-        state.users.items = [];
+        state.users = {
+          total_items: 0,
+          items: [],
+          isError: true,
+          isLoading: false,
+        };
       })
       .addCase(
         fetchUnconfirmedUsers.fulfilled,
@@ -163,7 +189,12 @@ export const userSlice = createSlice({
       .addCase(fetchUnconfirmedUsers.rejected, (state: TInitialUserState): void => {
         state.unconfirmedUsers.isLoading = false;
         state.unconfirmedUsers.isError = true;
-        state.unconfirmedUsers.items = [];
+        state.unconfirmedUsers = {
+          total_items: 0,
+          items: [],
+          isError: true,
+          isLoading: false,
+        };
       })
       .addCase(
         fetchBannedUsers.fulfilled,
@@ -183,18 +214,18 @@ export const userSlice = createSlice({
         state.bannedUsers.isError = false;
       })
       .addCase(fetchBannedUsers.rejected, (state: TInitialUserState): void => {
-        state.bannedUsers.isLoading = false;
-        state.bannedUsers.isError = true;
-        state.bannedUsers.items = [];
+        state.bannedUsers = {
+          total_items: 0,
+          items: [],
+          isError: true,
+          isLoading: false,
+        };
       })
-      .addCase(
-        updateUserThunk.fulfilled,
-        (state: TInitialUserState, action: PayloadAction<TUser>): void => {
-          state.updateUser.isError = false;
-          state.updateUser.isLoading = false;
-          SHOW_SUCCESS('Բաժանորդի տվյալները հաջողությամբ փոխվեցին');
-        }
-      )
+      .addCase(updateUserThunk.fulfilled, (state: TInitialUserState): void => {
+        state.updateUser.isError = false;
+        state.updateUser.isLoading = false;
+        SHOW_SUCCESS('Բաժանորդի տվյալները հաջողությամբ փոխվեցին');
+      })
       .addCase(updateUserThunk.pending, (state: TInitialUserState): void => {
         state.updateUser.isError = false;
         state.updateUser.isLoading = true;
@@ -219,6 +250,73 @@ export const userSlice = createSlice({
         state.updatePassword.isLoading = false;
         if (action.payload === 400) {
           SHOW_ERROR('Հին գաղտնաբառը սխալ է');
+        }
+      })
+      .addCase(sendOtpToMailThunk.fulfilled, (state: TInitialUserState, action): void => {
+        if (action.payload) {
+          state.resetPassword = {
+            isLoading: false,
+            isError: false,
+            otp: '',
+            mail: action.payload.mail,
+            mode: EResetPasswordMode.OPT_SECTION,
+          };
+        }
+      })
+      .addCase(sendOtpToMailThunk.pending, (state: TInitialUserState): void => {
+        state.resetPassword.isError = false;
+        state.resetPassword.isLoading = true;
+      })
+      .addCase(sendOtpToMailThunk.rejected, (state: TInitialUserState): void => {
+        state.resetPassword.isError = true;
+        state.resetPassword.isLoading = false;
+        SHOW_ERROR('Նշված էլեկտրոնային փոստով բաժանորդ չի գտնվել');
+      })
+      .addCase(confirmOtpThunk.fulfilled, (state: TInitialUserState, action): void => {
+        if (action.payload) {
+          state.resetPassword = {
+            isLoading: false,
+            isError: false,
+            otp: action.payload.otp,
+            mail: action.payload.mail,
+            mode: EResetPasswordMode.NEW_PASS_SECTION,
+          };
+        }
+      })
+      .addCase(confirmOtpThunk.pending, (state: TInitialUserState): void => {
+        state.resetPassword.isError = false;
+        state.resetPassword.isLoading = true;
+      })
+      .addCase(confirmOtpThunk.rejected, (state: TInitialUserState, action): void => {
+        state.resetPassword.isError = true;
+        state.resetPassword.isLoading = false;
+        if (action.payload) {
+          if (action.payload === 410) {
+            SHOW_ERROR('Նշված մեկ անգամյա գաղտմաբառը այլևս վավեր չէ, խնդրում ենք պահանջել նորը');
+          } else if (action.payload === 403) {
+            SHOW_ERROR('Սխալ մեկ անգամյա գաղտնաբառ');
+          }
+        }
+      })
+      .addCase(resetPasswordThunk.fulfilled, (state: TInitialUserState, action): void => {
+        if (action.payload) {
+          state.resetPassword = initialState.resetPassword;
+          SHOW_SUCCESS('Գաղտնաբառը հաջողությամբ փոխվեց');
+        }
+      })
+      .addCase(resetPasswordThunk.pending, (state: TInitialUserState): void => {
+        state.resetPassword.isError = false;
+        state.resetPassword.isLoading = true;
+      })
+      .addCase(resetPasswordThunk.rejected, (state: TInitialUserState, action): void => {
+        state.resetPassword.isError = true;
+        state.resetPassword.isLoading = false;
+        if (action.payload) {
+          if (action.payload === 404) {
+            SHOW_ERROR('Այս էլ․ փոստով բաժանորդ չի գտնվել');
+          } else if (action.payload === 403) {
+            SHOW_ERROR('Սխալ մեկ անգամյա գաղտնաբառ');
+          }
         }
       })
       .addCase(createUserThunk.fulfilled, (state: TInitialUserState): void => {
@@ -289,9 +387,10 @@ export const userSlice = createSlice({
       })
       .addCase(fetchMe.rejected, (state: TInitialUserState): void => {
         state.isAuth = false;
+        state.user = null;
         state.fetchMe.isError = true;
         state.fetchMe.isLoading = false;
       }),
 });
 export const userReducer = userSlice.reducer;
-export const { setAuthMode, logOut } = userSlice.actions;
+export const { setAuthMode, setResetPasswordMode, clearResetPassword, logOut } = userSlice.actions;

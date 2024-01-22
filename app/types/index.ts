@@ -49,7 +49,7 @@ export interface IOrderInfo {
   item: TOrder;
   totalAmount: number;
 }
-export interface IFieldWithError<T extends FormikValues> extends PropsWithChildren {
+export interface IFieldWithError<T extends FormikValues> extends PropsWithChildren, TClassName {
   fieldName: string;
   errors: FormikErrors<T>;
   touched: FormikTouched<T> | any;

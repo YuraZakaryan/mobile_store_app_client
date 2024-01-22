@@ -4,6 +4,11 @@ export enum EAuthMode {
   LOGIN = 'login',
   REGISTRATION = 'registration',
 }
+export enum EResetPasswordMode {
+  MAIL_SECTION = 'mail-section',
+  OPT_SECTION = 'otp-section',
+  NEW_PASS_SECTION = 'new-pass-section',
+}
 
 export type TRole = 'ADMIN' | 'MODERATOR' | 'USER';
 
@@ -12,6 +17,7 @@ export type TUser = {
   firstname: string;
   lastname: string;
   username: string;
+  mail: string;
   address: string;
   phone: string;
   role: TRole;
@@ -23,10 +29,17 @@ export type TStateStatus = {
   isLoading: boolean;
   isError: boolean;
 };
-
+export type TResetPassword = {
+  mode: EResetPasswordMode;
+  mail: string;
+  otp: string;
+  isLoading: boolean;
+  isError: boolean;
+};
 export type TInitialUserState = {
   isAuth: boolean | null;
   authMode: EAuthMode;
+  resetPassword: TResetPassword;
   user: TUser | null;
   users: TItemsWithTotalLength<TUser[]>;
   unconfirmedUsers: TItemsWithTotalLength<TUser[]>;
@@ -49,4 +62,9 @@ export type TTokens = {
 export type TPayloadActionUser = {
   user: TUser;
   tokens: TTokens;
+};
+export type TOtpData = {
+  message: string;
+  mail: string;
+  otp: string;
 };

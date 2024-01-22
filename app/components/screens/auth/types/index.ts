@@ -7,6 +7,7 @@ export type TInitialLoginFormValue = {
 export interface TInitialRegistrationFormValue extends TInitialLoginFormValue {
   firstname: string;
   lastname: string;
+  mail: string;
   address: string;
   password: string;
   phone: string;

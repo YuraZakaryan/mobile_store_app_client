@@ -8,6 +8,9 @@ export const registrationFormSchema = Yup.object().shape({
     .required('Ազգանունը պարտադիր է')
     .min(3, 'Ազգանունը պետք է ունենա առնվազն 3 տառ')
     .max(26, 'Ազգանունը չպետք է լինի ավելի քան 26 տառ'),
+  mail: Yup.string()
+    .email('Էլեկտրոնային փոստը չի համապատասխանում ձևաչափին')
+    .required('Էլեկտրոնային փոստը պարտադիր է'),
   username: Yup.string()
     .required('Մուտքանունը պարտադիր է')
     .min(8, ({ min }) => `'Մուտքանունը պետք է ունենա առնվազն ${min} տառ `)
@@ -27,6 +30,34 @@ export const registrationFormSchema = Yup.object().shape({
     .required('Գաղտնաբառը պարտադիր է'),
   confirmPassword: Yup.string()
     .oneOf([Yup.ref('password')], 'Գաղտնաբառերը չեն համընկնում')
+    .required('Գաղտնաբառի հաստատումը պարտադիր է'),
+});
+export const resetPasswordMailFormSchema = Yup.object().shape({
+  mail: Yup.string().required('Էլ․ փոստը պարտադիր է').email('Էլ․ փոստը վավեր չէ'),
+});
+export const resetPasswordOtpFormSchema = Yup.object().shape({
+  otp: Yup.string()
+    .required('Մեկ անգամյա գաղտնաբառը պարտադիր է')
+    .min(4, (min) => `Մեկ անգամյա գաղտնաբառը ${min} նիշ`),
+});
+export const setNewPasswordFormSchema = Yup.object().shape({
+  newPassword: Yup.string()
+    .test(
+      'not-same-as-old',
+      'Նոր գաղտնաբառը չի կարող համընկնի հին գաղտնաբառի հետ',
+      function (value) {
+        return value !== this.parent.oldPassword;
+      }
+    )
+    .matches(/\w*[a-z]\w*/, 'Նոր գաղտնաբառը պետք է պարունակի փոքրատառ')
+    .matches(/\w*[A-Z]\w*/, 'Նոր գաղտնաբառը պետք է պարունակի մեծատառ')
+    .matches(/\d/, 'Նոր գաղտնաբառը պետք է պարունակի թիվ')
+    .matches(/[!@#$?%^&*()\-_"=+{}; :,<.>]/, 'Նոր գաղտնաբառը պետք է պարունակի հատուկ նշան')
+    .min(8, ({ min }) => `Նոր գաղտնաբառը պետք է լինի մեծ ${min}֊ից`)
+    .max(18, ({ max }) => `Նոր գաղտնաբառը պետք է լինի փոքր ${max}֊ից`)
+    .required('Նոր գաղտնաբառը պարտադիր է'),
+  confirmPassword: Yup.string()
+    .oneOf([Yup.ref('newPassword')], 'Գաղտնաբառերը չեն համընկնում')
     .required('Գաղտնաբառի հաստատումը պարտադիր է'),
 });
 export const changePasswordFormSchema = Yup.object().shape({
@@ -70,6 +101,9 @@ export const updateUserFormSchema = Yup.object().shape({
     .min(5, 'Մուտքանունը պետք է ունենա առնվազն 5 տառ')
     .max(16, 'Մուտքանունը չպետք է լինի ավելի քան 16 տառ')
     .matches(/^[a-zA-Z0-9]+$/, 'Մուտքանունը պետք է պարունակի միայն անգլերեն տառեր և թվեր'),
+  mail: Yup.string()
+    .email('Էլեկտրոնային փոստը չի համապատասխանում ձևաչափին')
+    .required('Էլեկտրոնային փոստը պարտադիր է'),
   phone: Yup.string()
     .required('Հեռախոսահամարը պարտադիր է')
     .min(9, 'Հեռախոսահամարը չի համապատասխանում ՀՀ ձևաչափին'),

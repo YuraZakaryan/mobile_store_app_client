@@ -5,6 +5,7 @@ export * from './basket';
 export * from './last-orders';
 export * from './products-page-by-category';
 export * from './product-page';
+export * from './about-app';
 
 export * from './profile/main';
 export * from './profile/users-control';
@@ -19,3 +20,5 @@ export * from './profile/user-password-edit';
 export * from './profile/category-create-edit';
 export * from './profile/product-create-edit';
 export * from './profile/order-view';
+
+export * from './reset-password';

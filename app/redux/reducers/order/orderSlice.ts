@@ -36,6 +36,7 @@ const initialState: TInitialBasketState = {
     confirmedTime: null,
     acceptedTime: null,
     deliveredTime: null,
+    rejectedTime: null,
     createdAt: null,
   },
   orders: {
@@ -183,10 +184,14 @@ const orderSlice = createSlice({
         state.toOrder.isLoading = true;
         state.toOrder.isError = false;
       })
-      .addCase(toOrderThunk.rejected, (state: TInitialBasketState): void => {
+      .addCase(toOrderThunk.rejected, (state: TInitialBasketState, action): void => {
         state.toOrder.isLoading = false;
         state.toOrder.isError = true;
-        SHOW_ERROR('Պատվերի հաստատման հետ կապված խնդիր է առաջացել');
+        if (action.payload === 502) {
+          SHOW_ERROR('Ոչ բավարար ապրանքի քանակ');
+        } else {
+          SHOW_ERROR('Պատվերի հաստատման հետ կապված խնդիր է առաջացել');
+        }
       })
       .addCase(
         fetchAllOrdersThunk.fulfilled,
@@ -208,8 +213,12 @@ const orderSlice = createSlice({
         state.orders.isError = false;
       })
       .addCase(fetchAllOrdersThunk.rejected, (state: TInitialBasketState): void => {
-        state.orders.isLoading = false;
-        state.orders.isError = true;
+        state.orders = {
+          total_items: 0,
+          items: [],
+          isError: true,
+          isLoading: false,
+        };
       })
       .addCase(
         fetchDeliveredOrdersThunk.fulfilled,
@@ -231,9 +240,12 @@ const orderSlice = createSlice({
         state.ordersHistory.isError = false;
       })
       .addCase(fetchDeliveredOrdersThunk.rejected, (state: TInitialBasketState): void => {
-        state.ordersHistory.isLoading = false;
-        state.ordersHistory.isError = true;
-        state.ordersHistory.items = [];
+        state.ordersHistory = {
+          total_items: 0,
+          items: [],
+          isError: true,
+          isLoading: false,
+        };
       })
       .addCase(
         fetchOrdersByAuthorThunk.fulfilled,
@@ -255,8 +267,12 @@ const orderSlice = createSlice({
         state.ordersHistory.isError = false;
       })
       .addCase(fetchOrdersByAuthorThunk.rejected, (state: TInitialBasketState): void => {
-        state.ordersHistory.isLoading = false;
-        state.ordersHistory.isError = true;
+        state.ordersHistory = {
+          total_items: 0,
+          items: [],
+          isError: true,
+          isLoading: false,
+        };
       })
       .addCase(changeOrderStatusThunk.fulfilled, (state: TInitialBasketState): void => {
         state.changeStatus.isLoading = false;
@@ -271,14 +287,11 @@ const orderSlice = createSlice({
         state.changeStatus.isLoading = false;
         state.changeStatus.isError = true;
       })
-      .addCase(
-        cancelOrderThunk.fulfilled,
-        (state: TInitialBasketState, action: PayloadAction<TOrder>): void => {
-          state.cancelOrder.isLoading = false;
-          state.cancelOrder.isError = false;
-          SHOW_SUCCESS('Պատվերը հաջողությամբ չեղարկվեց');
-        }
-      )
+      .addCase(cancelOrderThunk.fulfilled, (state: TInitialBasketState): void => {
+        state.cancelOrder.isLoading = false;
+        state.cancelOrder.isError = false;
+        SHOW_SUCCESS('Պատվերը հաջողությամբ չեղարկվեց');
+      })
       .addCase(cancelOrderThunk.pending, (state: TInitialBasketState): void => {
         state.cancelOrder.isLoading = true;
         state.cancelOrder.isError = false;

@@ -27,22 +27,18 @@ export const hasTimePassed = (
   specifiedDateString: string = '18 / 01 / 2024  15:04',
   seconds: number = 20
 ): boolean => {
-  // Преобразовываем строку с датой в объект Date
-  const dateParts = specifiedDateString.split(/[\/\s:]+/); // Разделяем строку на части
+  const dateParts = specifiedDateString.split(/[\/\s:]+/);
   const specifiedDate = new Date(
-    parseInt(dateParts[2]), // год
-    parseInt(dateParts[1]) - 1, // месяц (начинается с 0)
-    parseInt(dateParts[0]), // день
-    parseInt(dateParts[3]), // час
-    parseInt(dateParts[4]) // минута
+    parseInt(dateParts[2]),
+    parseInt(dateParts[1]) - 1,
+    parseInt(dateParts[0]),
+    parseInt(dateParts[3]),
+    parseInt(dateParts[4])
   );
 
-  // Получаем текущую дату и время
   const currentDate = new Date();
 
-  // Вычисляем разницу в секундах между текущей датой и указанной датой
   const timeDifferenceInSeconds = (currentDate.getTime() - specifiedDate.getTime()) / 1000;
 
-  // Проверяем, прошло ли указанное количество секунд
   return timeDifferenceInSeconds >= seconds;
 };

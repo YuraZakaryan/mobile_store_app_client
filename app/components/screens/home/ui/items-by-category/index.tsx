@@ -13,21 +13,20 @@ export const ItemsByCategory: React.FC<IItemsByCategory> = React.memo((props) =>
   const handleNavigate = (): void => {
     navigate('byFilter', { categoryTitle });
   };
-
   return (
     <>
       {Array.isArray(products) && products.length !== 0 ? (
-        <View className="mt-3">
+        <View className="my-3">
           <View>
-            <View className="flex-1 items-center flex-row">
+            <View className="items-center flex-row">
               {icon}
               <View className="justify-center flex-row ml-3">
-                <Text className="uppercase text-lg text-blue-600">{categoryTitle.charAt(0)}</Text>
-                <Text className="text-lg text-blue-600">{categoryTitle.slice(1)}</Text>
+                <Text className="uppercase text-lg text-orange-600">{categoryTitle.charAt(0)}</Text>
+                <Text className="text-lg text-orange-600">{categoryTitle.slice(1)}</Text>
               </View>
             </View>
           </View>
-          <View className="mt-5">
+          <View className="mt-3">
             <FlatList
               scrollEnabled={false}
               data={products}

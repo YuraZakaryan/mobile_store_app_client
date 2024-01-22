@@ -9,6 +9,7 @@ export type TInitialUserCreateEditFormValue = {
   firstname: string;
   lastname: string;
   username: string;
+  mail: string;
   address: string;
   password?: string;
   phone: string;

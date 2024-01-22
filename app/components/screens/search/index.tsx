@@ -25,12 +25,15 @@ export const Search = () => {
   const dispatch = useAppDispatch();
   const { search, searchQuery } = useAppSelector((state) => state.product);
   const [initialSearch, setInitialSearch] = React.useState<boolean>(false);
+  const { deleteItem, create, changeStatus, toOrder } = useAppSelector((state) => state.order);
+  const isLoading: boolean =
+    create.isLoading || deleteItem.isLoading || changeStatus.isLoading || toOrder.isLoading;
 
   const debouncedSearch = useDebounce(searchQuery, 500);
 
   React.useEffect(() => {
     dispatch(searchProductsThunk({ query: debouncedSearch }));
-  }, [initialSearch, debouncedSearch]);
+  }, [initialSearch, debouncedSearch, isLoading]);
 
   const handleSearchChange = (text: string): void => {
     dispatch(setSearchQuery(text));
