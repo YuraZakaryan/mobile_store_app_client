@@ -12,9 +12,10 @@ import { Main, OrderItemCard, PaginationButtons } from '../../wrappers';
 
 export const LastOrders = () => {
   const dispatch = useAppDispatch();
-  const { ordersHistory } = useAppSelector((state) => state.order);
+  const { ordersHistory, toOrder } = useAppSelector((state) => state.order);
   const { user } = useAppSelector((state) => state.user);
   const [currentLastOrderPage, setLastOrderCurrentPage] = React.useState<number>(1);
+  const isLoading = toOrder.isLoading;
 
   const fetchData = (): void => {
     dispatch(
@@ -28,7 +29,7 @@ export const LastOrders = () => {
 
   React.useEffect(() => {
     fetchData();
-  }, [currentLastOrderPage]);
+  }, [currentLastOrderPage, isLoading]);
 
   const handlePrevLastOrderPage = (): void => {
     if (currentLastOrderPage > 1) {
@@ -83,15 +84,7 @@ export const LastOrders = () => {
                         scrollEnabled={false}
                         data={order.items}
                         ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-                        renderItem={({ item }) => (
-                          <OrderItemCard
-                            orderCount={item.itemCount}
-                            price={item.product.price}
-                            code={item.product.code}
-                            title={item.product.title}
-                            discount={item.product.discount}
-                          />
-                        )}
+                        renderItem={({ item }) => <OrderItemCard item={item} />}
                         keyExtractor={(item: TOrderItem) => item._id}
                       />
                       <View className="w-full p-2 flex-row justify-between items-center">
