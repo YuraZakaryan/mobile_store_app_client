@@ -1,4 +1,5 @@
-import { NavigationProp, ParamListBase, useNavigation, useRoute } from '@react-navigation/native';
+import { Feather } from '@expo/vector-icons';
+import { NavigationProp, useNavigation, useRoute } from '@react-navigation/native';
 import React from 'react';
 import {
   ActivityIndicator,
@@ -16,41 +17,64 @@ import { InfoItem } from './wrapper';
 import { useAppDispatch, useAppSelector } from '../../../hooks/redux';
 import { createOrAddOrderThunk } from '../../../redux/http/orderThunk';
 import { changeForm, setProductId } from '../../../redux/reducers/order/orderSlice';
-import { API_URL } from '../../../utils/constants';
+import { TOrderItem } from '../../../redux/types/order';
+import { API_URL, ICON_MAIN_COLOR } from '../../../utils/constants';
 import { SaleIcon } from '../../wrappers';
 
 export const ProductPage = () => {
-  const { setOptions, setParams } = useNavigation<NavigationProp<any, any>>();
   const dispatch = useAppDispatch();
+  const [orderExistsAfterClick, setOrderExistsAfterClick] = React.useState<boolean>(false);
+  const { setOptions, setParams } = useNavigation<NavigationProp<any, any>>();
   const route = useRoute();
   const { item }: TProductRouteParams = route.params as TProductRouteParams;
-  const { newItemForm, create } = useAppSelector((state) => state.order);
+  const { newItemForm, create, basket, deleteItem } = useAppSelector((state) => state.order);
   const { user } = useAppSelector((state) => state.user);
 
+  // Set header title
   React.useLayoutEffect((): void => {
     setOptions({
       headerTitle: item.title,
     });
   }, []);
 
+  // Dispatch product id on item change
   React.useEffect((): void => {
     dispatch(setProductId({ product: item._id, author: user?._id as string, itemCount: 0 }));
   }, [item._id]);
 
+  // Reset orderExistsAfterClick on deleteItem.isLoading change
+  React.useEffect(() => {
+    if (orderExistsAfterClick) {
+      setOrderExistsAfterClick(false);
+    }
+  }, [deleteItem.isLoading]);
+
+  // Handle form field change
   const handleChange = (name: string, value: string | number | null): void => {
     dispatch(changeForm({ name, value }));
   };
 
+  // Handle button click
   const handleClick = (): void => {
     dispatch(createOrAddOrderThunk(newItemForm))
       .unwrap()
       .then((res): void => {
         setParams({ item: res });
+        setOrderExistsAfterClick(true);
       })
       .catch((err) => console.log(err));
   };
 
-  const isButtonDisable: boolean = newItemForm.itemCount === 0 || create.isLoading;
+  // Check if the order exists in the basket
+  const orderExists: boolean = basket.items.some(
+    (order: TOrderItem): boolean => order.product._id === item._id
+  );
+
+  // Check if the button should be disabled
+  const isButtonDisable: boolean =
+    newItemForm.itemCount === 0 || create.isLoading || orderExists || orderExistsAfterClick;
+
+  // Check if the item has a discount
   const checkDiscount: boolean = item.discount > 0;
 
   return (
@@ -70,7 +94,7 @@ export const ProductPage = () => {
               <Text className="text-gray-500 p-4">Քանակը</Text>
               <View className="px-4">
                 <NumericInput
-                  onChange={(value) => handleChange('itemCount', value)}
+                  onChange={(value: number) => handleChange('itemCount', value)}
                   totalWidth={120}
                   type="plus-minus"
                   valueType="real"
@@ -101,6 +125,11 @@ export const ProductPage = () => {
               disabled={isButtonDisable}>
               {create.isLoading ? (
                 <ActivityIndicator size="small" />
+              ) : orderExists || orderExistsAfterClick ? (
+                <View className="flex-row items-center justify-center">
+                  <Feather name="shopping-cart" size={16} color={ICON_MAIN_COLOR} />
+                  <Text className="ml-2 text-white font-semibold">ԶԱՄԲՅՈՒՂՈՒՄ</Text>
+                </View>
               ) : (
                 <Text className="text-center text-white font-bold text-base">
                   Ավելացնել զամբյուղում

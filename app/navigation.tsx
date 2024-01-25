@@ -4,7 +4,7 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
-import { Text, View } from 'react-native';
+import { ActivityIndicator, Text, View } from 'react-native';
 import Toast from 'react-native-toast-message';
 
 import {
@@ -36,6 +36,7 @@ import { useAppDispatch, useAppSelector } from './hooks/redux';
 import { fetchMe } from './redux/http/userThunk';
 import { TIconName, TTabsName } from './types/navigation';
 import { isAdmin } from './utils';
+import { ICON_MAIN_COLOR } from './utils/constants';
 
 const tabsName: TTabsName = {
   homeGroup: 'home group',
@@ -206,7 +207,7 @@ const ProductsPageStackGroup = () => {
   );
 };
 
-const SearchPageStackGroup = () => {
+export const SearchPageStackGroup = () => {
   return (
     <MyPageStack.Navigator>
       <MyPageStack.Screen
@@ -374,7 +375,7 @@ const TopTabsGroup = () => {
 const Tab = createBottomTabNavigator();
 
 const TabGroup = () => {
-  const { isAuth, user } = useAppSelector((state) => state.user);
+  const { isAuth, user, fetchMe } = useAppSelector((state) => state.user);
   const { basket } = useAppSelector((state) => state.order);
 
   return (
@@ -390,10 +391,6 @@ const TabGroup = () => {
             iconName = 'search1';
           } else if (route.name === tabsName.basket) {
             iconName = 'retweet';
-          } else if (route.name === tabsName.profileGroup) {
-            iconName = 'user';
-          } else if (route.name === tabsName.authorizationGroup) {
-            iconName = 'user';
           }
 
           return route.name === tabsName.basket ? (
@@ -409,10 +406,6 @@ const TabGroup = () => {
             <AntDesign name={iconName} size={26} color={color} />
           );
         },
-        // tabBarStyle: { height: 90 },
-        // tabBarLabelStyle: {
-        //   fontSize: 12,
-        // },
       })}>
       <Tab.Screen
         name={tabsName.homeGroup}
@@ -452,6 +445,25 @@ const TabGroup = () => {
           options={{
             headerShown: true,
             title: 'Իմ էջը',
+            tabBarLabel: ({ color }) => {
+              if (fetchMe.isLoading) {
+                return null;
+              }
+
+              return (
+                <Text className="text-[10px] font-light" style={{ color }}>
+                  Իմ էջը
+                </Text>
+              );
+            },
+            tabBarIcon: ({ color }) => {
+              if (fetchMe.isLoading) {
+                return <ActivityIndicator size="small" color={ICON_MAIN_COLOR} />;
+              }
+              const iconName: TIconName = 'user';
+
+              return <AntDesign name={iconName} size={26} color={color} />;
+            },
           }}
         />
       ) : (
@@ -461,6 +473,25 @@ const TabGroup = () => {
           options={{
             headerShown: false,
             title: 'Մուտք գործել',
+            tabBarLabel: ({ color }) => {
+              if (fetchMe.isLoading) {
+                return null;
+              }
+
+              return (
+                <Text className="text-[10px] font-light" style={{ color }}>
+                  Մուտք գործել
+                </Text>
+              );
+            },
+            tabBarIcon: ({ color }) => {
+              if (fetchMe.isLoading) {
+                return <ActivityIndicator size="small" color={ICON_MAIN_COLOR} />;
+              }
+              const iconName: TIconName = 'user';
+
+              return <AntDesign name={iconName} size={26} color={color} />;
+            },
           }}
         />
       )}
@@ -470,15 +501,11 @@ const TabGroup = () => {
 
 const Navigation = () => {
   const dispatch = useAppDispatch();
-  const { fetchMe: meStatus } = useAppSelector((state) => state.user);
-
   React.useEffect((): void => {
     dispatch(fetchMe());
   }, []);
 
-  return meStatus.isLoading ? (
-    <Loading />
-  ) : (
+  return (
     <NavigationContainer>
       <TabGroup />
       <Toast />

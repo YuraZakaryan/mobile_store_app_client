@@ -16,8 +16,12 @@ import { ResetPasswordButton } from '../reset-password-button';
 export const Login = () => {
   const dispatch = useAppDispatch();
 
+  // Retrieve login state from the Redux store
   const { login } = useAppSelector((state) => state.user);
+
+  // Define a function for handling form submission
   const onSubmit = async (values: TInitialLoginFormValue) => {
+    // Dispatch the loginThunk action with the provided form values
     await dispatch(loginThunk(values));
   };
 

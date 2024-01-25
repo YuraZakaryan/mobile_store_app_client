@@ -12,3 +12,4 @@ export * from './crud-button-group';
 export * from './sale-icon';
 export * from './orders-list';
 export * from './pagination-buttons';
+export * from './numeric-input-custom';

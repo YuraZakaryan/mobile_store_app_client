@@ -23,23 +23,33 @@ import { ProductItem } from '../../wrappers';
 
 export const Search = () => {
   const dispatch = useAppDispatch();
+
+  // Redux state selectors for product search and order-related states
   const { search, searchQuery } = useAppSelector((state) => state.product);
   const [initialSearch, setInitialSearch] = React.useState<boolean>(false);
+
+  // Redux state selectors for order-related states
   const { deleteItem, create, changeStatus, toOrder } = useAppSelector((state) => state.order);
+
+  // Determine overall loading status for multiple order-related actions
   const isLoading: boolean =
     create.isLoading || deleteItem.isLoading || changeStatus.isLoading || toOrder.isLoading;
 
+  // Custom hook for debouncing the search query
   const debouncedSearch = useDebounce(searchQuery, 500);
 
+  // Effect to trigger searchProductsThunk when search query changes or initial search is true
   React.useEffect(() => {
     dispatch(searchProductsThunk({ query: debouncedSearch }));
   }, [initialSearch, debouncedSearch, isLoading]);
 
   const handleSearchChange = (text: string): void => {
+    // Dispatch action to set the search query and indicate an initial search
     dispatch(setSearchQuery(text));
     setInitialSearch(true);
   };
 
+  // Function to clear the search query
   const handleClearSearch = (): void => {
     dispatch(clearSearchQuery());
   };

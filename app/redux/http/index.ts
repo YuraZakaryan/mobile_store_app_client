@@ -6,7 +6,7 @@ import { TPayloadActionUser } from '../types';
 
 export const $authHost = axios.create({
   baseURL: `${API_URL || 'http:localhost:5000'}/api/`,
-  timeout: 1000,
+  timeout: 10000,
 });
 
 $authHost.interceptors.request.use(
@@ -43,7 +43,7 @@ $authHost.interceptors.response.use(
           });
           await SecureStoreService.saveAccessToken(data.tokens.access_token);
           await SecureStoreService.saveRefreshToken(data.tokens.refresh_token);
-          $authHost.defaults.headers.common['Authorization'] = `Bearer ${data.tokens.access_token}`;
+          $authHost.defaults.headers['Authorization'] = `Bearer ${data.tokens.access_token}`;
           return $authHost(originalRequest);
         } catch (e) {
           const error = e as AxiosError;

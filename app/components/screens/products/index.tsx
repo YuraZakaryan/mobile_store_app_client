@@ -11,21 +11,26 @@ import { Loading } from '../../ui';
 import { PaginationButtons, ProductItem } from '../../wrappers';
 
 export const Products = () => {
+  // Redux state selectors
   const { chosen } = useAppSelector((state) => state.category);
   const { categories } = useAppSelector((state) => state.category);
   const { deleteItem, create, changeStatus, toOrder } = useAppSelector((state) => state.order);
-
   const { productsByCategory } = useAppSelector((state) => state.product);
+
+  // State to track the current page for fetching products by category
   const [currentProductPage, setProductCurrentPage] = React.useState<number>(1);
 
+  // Loading status based on multiple order-related actions
   const isLoading: boolean =
     create.isLoading || deleteItem.isLoading || changeStatus.isLoading || toOrder.isLoading;
 
   const dispatch = useAppDispatch();
   const navigation = useNavigation<NavigationProp<any, any>>();
+
   const fetchCategoriesData = (): void => {
     dispatch(fetchCategoriesThunk({}));
   };
+
   const fetchProductsByCategoryData = (): void => {
     dispatch(
       fetchProductsByCategoryThunk({
@@ -36,10 +41,12 @@ export const Products = () => {
     );
   };
 
+  // Fetch categories data on component mount
   React.useEffect((): void => {
     fetchCategoriesData();
   }, []);
 
+  // Update header title and fetch products by category data when 'chosen' category changes
   React.useLayoutEffect((): void => {
     navigation.setOptions({
       headerTitle: chosen.title || 'Ապրանքներ',
@@ -48,25 +55,31 @@ export const Products = () => {
     setProductCurrentPage(1);
   }, [chosen]);
 
+  // Fetch products by category data on component mount, page change, or loading state change
   React.useEffect((): void => {
     fetchProductsByCategoryData();
   }, [currentProductPage, isLoading]);
 
+  // Function to handle moving to the previous page of products
   const handlePrevProductPage = (): void => {
     if (currentProductPage > 1) {
       setProductCurrentPage((prevPage: number) => prevPage - 1);
     }
   };
 
+  // Function to handle moving to the next page of products
   const handleNextProductPage = (): void => {
     if (currentProductPage * LIMIT_NUMBER < productsByCategory.total_items) {
       setProductCurrentPage((prevPage: number) => prevPage + 1);
     }
   };
+
+  // Determine button disable status based on current page and total items
   const previousButtonDisable: boolean = currentProductPage <= 1;
   const nextButtonDisable: boolean =
     currentProductPage * LIMIT_NUMBER >= productsByCategory.total_items;
 
+  // Function to handle manual data refresh
   const handleRefresh = (): void => {
     fetchProductsByCategoryData();
   };

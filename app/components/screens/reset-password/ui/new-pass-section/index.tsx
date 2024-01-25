@@ -12,14 +12,20 @@ import { LayoutResetPassword, ResetPasswordForm, ResetSendButton } from '../../w
 
 export const NewPassSection = () => {
   const dispatch = useAppDispatch();
+
+  // Retrieve the resetPassword state from the Redux store's user slice
   const { resetPassword } = useAppSelector((state) => state.user);
+
+  // React Navigation hook for navigation actions
   const { navigate } = useNavigation<NavigationProp<ParamListBase>>();
 
+  // Initial form values for setting a new password
   const initialSetNewPassFormValue: TInitialSetNewPassFormValue = {
     newPassword: '',
     confirmPassword: '',
   };
 
+  // Form submission handler for resetting the password with the provided values
   const onSubmit = (values: FormikValues) => {
     dispatch(
       resetPasswordThunk({

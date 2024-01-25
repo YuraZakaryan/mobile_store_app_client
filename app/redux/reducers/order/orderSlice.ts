@@ -158,7 +158,7 @@ const orderSlice = createSlice({
         state.fetchBasketOrder.isLoading = false;
         state.fetchBasketOrder.isError = true;
       })
-      .addCase(deleteOrderItemThunk.fulfilled, (state, action: PayloadAction<string>) => {
+      .addCase(deleteOrderItemThunk.fulfilled, (state, action: PayloadAction<string>): void => {
         state.basket.items = state.basket.items.filter(
           (item: TOrderItem): boolean => item._id !== action.payload
         );

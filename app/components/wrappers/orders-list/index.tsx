@@ -31,13 +31,7 @@ export const OrdersList: React.FC<IOrderList> = React.memo((props) => {
             renderItem={({ item }) => (
               <>
                 {item.product ? (
-                  <OrderItemCard
-                    orderCount={item.itemCount}
-                    price={item.product.price}
-                    code={item.product.code}
-                    title={item.product.title}
-                    discount={item.product.discount}
-                  />
+                  <OrderItemCard item={item} />
                 ) : (
                   <View className="bg-white p-2 rounded-lg">
                     <Text className="text-xl text-gray-500">Ապրանքները ջնջվել է</Text>

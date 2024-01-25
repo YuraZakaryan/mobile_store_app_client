@@ -255,7 +255,7 @@ export const UserCreateEdit = () => {
                     {item ? (item.confirmed ? 'Պահպանել' : 'Հաստատել') : 'Ստեղծել'}
                   </CrudMainButton>
                 </View>
-                {item && user?.role === 'ADMIN' ? (
+                {item && user?.role === 'ADMIN' && user?._id !== item._id ? (
                   <View>
                     <DeleteButton
                       handleDelete={!item.confirmed ? handleCancel : toggleBan}

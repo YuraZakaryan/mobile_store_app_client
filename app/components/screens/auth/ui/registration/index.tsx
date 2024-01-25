@@ -15,8 +15,13 @@ import { SignButton } from '../../wrappers';
 
 export const Registration = () => {
   const dispatch = useAppDispatch();
+
+  // Retrieve registration state from the Redux store
   const { registration } = useAppSelector((state) => state.user);
-  const onSubmit = async (values: TInitialRegistrationFormValue) => {
+
+  // Define a function for handling form submission
+  const onSubmit = async (values: TInitialRegistrationFormValue): Promise<void> => {
+    // Dispatch the registrationThunk action with the provided form values
     await dispatch(registrationThunk(values));
   };
   return (

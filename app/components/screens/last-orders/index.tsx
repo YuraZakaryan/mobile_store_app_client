@@ -1,5 +1,5 @@
 import React from 'react';
-import { FlatList, RefreshControl, SafeAreaView, ScrollView, Text, View } from 'react-native';
+import { FlatList, RefreshControl, ScrollView, Text, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../hooks/redux';
 import { fetchOrdersByAuthorThunk } from '../../../redux/http/orderThunk';
@@ -12,11 +12,20 @@ import { Main, OrderItemCard, PaginationButtons } from '../../wrappers';
 
 export const LastOrders = () => {
   const dispatch = useAppDispatch();
+
+  // Retrieve orders history and 'toOrder' state from the Redux store
   const { ordersHistory, toOrder } = useAppSelector((state) => state.order);
+
+  // Retrieve user information from the Redux store
   const { user } = useAppSelector((state) => state.user);
+
+  // State to track the current page for fetching orders
   const [currentLastOrderPage, setLastOrderCurrentPage] = React.useState<number>(1);
+
+  // Loading status based on 'toOrder' action
   const isLoading = toOrder.isLoading;
 
+  // Function to fetch orders by author with pagination
   const fetchData = (): void => {
     dispatch(
       fetchOrdersByAuthorThunk({
@@ -27,16 +36,19 @@ export const LastOrders = () => {
     );
   };
 
+  // Fetch data on component mount, page change, or loading state change
   React.useEffect(() => {
     fetchData();
   }, [currentLastOrderPage, isLoading]);
 
+  // Function to handle moving to the previous page of orders
   const handlePrevLastOrderPage = (): void => {
     if (currentLastOrderPage > 1) {
       setLastOrderCurrentPage((prevPage: number) => prevPage - 1);
     }
   };
 
+  // Function to handle moving to the next page of orders
   const handleNextLastOrderPage = (): void => {
     const totalUnconfirmedUsers: number = ordersHistory.total_items;
     if (currentLastOrderPage * LIMIT_NUMBER < totalUnconfirmedUsers) {
@@ -47,9 +59,12 @@ export const LastOrders = () => {
   const handleRefresh = (): void => {
     fetchData();
   };
+
+  // Determine button disable status based on current page and total items
   const previousButtonDisable = currentLastOrderPage <= 1;
   const nextButtonDisable = currentLastOrderPage * LIMIT_NUMBER >= ordersHistory.total_items;
 
+  // Group orders history items by a certain criteria (assuming 'groupedHistory' is a function)
   const groupedProducts = groupedHistory(ordersHistory.items);
 
   return ordersHistory.isLoading ? (

@@ -16,14 +16,21 @@ import { PaginationButtons, ProductItem } from '../../wrappers';
 
 export const ProductsPageByCategory = () => {
   const dispatch = useAppDispatch();
+
+  // React Navigation hooks
   const navigation = useNavigation<NavigationProp<any, any>>();
   const route = useRoute();
   const { categoryTitle }: TCategoryRouteParams = route.params as TCategoryRouteParams;
+
+  // Redux state selectors for products on the home screen
   const { productsForHomeScreen, discountedProductsForHomeScreen } = useAppSelector(
     (state) => state.product
   );
+
+  // State to track the current page for fetching products
   const [currentProductPage, setProductCurrentPage] = React.useState<number>(1);
 
+  // Function to fetch data based on the selected category title
   const fetchData = (): void => {
     if (categoryTitle === categoryHome.newProducts) {
       dispatch(
@@ -39,35 +46,43 @@ export const ProductsPageByCategory = () => {
     }
   };
 
+  // Fetch data on component mount or page change
   React.useEffect((): void => {
     fetchData();
   }, [currentProductPage]);
 
+  // Update header title based on the selected category
   React.useLayoutEffect((): void => {
     navigation.setOptions({
       headerTitle: categoryTitle,
     });
   }, []);
 
+  // Determine which set of products to display based on the selected category
   const products =
     categoryTitle === categoryHome.newProducts
       ? productsForHomeScreen
       : discountedProductsForHomeScreen;
 
+  // Function to handle moving to the previous page of products
   const handlePrevProductPage = (): void => {
     if (currentProductPage > 1) {
       setProductCurrentPage((prevPage: number) => prevPage - 1);
     }
   };
 
+  // Function to handle moving to the next page of products
   const handleNextProductPage = (): void => {
     if (currentProductPage * LIMIT_NUMBER < products.total_items) {
       setProductCurrentPage((prevPage: number) => prevPage + 1);
     }
   };
+
+  // Determine button disable status based on current page and total items
   const previousButtonDisable: boolean = currentProductPage <= 1;
   const nextButtonDisable: boolean = currentProductPage * LIMIT_NUMBER >= products.total_items;
 
+  // Function to handle manual data refresh
   const handleRefresh = () => {
     fetchData();
   };

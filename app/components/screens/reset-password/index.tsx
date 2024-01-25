@@ -5,6 +5,7 @@ import { useAppSelector } from '../../../hooks/redux';
 import { EResetPasswordMode } from '../../../redux/types';
 
 export const ResetPassword = () => {
+  // Retrieve the resetPassword state from the Redux store's user slice
   const { resetPassword } = useAppSelector(({ user }) => user);
 
   const sectionComponent = (() => {

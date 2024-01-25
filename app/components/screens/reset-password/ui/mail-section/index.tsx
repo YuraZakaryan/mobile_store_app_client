@@ -11,10 +11,16 @@ import { LayoutResetPassword, ResetPasswordForm, ResetSendButton } from '../../w
 
 export const MailSection = () => {
   const dispatch = useAppDispatch();
+
+  // Retrieve the resetPassword state from the Redux store's user slice
   const { resetPassword } = useAppSelector((state) => state.user);
+
+  // Initial form values for sending mail
   const initialSendMailFormValue: TInitialSendMailFormValue = {
     mail: '',
   };
+
+  // Form submission handler for sending OTP to the provided mail
   const onSubmit = (values: FormikValues): void => {
     dispatch(sendOtpToMailThunk(values.mail));
   };

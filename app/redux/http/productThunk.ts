@@ -27,7 +27,12 @@ export const fetchProductsThunk = createAsyncThunk(
     } catch (err) {
       const error = err as AxiosError;
       console.log(error);
-      return rejectWithValue(error.message || 'Failed to fetch products');
+      if (error.code) {
+        console.log(error.code);
+        return rejectWithValue(error.code);
+      } else {
+        return rejectWithValue(error.message || 'Failed to fetch products');
+      }
     }
   }
 );

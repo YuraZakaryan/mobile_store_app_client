@@ -23,7 +23,6 @@ import {
   EResetPasswordMode,
   TInitialUserState,
   TItemsWithTotalLength,
-  TOtpData,
   TPayloadActionUser,
   TUser,
 } from '../../types';
@@ -221,11 +220,21 @@ export const userSlice = createSlice({
           isLoading: false,
         };
       })
-      .addCase(updateUserThunk.fulfilled, (state: TInitialUserState): void => {
-        state.updateUser.isError = false;
-        state.updateUser.isLoading = false;
-        SHOW_SUCCESS('Բաժանորդի տվյալները հաջողությամբ փոխվեցին');
-      })
+      .addCase(
+        updateUserThunk.fulfilled,
+        (state: TInitialUserState, action: PayloadAction<TUser>): void => {
+          if (action.payload) {
+            const { _id } = action.payload;
+            state.updateUser.isError = false;
+            state.updateUser.isLoading = false;
+            if (state.user?._id === _id) {
+              SHOW_SUCCESS('Փոփոխությունները տեսնելու համար նորից մուտք գործեք ծրագիր');
+            } else {
+              SHOW_SUCCESS('Բաժանորդի տվյալները հաջողությամբ փոխվեցին');
+            }
+          }
+        }
+      )
       .addCase(updateUserThunk.pending, (state: TInitialUserState): void => {
         state.updateUser.isError = false;
         state.updateUser.isLoading = true;

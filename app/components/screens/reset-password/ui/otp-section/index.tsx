@@ -4,7 +4,7 @@ import { Text, View } from 'react-native';
 import OTPTextInput from 'react-native-otp-textinput';
 
 import { useAppDispatch, useAppSelector } from '../../../../../hooks/redux';
-import { confirmOtpThunk, sendOtpToMailThunk } from '../../../../../redux/http/userThunk';
+import { confirmOtpThunk } from '../../../../../redux/http/userThunk';
 import { ICON_MAIN_COLOR } from '../../../../../utils/constants';
 import { resetPasswordOtpFormSchema } from '../../../../../validation';
 import { FieldWithError } from '../../../../wrappers';
@@ -12,10 +12,16 @@ import { TInitialSendOtpFormValue } from '../../types';
 import { LayoutResetPassword, ResetPasswordForm, ResetSendButton } from '../../wrapper';
 export const OtpSection = () => {
   const dispatch = useAppDispatch();
+
+  // Retrieve the resetPassword state from the Redux store's user slice
   const { resetPassword } = useAppSelector((state) => state.user);
+
+  // Initial form values for confirming OTP
   const initialSendOtpFormValue: TInitialSendOtpFormValue = {
     otp: '',
   };
+
+  // Form submission handler for confirming OTP with the provided OTP and mail
   const onSubmit = (values: FormikValues): void => {
     dispatch(confirmOtpThunk({ otp: values.otp, mail: resetPassword.mail }));
   };

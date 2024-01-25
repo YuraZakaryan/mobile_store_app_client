@@ -11,7 +11,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import NumericInput from 'react-native-numeric-input';
 
 import { TInitialItemCounts } from './types';
 import { useAppDispatch, useAppSelector } from '../../../hooks/redux';
@@ -28,24 +27,57 @@ import {
 import { EPackage, TOrderItem } from '../../../redux/types/order';
 import { API_URL } from '../../../utils/constants';
 import { calculateDiscountedPrice, formattedPrice } from '../../../utils/product';
-import { EmptyOrder, Loading } from '../../ui';
-import { Main } from '../../wrappers';
+import { EmptyOrder } from '../../ui';
+import { Main, NumericInputCustom } from '../../wrappers';
 
 export const Basket = () => {
   const dispatch = useAppDispatch();
   const [initialItemCounts, setInitialItemCounts] = React.useState<TInitialItemCounts>({});
-  const { basket, fetchBasketOrder, toOrder, create } = useAppSelector((state) => state.order);
+  const { basket, fetchBasketOrder, toOrder, create, deleteItem } = useAppSelector(
+    (state) => state.order
+  );
   const { user } = useAppSelector((state) => state.user);
   const isAnyItemCountZero = basket.items.some((item) => item.itemCount === 0);
   const isLoading: boolean = create.isLoading;
-
   const fetchData = (): void => {
     dispatch(getOrderByUserInProgressThunk(user?._id as string));
   };
+
+  // Fetch data when loading state changes
   React.useEffect((): void => {
     fetchData();
   }, [isLoading]);
 
+  // Update initialItemCounts when basket or order deletion changes
+  React.useEffect(() => {
+    setInitialItemCounts((prevCounts) => {
+      const updatedCounts = { ...prevCounts };
+
+      basket.items.forEach((item: TOrderItem): void => {
+        if (updatedCounts[item._id]) {
+          updatedCounts[item._id] = prevCounts[item._id];
+        } else {
+          updatedCounts[item._id] = item.itemCount;
+        }
+      });
+
+      basket.items.forEach((item: TOrderItem): void => {
+        if (!updatedCounts[item._id]) {
+          updatedCounts[item._id] = item.itemCount;
+        }
+      });
+
+      Object.keys(updatedCounts).forEach((itemId: string): void => {
+        if (!basket.items.find((item: TOrderItem): boolean => item._id === itemId)) {
+          delete updatedCounts[itemId];
+        }
+      });
+
+      return updatedCounts;
+    });
+  }, [fetchBasketOrder.isLoading, deleteItem.isLoading]);
+
+  // Calculate the total price of items in the basket
   const sumItemsPrice: number = basket.items.reduce((acc: number, item: TOrderItem): number => {
     if (item.product && item.product.price) {
       const itemPrice: number = item.product.discount
@@ -56,30 +88,34 @@ export const Basket = () => {
     return acc;
   }, 0);
 
+  // Handle change in packaging type
   const handleChangePackagingType = (typePackaging: EPackage): void => {
     dispatch(setPackaging(typePackaging));
   };
 
+  // Handle change in notes
   const handleChangeNotes = (text: string): void => {
     dispatch(setNecessaryNotes(text));
   };
 
+  // Handle deletion of an order item
   const handleDelete = (_id: string): void => {
     dispatch(deleteOrderItemThunk(_id));
   };
 
+  // Move items to the order
   const handleClick = (): void => {
     dispatch(toOrderThunk(basket));
   };
 
+  // Refresh data
   const handleRefresh = (): void => {
     fetchData();
   };
+
   return (
     <Main>
-      {fetchBasketOrder.isLoading ? (
-        <Loading />
-      ) : !basket.items.length || basket.items.length === 0 ? (
+      {!basket.items.length || basket.items.length === 0 ? (
         <EmptyOrder text="Զամբյուղը դատարկ է" />
       ) : (
         <ScrollView
@@ -101,8 +137,13 @@ export const Basket = () => {
                         <View className="flex-row flex-1 min-h-[150px] bg-white shadow rounded-lg relative">
                           <TouchableOpacity
                             className="absolute right-2 top-2"
+                            disabled={deleteItem.isLoading}
                             onPress={() => handleDelete(item._id)}>
-                            <FontAwesome name="window-close" size={23} color="red" />
+                            {deleteItem.isLoading ? (
+                              <ActivityIndicator size="small" color="red" />
+                            ) : (
+                              <FontAwesome name="window-close" size={23} color="red" />
+                            )}
                           </TouchableOpacity>
                           <View>
                             {item.product && item.product.picture && (
@@ -155,26 +196,13 @@ export const Basket = () => {
                               </View>
                               <View>
                                 {item.product && (
-                                  <NumericInput
-                                    onChange={(value: number): void => {
-                                      if (!initialItemCounts[item._id]) {
-                                        setInitialItemCounts({
-                                          ...initialItemCounts,
-                                          [item._id]: item.itemCount,
-                                        });
-                                      }
-                                      dispatch(
-                                        updateItemCount({ itemId: item._id, newValue: value })
-                                      );
-                                    }}
-                                    totalWidth={100}
-                                    type="plus-minus"
-                                    valueType="real"
-                                    rounded
-                                    totalHeight={25}
+                                  <NumericInputCustom
                                     value={item.itemCount}
                                     minValue={0}
                                     maxValue={item.product.count + initialItemCount}
+                                    onChange={(newValue: number): void => {
+                                      dispatch(updateItemCount({ itemId: item._id, newValue }));
+                                    }}
                                   />
                                 )}
                               </View>
@@ -186,7 +214,6 @@ export const Basket = () => {
                   );
                 }}
                 horizontal={false}
-                keyExtractor={(item: TOrderItem) => item._id}
               />
             </View>
             <View className="bg-white flex-row justify-between p-4 items-center w-full rounded-lg">

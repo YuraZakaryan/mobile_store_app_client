@@ -5,6 +5,7 @@ import { Image, ScrollView, Text, View } from 'react-native';
 import { Main } from '../../wrappers';
 
 export const AboutApp = () => {
+  // Retrieve the version from Constants.expoConfig or fallback to 'N/A' if it's undefined or null
   const version: string = Constants.expoConfig?.version || 'N/A';
 
   return (
