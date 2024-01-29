@@ -62,8 +62,8 @@ export const Search = () => {
     fetchDataByQuery();
   };
 
-  const hasNetworkError: boolean = search.isNetworkError;
-  const hasError: boolean = search.isError;
+  const isNetworkError: boolean = search.isNetworkError;
+  const isTechnicalError: boolean = search.isError;
 
   return search.isLoading && !initialSearch ? (
     <Loading />
@@ -84,10 +84,10 @@ export const Search = () => {
                 value={searchQuery}
                 onChangeText={handleSearchChange}
               />
-              {hasError ? (
+              {isNetworkError || isTechnicalError ? (
                 <NetworkError
                   handleRefresh={handleRefresh}
-                  type={hasNetworkError ? ETypeError.NETWORK : ETypeError.TECHNICAL}
+                  type={isTechnicalError ? ETypeError.TECHNICAL : ETypeError.NETWORK}
                 />
               ) : (
                 <>

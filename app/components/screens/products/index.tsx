@@ -85,17 +85,17 @@ export const Products = () => {
     fetchProductsByCategoryData();
   };
 
-  const hasNetworkError: boolean = categories.isNetworkError || productsByCategory.isNetworkError;
-  const hasError: boolean = categories.isError || categories.isError;
+  const isNetworkError: boolean = categories.isNetworkError || productsByCategory.isNetworkError;
+  const isTechnicalError: boolean = categories.isError || productsByCategory.isError;
 
   return categories.isLoading && productsByCategory.isLoading ? (
     <Loading />
   ) : (
     <SafeAreaView style={{ flex: 1 }}>
-      {hasError ? (
+      {isNetworkError || isTechnicalError ? (
         <NetworkError
           handleRefresh={handleRefresh}
-          type={hasNetworkError ? ETypeError.NETWORK : ETypeError.TECHNICAL}
+          type={isTechnicalError ? ETypeError.TECHNICAL : ETypeError.NETWORK}
         />
       ) : (
         <View className="h-full flex-1 flex-row justify-between">
