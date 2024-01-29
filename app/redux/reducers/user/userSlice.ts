@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 import { SecureStoreService } from '../../../services';
 import { SHOW_ERROR, SHOW_SUCCESS } from '../../../toasts';
+import { NETWORK_ERROR_MESSAGE } from '../../../utils/constants';
 import {
   cancelUserThunk,
   confirmOtpThunk,
@@ -33,11 +34,24 @@ const initialState: TInitialUserState = {
   users: {
     isLoading: false,
     isError: false,
+    isNetworkError: false,
     total_items: 0,
     items: [],
   },
-  unconfirmedUsers: { isLoading: false, isError: false, total_items: 0, items: [] },
-  bannedUsers: { isLoading: false, isError: false, total_items: 0, items: [] },
+  unconfirmedUsers: {
+    isLoading: false,
+    isError: false,
+    isNetworkError: false,
+    total_items: 0,
+    items: [],
+  },
+  bannedUsers: {
+    isLoading: false,
+    isError: false,
+    isNetworkError: false,
+    total_items: 0,
+    items: [],
+  },
   fetchMe: {
     isLoading: false,
     isError: false,
@@ -52,31 +66,24 @@ const initialState: TInitialUserState = {
   },
   login: {
     isLoading: false,
-    isError: false,
   },
   registration: {
     isLoading: false,
-    isError: false,
   },
   createUser: {
     isLoading: false,
-    isError: false,
   },
   updateUser: {
     isLoading: false,
-    isError: false,
   },
   cancelUser: {
     isLoading: false,
-    isError: false,
   },
   banUser: {
     isLoading: false,
-    isError: false,
   },
   updatePassword: {
     isLoading: false,
-    isError: false,
   },
 };
 
@@ -116,12 +123,14 @@ export const userSlice = createSlice({
       )
       .addCase(loginThunk.pending, (state: TInitialUserState): void => {
         state.login.isLoading = true;
-        state.login.isError = false;
       })
-      .addCase(loginThunk.rejected, (state: TInitialUserState): void => {
+      .addCase(loginThunk.rejected, (state: TInitialUserState, action): void => {
         state.login.isLoading = false;
-        state.login.isError = true;
-        SHOW_ERROR('Մուտքանունը կամ գաղտնաբառը սխալ է');
+        if (action.payload === 'NetworkError') {
+          SHOW_ERROR(NETWORK_ERROR_MESSAGE);
+        } else {
+          SHOW_ERROR('Մուտքանունը կամ գաղտնաբառը սխալ է');
+        }
       })
       .addCase(
         registrationThunk.fulfilled,
@@ -134,12 +143,14 @@ export const userSlice = createSlice({
       )
       .addCase(registrationThunk.pending, (state: TInitialUserState): void => {
         state.registration.isLoading = true;
-        state.registration.isError = false;
       })
-      .addCase(registrationThunk.rejected, (state: TInitialUserState): void => {
+      .addCase(registrationThunk.rejected, (state: TInitialUserState, action): void => {
         state.registration.isLoading = false;
-        state.registration.isError = true;
-        SHOW_ERROR('Մուտքանունը զբաղված է, խնդրում ենք փորձել մեկ ուրիշ');
+        if (action.payload === 'NetworkError') {
+          SHOW_ERROR(NETWORK_ERROR_MESSAGE);
+        } else {
+          SHOW_ERROR('Մուտքանունը զբաղված է, խնդրում ենք փորձել մեկ ուրիշ');
+        }
       })
       .addCase(
         fetchUsersThunk.fulfilled,
@@ -150,6 +161,7 @@ export const userSlice = createSlice({
             total_items,
             items,
             isError: false,
+            isNetworkError: false,
             isLoading: false,
           };
         }
@@ -157,16 +169,17 @@ export const userSlice = createSlice({
       .addCase(fetchUsersThunk.pending, (state: TInitialUserState): void => {
         state.users.isLoading = true;
         state.users.isError = false;
+        state.users.isNetworkError = false;
       })
-      .addCase(fetchUsersThunk.rejected, (state: TInitialUserState): void => {
+      .addCase(fetchUsersThunk.rejected, (state: TInitialUserState, action): void => {
+        state.users.total_items = 0;
+        state.users.items = [];
         state.users.isLoading = false;
-        state.users.isError = true;
-        state.users = {
-          total_items: 0,
-          items: [],
-          isError: true,
-          isLoading: false,
-        };
+        if (action.payload === 'NetworkError') {
+          state.users.isNetworkError = true;
+        } else if (action.payload !== 404) {
+          state.users.isError = true;
+        }
       })
       .addCase(
         fetchUnconfirmedUsers.fulfilled,
@@ -177,6 +190,7 @@ export const userSlice = createSlice({
             total_items,
             items,
             isError: false,
+            isNetworkError: false,
             isLoading: false,
           };
         }
@@ -184,16 +198,17 @@ export const userSlice = createSlice({
       .addCase(fetchUnconfirmedUsers.pending, (state: TInitialUserState): void => {
         state.unconfirmedUsers.isLoading = true;
         state.unconfirmedUsers.isError = false;
+        state.unconfirmedUsers.isNetworkError = false;
       })
-      .addCase(fetchUnconfirmedUsers.rejected, (state: TInitialUserState): void => {
+      .addCase(fetchUnconfirmedUsers.rejected, (state: TInitialUserState, action): void => {
+        state.unconfirmedUsers.total_items = 0;
+        state.unconfirmedUsers.items = [];
         state.unconfirmedUsers.isLoading = false;
-        state.unconfirmedUsers.isError = true;
-        state.unconfirmedUsers = {
-          total_items: 0,
-          items: [],
-          isError: true,
-          isLoading: false,
-        };
+        if (action.payload === 'NetworkError') {
+          state.unconfirmedUsers.isNetworkError = true;
+        } else if (action.payload !== 404) {
+          state.unconfirmedUsers.isError = true;
+        }
       })
       .addCase(
         fetchBannedUsers.fulfilled,
@@ -204,6 +219,7 @@ export const userSlice = createSlice({
             total_items,
             items,
             isError: false,
+            isNetworkError: false,
             isLoading: false,
           };
         }
@@ -211,53 +227,44 @@ export const userSlice = createSlice({
       .addCase(fetchBannedUsers.pending, (state: TInitialUserState): void => {
         state.bannedUsers.isLoading = true;
         state.bannedUsers.isError = false;
+        state.bannedUsers.isNetworkError = false;
       })
-      .addCase(fetchBannedUsers.rejected, (state: TInitialUserState): void => {
-        state.bannedUsers = {
-          total_items: 0,
-          items: [],
-          isError: true,
-          isLoading: false,
-        };
-      })
-      .addCase(
-        updateUserThunk.fulfilled,
-        (state: TInitialUserState, action: PayloadAction<TUser>): void => {
-          if (action.payload) {
-            const { _id } = action.payload;
-            state.updateUser.isError = false;
-            state.updateUser.isLoading = false;
-            if (state.user?._id === _id) {
-              SHOW_SUCCESS('Փոփոխությունները տեսնելու համար նորից մուտք գործեք ծրագիր');
-            } else {
-              SHOW_SUCCESS('Բաժանորդի տվյալները հաջողությամբ փոխվեցին');
-            }
-          }
+      .addCase(fetchBannedUsers.rejected, (state: TInitialUserState, action): void => {
+        state.bannedUsers.total_items = 0;
+        state.bannedUsers.items = [];
+        state.bannedUsers.isLoading = false;
+        if (action.payload === 'NetworkError') {
+          state.bannedUsers.isNetworkError = true;
+        } else if (action.payload !== 404) {
+          state.bannedUsers.isError = true;
         }
-      )
+      })
+      .addCase(updateUserThunk.fulfilled, (state: TInitialUserState): void => {
+        state.updateUser.isLoading = false;
+      })
       .addCase(updateUserThunk.pending, (state: TInitialUserState): void => {
-        state.updateUser.isError = false;
         state.updateUser.isLoading = true;
       })
-      .addCase(updateUserThunk.rejected, (state: TInitialUserState): void => {
-        state.updateUser.isError = true;
+      .addCase(updateUserThunk.rejected, (state: TInitialUserState, action): void => {
         state.updateUser.isLoading = false;
-        SHOW_ERROR('Բաժանորդի տվյալների փոփոխման հետ  կապված խնդիր է առաջացել');
+        if (action.payload === 'NetworkError') {
+          SHOW_ERROR(NETWORK_ERROR_MESSAGE);
+        } else {
+          SHOW_ERROR('Բաժանորդի տվյալների փոփոխման հետ  կապված խնդիր է առաջացել');
+        }
       })
       .addCase(updatePasswordThunk.fulfilled, (state: TInitialUserState): void => {
-        state.updatePassword.isError = false;
         state.updatePassword.isLoading = false;
-
         SHOW_SUCCESS('Գաղտնաբառը հաջողությամբ փոխվեց');
       })
       .addCase(updatePasswordThunk.pending, (state: TInitialUserState): void => {
-        state.updatePassword.isError = false;
         state.updatePassword.isLoading = true;
       })
       .addCase(updatePasswordThunk.rejected, (state: TInitialUserState, action): void => {
-        state.updatePassword.isError = true;
         state.updatePassword.isLoading = false;
-        if (action.payload === 400) {
+        if (action.payload === 'NetworkError') {
+          SHOW_ERROR(NETWORK_ERROR_MESSAGE);
+        } else if (action.payload === 400) {
           SHOW_ERROR('Հին գաղտնաբառը սխալ է');
         }
       })
@@ -273,38 +280,36 @@ export const userSlice = createSlice({
         }
       })
       .addCase(sendOtpToMailThunk.pending, (state: TInitialUserState): void => {
-        state.resetPassword.isError = false;
         state.resetPassword.isLoading = true;
       })
-      .addCase(sendOtpToMailThunk.rejected, (state: TInitialUserState): void => {
-        state.resetPassword.isError = true;
+      .addCase(sendOtpToMailThunk.rejected, (state: TInitialUserState, action): void => {
         state.resetPassword.isLoading = false;
-        SHOW_ERROR('Նշված էլեկտրոնային փոստով բաժանորդ չի գտնվել');
-      })
-      .addCase(confirmOtpThunk.fulfilled, (state: TInitialUserState, action): void => {
-        if (action.payload) {
-          state.resetPassword = {
-            isLoading: false,
-            isError: false,
-            otp: action.payload.otp,
-            mail: action.payload.mail,
-            mode: EResetPasswordMode.NEW_PASS_SECTION,
-          };
+        if (action.payload === 'NetworkError') {
+          SHOW_ERROR(NETWORK_ERROR_MESSAGE);
+        } else {
+          SHOW_ERROR('Նշված էլեկտրոնային փոստով բաժանորդ չի գտնվել');
         }
       })
+      .addCase(confirmOtpThunk.fulfilled, (state: TInitialUserState, action): void => {
+        state.resetPassword = {
+          isLoading: false,
+          isError: false,
+          otp: action.payload.otp,
+          mail: action.payload.mail,
+          mode: EResetPasswordMode.NEW_PASS_SECTION,
+        };
+      })
       .addCase(confirmOtpThunk.pending, (state: TInitialUserState): void => {
-        state.resetPassword.isError = false;
         state.resetPassword.isLoading = true;
       })
       .addCase(confirmOtpThunk.rejected, (state: TInitialUserState, action): void => {
-        state.resetPassword.isError = true;
         state.resetPassword.isLoading = false;
-        if (action.payload) {
-          if (action.payload === 410) {
-            SHOW_ERROR('Նշված մեկ անգամյա գաղտմաբառը այլևս վավեր չէ, խնդրում ենք պահանջել նորը');
-          } else if (action.payload === 403) {
-            SHOW_ERROR('Սխալ մեկ անգամյա գաղտնաբառ');
-          }
+        if (action.payload === 'NetworkError') {
+          SHOW_ERROR(NETWORK_ERROR_MESSAGE);
+        } else if (action.payload === 410) {
+          SHOW_ERROR('Նշված մեկ անգամյա գաղտմաբառը այլևս վավեր չէ, խնդրում ենք պահանջել նորը');
+        } else if (action.payload === 403) {
+          SHOW_ERROR('Սխալ մեկ անգամյա գաղտնաբառ');
         }
       })
       .addCase(resetPasswordThunk.fulfilled, (state: TInitialUserState, action): void => {
@@ -314,70 +319,59 @@ export const userSlice = createSlice({
         }
       })
       .addCase(resetPasswordThunk.pending, (state: TInitialUserState): void => {
-        state.resetPassword.isError = false;
         state.resetPassword.isLoading = true;
       })
       .addCase(resetPasswordThunk.rejected, (state: TInitialUserState, action): void => {
-        state.resetPassword.isError = true;
         state.resetPassword.isLoading = false;
-        if (action.payload) {
-          if (action.payload === 404) {
-            SHOW_ERROR('Այս էլ․ փոստով բաժանորդ չի գտնվել');
-          } else if (action.payload === 403) {
-            SHOW_ERROR('Սխալ մեկ անգամյա գաղտնաբառ');
-          }
+        if (action.payload === 'NetworkError') {
+          SHOW_ERROR(NETWORK_ERROR_MESSAGE);
+        } else if (action.payload === 404) {
+          SHOW_ERROR('Այս էլ․ փոստով բաժանորդ չի գտնվել');
+        } else if (action.payload === 403) {
+          SHOW_ERROR('Սխալ մեկ անգամյա գաղտնաբառ');
         }
       })
       .addCase(createUserThunk.fulfilled, (state: TInitialUserState): void => {
-        state.createUser.isError = false;
         state.createUser.isLoading = false;
-        SHOW_SUCCESS('Բաժանորդի հաջողությամբ ստեղծվեց');
       })
       .addCase(createUserThunk.pending, (state: TInitialUserState): void => {
-        state.createUser.isError = false;
         state.createUser.isLoading = true;
       })
-      .addCase(createUserThunk.rejected, (state: TInitialUserState): void => {
-        state.createUser.isError = true;
+      .addCase(createUserThunk.rejected, (state: TInitialUserState, action): void => {
         state.createUser.isLoading = false;
-        SHOW_ERROR('Բաժանորդի ստեղծման հետ կապված խնդիր է առաջացել');
+        if (action.payload === 'NetworkError') {
+          SHOW_ERROR(NETWORK_ERROR_MESSAGE);
+        } else {
+          SHOW_ERROR('Բաժանորդի ստեղծման հետ կապված խնդիր է առաջացել');
+        }
       })
       .addCase(cancelUserThunk.fulfilled, (state: TInitialUserState): void => {
-        state.cancelUser.isError = false;
         state.cancelUser.isLoading = false;
-        SHOW_SUCCESS('Բաժանորդը հաջողությամբ չեղարկվեց');
       })
       .addCase(cancelUserThunk.pending, (state: TInitialUserState): void => {
-        state.cancelUser.isError = false;
         state.cancelUser.isLoading = true;
       })
-      .addCase(cancelUserThunk.rejected, (state: TInitialUserState): void => {
-        state.cancelUser.isError = true;
+      .addCase(cancelUserThunk.rejected, (state: TInitialUserState, action): void => {
         state.cancelUser.isLoading = false;
-        SHOW_ERROR('Բաժանորդի չեղարկման հետ կապված խնդիր է առաջացել');
-      })
-      .addCase(
-        toggleBanThunk.fulfilled,
-        (state: TInitialUserState, action: PayloadAction<{ message: string }>): void => {
-          state.banUser.isError = false;
-          state.banUser.isLoading = false;
-          SHOW_SUCCESS(
-            `${
-              action.payload.message === 'User banned'
-                ? 'Բաժանորդը հաջողությամբ ապաակտիվացվեց'
-                : 'Բաժանորդը հաջողությամբ ակտիվացվեց'
-            }`
-          );
+        if (action.payload === 'NetworkError') {
+          SHOW_ERROR(NETWORK_ERROR_MESSAGE);
+        } else {
+          SHOW_ERROR('Բաժանորդի չեղարկման հետ կապված խնդիր է առաջացել');
         }
-      )
+      })
+      .addCase(toggleBanThunk.fulfilled, (state: TInitialUserState): void => {
+        state.banUser.isLoading = false;
+      })
       .addCase(toggleBanThunk.pending, (state: TInitialUserState): void => {
-        state.banUser.isError = false;
         state.banUser.isLoading = true;
       })
-      .addCase(toggleBanThunk.rejected, (state: TInitialUserState): void => {
-        state.banUser.isError = true;
+      .addCase(toggleBanThunk.rejected, (state: TInitialUserState, action): void => {
         state.banUser.isLoading = false;
-        SHOW_ERROR('Բաժանորդի ակտիվացման կամ ապաակտիվացման հետ կապված խնդիր է առաջացել');
+        if (action.payload === 'NetworkError') {
+          SHOW_ERROR(NETWORK_ERROR_MESSAGE);
+        } else {
+          SHOW_ERROR('Բաժանորդի ակտիվացման կամ ապաակտիվացման հետ կապված խնդիր է առաջացել');
+        }
       })
       .addCase(
         fetchMe.fulfilled,
@@ -386,18 +380,15 @@ export const userSlice = createSlice({
           if (action.payload) {
             state.isAuth = true;
           }
-          state.fetchMe.isError = false;
           state.fetchMe.isLoading = false;
         }
       )
       .addCase(fetchMe.pending, (state: TInitialUserState): void => {
-        state.fetchMe.isError = false;
         state.fetchMe.isLoading = true;
       })
       .addCase(fetchMe.rejected, (state: TInitialUserState): void => {
         state.isAuth = false;
         state.user = null;
-        state.fetchMe.isError = true;
         state.fetchMe.isLoading = false;
       }),
 });

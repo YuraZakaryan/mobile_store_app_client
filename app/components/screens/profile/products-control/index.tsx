@@ -3,19 +3,23 @@ import React from 'react';
 import { Image, RefreshControl, ScrollView, Text, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
+import { fetchCategoriesThunk } from '../../../../redux/http/categoryThunk';
 import { fetchProductsThunk } from '../../../../redux/http/productThunk';
 import { TProduct } from '../../../../redux/types';
+import { SHOW_ERROR } from '../../../../toasts';
 import { API_URL, LIMIT_NUMBER } from '../../../../utils/constants';
 import { CreateItemButton, CrudList, Main } from '../../../wrappers';
 
 export const ProductsControl = () => {
   const dispatch = useAppDispatch();
   const { create, update, delete: deleteProduct } = useAppSelector((state) => state.product);
+  const { categories } = useAppSelector((state) => state.category);
   const [currentProductPage, setProductCurrentPage] = React.useState<number>(1);
   const isLoading = create.isLoading || update.isLoading || deleteProduct.isLoading;
 
   const fetchData = (): void => {
     dispatch(fetchProductsThunk({ page: currentProductPage, limit: LIMIT_NUMBER }));
+    dispatch(fetchCategoriesThunk({}));
   };
 
   React.useEffect((): void => {
@@ -39,7 +43,11 @@ export const ProductsControl = () => {
   };
 
   const handleClick = (): void => {
-    navigate('productCreateEdit');
+    if (categories.total_items === 0) {
+      SHOW_ERROR('Առաջին հերթին ստեղծել կատեգորիա');
+    } else {
+      navigate('productCreateEdit');
+    }
   };
 
   const handleRefresh = (): void => {

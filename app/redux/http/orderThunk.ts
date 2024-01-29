@@ -7,6 +7,7 @@ import {
   TFetchOptions,
   TItemsWithTotalLength,
   TNewItemForm,
+  TProduct,
 } from '../types';
 import { EOrderStatus, TOrder, TOrderItem } from '../types/order';
 
@@ -14,25 +15,31 @@ export const createOrAddOrderThunk = createAsyncThunk(
   'createOrAdd/order',
   async (formData: TNewItemForm, { rejectWithValue }) => {
     try {
-      const { data } = await $authHost.post('order', formData);
+      const { data } = await $authHost.post<TProduct>('order', formData);
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      if (error.response) {
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
         return rejectWithValue(error.response.status);
       }
     }
   }
 );
 export const getOrderByUserInProgressThunk = createAsyncThunk(
-  ' getByUser/order',
+  'getByUser/order',
   async (_id: string, { rejectWithValue }) => {
     try {
       const { data } = await $authHost.get<TOrder>(`order/in-progress/${_id}`);
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      return rejectWithValue(error.message || 'Failed to get order by user');
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
     }
   }
 );
@@ -44,7 +51,11 @@ export const deleteOrderItemThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      return rejectWithValue(error.message || 'Failed to delete order item');
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
     }
   }
 );
@@ -60,7 +71,9 @@ export const toOrderThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      if (error.response) {
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
         return rejectWithValue(error.response.status);
       }
     }
@@ -78,7 +91,11 @@ export const fetchDeliveredOrdersThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      return rejectWithValue(error.message || 'Failed to fetch all orders by status');
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
     }
   }
 );
@@ -94,7 +111,11 @@ export const fetchAllOrdersThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      return rejectWithValue(error.message || 'Failed to fetch all orders');
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
     }
   }
 );
@@ -110,7 +131,11 @@ export const fetchOrdersByAuthorThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      return rejectWithValue(error.message || 'Failed to fetch orders by author id');
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
     }
   }
 );
@@ -141,7 +166,11 @@ export const changeOrderStatusThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      return rejectWithValue(error.message || 'Failed to change order status');
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
     }
   }
 );
@@ -159,7 +188,11 @@ export const cancelOrderThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      return rejectWithValue(error.message || 'Failed to change order status');
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
     }
   }
 );
@@ -182,7 +215,11 @@ export const deliverOrderThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      return rejectWithValue(error.message || 'Failed to change order status');
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
     }
   }
 );

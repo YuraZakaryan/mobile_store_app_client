@@ -2,6 +2,8 @@ import { NavigationProp, useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
 
+import { useAppDispatch } from '../../../hooks/redux';
+import { updateCurrentProduct } from '../../../redux/reducers/product/productSlice';
 import { IProductItem } from '../../../types';
 import { API_URL } from '../../../utils/constants';
 import { calculateDiscountedPrice, formattedPrice } from '../../../utils/product';
@@ -9,11 +11,13 @@ import { TProductItemParamList } from '../../screens/home/types';
 import { SaleIcon } from '../sale-icon';
 
 export const ProductItem: React.FC<IProductItem> = React.memo((props) => {
+  const dispatch = useAppDispatch();
   const { item, index, isLastInRow, imageClassName, height } = props;
   const { navigate } = useNavigation<NavigationProp<TProductItemParamList>>();
 
   const handleNavigate = (): void => {
-    navigate('product', { item });
+    dispatch(updateCurrentProduct(null));
+    navigate('product', { title: item.title, productId: item._id });
   };
   const checkDiscount: boolean = item.discount > 0;
   return (

@@ -1,5 +1,3 @@
-import { TProduct } from '../../../../redux/types';
-
 export enum ETypeInfo {
   PRICE = 'price',
   PRICE_WITH_DISCOUNTED = 'discountedPrice',
@@ -13,5 +11,6 @@ export interface IInfoItem {
 }
 
 export type TProductRouteParams = {
-  item: TProduct;
+  title: string;
+  productId: string;
 };

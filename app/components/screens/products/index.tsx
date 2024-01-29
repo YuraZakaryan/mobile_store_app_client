@@ -6,8 +6,9 @@ import { ProductCategoryItem } from './wrapper';
 import { useAppDispatch, useAppSelector } from '../../../hooks/redux';
 import { fetchCategoriesThunk } from '../../../redux/http/categoryThunk';
 import { fetchProductsByCategoryThunk } from '../../../redux/http/productThunk';
+import { ETypeError } from '../../../types';
 import { LIMIT_NUMBER } from '../../../utils/constants';
-import { Loading } from '../../ui';
+import { Loading, NetworkError } from '../../ui';
 import { PaginationButtons, ProductItem } from '../../wrappers';
 
 export const Products = () => {
@@ -84,48 +85,61 @@ export const Products = () => {
     fetchProductsByCategoryData();
   };
 
+  const hasNetworkError: boolean = categories.isNetworkError || productsByCategory.isNetworkError;
+  const hasError: boolean = categories.isError || categories.isError;
+
   return categories.isLoading && productsByCategory.isLoading ? (
     <Loading />
   ) : (
     <SafeAreaView style={{ flex: 1 }}>
-      <View className="h-full flex-1 flex-row justify-between">
-        <View className="items-center bg-white">
-          <FlatList
-            data={categories.items}
-            renderItem={({ item }) => <ProductCategoryItem item={item} key={item._id} />}
-          />
+      {hasError ? (
+        <NetworkError
+          handleRefresh={handleRefresh}
+          type={hasNetworkError ? ETypeError.NETWORK : ETypeError.TECHNICAL}
+        />
+      ) : (
+        <View className="h-full flex-1 flex-row justify-between">
+          <View className="items-center bg-white">
+            <FlatList
+              data={categories.items}
+              renderItem={({ item }) => <ProductCategoryItem item={item} key={item._id} />}
+            />
+          </View>
+          <View className="m-2 mt-1 ml-0.5 w-full flex-1">
+            <FlatList
+              refreshControl={
+                <RefreshControl
+                  refreshing={productsByCategory.isLoading}
+                  onRefresh={handleRefresh}
+                />
+              }
+              data={productsByCategory.items}
+              horizontal={false}
+              numColumns={2}
+              ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+              renderItem={({ index, item }) => (
+                <ProductItem
+                  index={index}
+                  item={item}
+                  imageClassName="w-28 h-28 mt-[20px]"
+                  height={24}
+                  isLastInRow={
+                    productsByCategory.items.length % 2 === 0 ||
+                    index === productsByCategory.items.length - 1
+                  }
+                />
+              )}
+            />
+            <PaginationButtons
+              total_items={productsByCategory.total_items}
+              previousButtonDisable={previousButtonDisable}
+              nextButtonDisable={nextButtonDisable}
+              handlePrevPage={handlePrevProductPage}
+              handleNextPage={handleNextProductPage}
+            />
+          </View>
         </View>
-        <View className="m-2 mt-1 ml-0.5 w-full flex-1">
-          <FlatList
-            refreshControl={
-              <RefreshControl refreshing={productsByCategory.isLoading} onRefresh={handleRefresh} />
-            }
-            data={productsByCategory.items}
-            horizontal={false}
-            numColumns={2}
-            ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-            renderItem={({ index, item }) => (
-              <ProductItem
-                index={index}
-                item={item}
-                imageClassName="w-28 h-28 mt-[20px]"
-                height={24}
-                isLastInRow={
-                  productsByCategory.items.length % 2 === 0 ||
-                  index === productsByCategory.items.length - 1
-                }
-              />
-            )}
-          />
-          <PaginationButtons
-            total_items={productsByCategory.total_items}
-            previousButtonDisable={previousButtonDisable}
-            nextButtonDisable={nextButtonDisable}
-            handlePrevPage={handlePrevProductPage}
-            handleNextPage={handleNextProductPage}
-          />
-        </View>
-      </View>
+      )}
     </SafeAreaView>
   );
 };

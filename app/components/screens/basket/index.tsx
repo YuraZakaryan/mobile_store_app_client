@@ -33,12 +33,16 @@ import { Main, NumericInputCustom } from '../../wrappers';
 export const Basket = () => {
   const dispatch = useAppDispatch();
   const [initialItemCounts, setInitialItemCounts] = React.useState<TInitialItemCounts>({});
+  const [itemLoadingStates, setItemLoadingStates] = React.useState<{ [itemId: string]: boolean }>(
+    {}
+  );
   const { basket, fetchBasketOrder, toOrder, create, deleteItem } = useAppSelector(
     (state) => state.order
   );
   const { user } = useAppSelector((state) => state.user);
   const isAnyItemCountZero = basket.items.some((item) => item.itemCount === 0);
   const isLoading: boolean = create.isLoading;
+
   const fetchData = (): void => {
     dispatch(getOrderByUserInProgressThunk(user?._id as string));
   };
@@ -100,7 +104,17 @@ export const Basket = () => {
 
   // Handle deletion of an order item
   const handleDelete = (_id: string): void => {
-    dispatch(deleteOrderItemThunk(_id));
+    setItemLoadingStates((prevLoadingStates) => ({
+      ...prevLoadingStates,
+      [_id]: true,
+    }));
+
+    dispatch(deleteOrderItemThunk(_id)).then(() => {
+      setItemLoadingStates((prevLoadingStates) => ({
+        ...prevLoadingStates,
+        [_id]: false,
+      }));
+    });
   };
 
   // Move items to the order
@@ -137,9 +151,9 @@ export const Basket = () => {
                         <View className="flex-row flex-1 min-h-[150px] bg-white shadow rounded-lg relative">
                           <TouchableOpacity
                             className="absolute right-2 top-2"
-                            disabled={deleteItem.isLoading}
+                            disabled={itemLoadingStates[item._id]}
                             onPress={() => handleDelete(item._id)}>
-                            {deleteItem.isLoading ? (
+                            {itemLoadingStates[item._id] ? (
                               <ActivityIndicator size="small" color="red" />
                             ) : (
                               <FontAwesome name="window-close" size={23} color="red" />

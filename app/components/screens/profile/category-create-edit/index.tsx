@@ -11,6 +11,7 @@ import {
   deleteCategoryThunk,
   updateCategoryThunk,
 } from '../../../../redux/http/categoryThunk';
+import { SHOW_SUCCESS } from '../../../../toasts';
 import { API_URL, ICON_MAIN_COLOR } from '../../../../utils/constants';
 import { pickImageSetFormik } from '../../../../utils/image';
 import { createAndEditCategoryFormSchema } from '../../../../validation';
@@ -61,14 +62,29 @@ export const CategoryCreateEdit = () => {
       formData.append('picture', values.picture);
     }
     if (item) {
-      await dispatch(updateCategoryThunk({ id: item?._id as string, formData }));
+      await dispatch(updateCategoryThunk({ id: item?._id as string, formData }))
+        .unwrap()
+        .then((res) => res && SHOW_SUCCESS('Կատեգորիան հաջողությամբ փոփոխվեց'))
+        .catch((err) => {
+          console.log(err);
+        });
     } else {
-      await dispatch(createCategoryThunk({ formData, navigate }));
+      await dispatch(createCategoryThunk({ formData, navigate }))
+        .unwrap()
+        .then((res) => res && SHOW_SUCCESS('Կատեգորիան հաջողությամբ ստեղծվեց'))
+        .catch((err) => {
+          console.log(err);
+        });
     }
   };
 
   const handleDelete = async () => {
-    await dispatch(deleteCategoryThunk({ _id: item?._id as string, navigate }));
+    await dispatch(deleteCategoryThunk({ _id: item?._id as string, navigate }))
+      .unwrap()
+      .then((res) => res && SHOW_SUCCESS('Կատեգորիան հաջողությամբ ջնջվեց'))
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   return (

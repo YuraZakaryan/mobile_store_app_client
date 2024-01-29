@@ -33,6 +33,7 @@ import {
 import { Auth } from './components/screens/auth';
 import { Loading } from './components/ui';
 import { useAppDispatch, useAppSelector } from './hooks/redux';
+import { getOrderByUserInProgressThunk } from './redux/http/orderThunk';
 import { fetchMe } from './redux/http/userThunk';
 import { TIconName, TTabsName } from './types/navigation';
 import { isAdmin } from './utils';
@@ -501,9 +502,15 @@ const TabGroup = () => {
 
 const Navigation = () => {
   const dispatch = useAppDispatch();
+  const { user } = useAppSelector((state) => state.user);
+
   React.useEffect((): void => {
     dispatch(fetchMe());
   }, []);
+
+  React.useEffect(() => {
+    dispatch(getOrderByUserInProgressThunk(user?._id as string));
+  }, [user]);
 
   return (
     <NavigationContainer>

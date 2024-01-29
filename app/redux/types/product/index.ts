@@ -19,7 +19,12 @@ export interface IProductHistory extends TProduct {
   orderCount: number;
 }
 
+export interface ICurrentProduct extends TStateStatus {
+  product: TProduct | null;
+}
+
 export type TInitialProductState = {
+  currentProduct: ICurrentProduct;
   products: TItemsWithTotalLength<TProduct[]>;
   discountedProducts: TItemsWithTotalLength<TProduct[]>;
   discountedProductsForHomeScreen: TItemsWithTotalLength<TProduct[]>;

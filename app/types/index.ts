@@ -39,6 +39,7 @@ export interface ICreateItemButton {
 }
 export interface ILabelInput extends PropsWithChildren, TClassName {
   label: string;
+  additionalLabel?: string;
   icon?: React.ReactNode;
   required?: boolean;
 }
@@ -89,4 +90,12 @@ export interface INumericInputCustom {
   minValue: number;
   maxValue: number;
   onChange: (value: number) => void;
+}
+export enum ETypeError {
+  NETWORK = 'network',
+  TECHNICAL = 'technical',
+}
+export interface INetworkError {
+  handleRefresh: () => void;
+  type?: ETypeError;
 }

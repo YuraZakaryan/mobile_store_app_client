@@ -42,42 +42,51 @@ const initialState: TInitialBasketState = {
   orders: {
     isLoading: false,
     isError: false,
+    isNetworkError: false,
     total_items: 0,
     items: [],
   },
   ordersHistory: {
     isLoading: false,
     isError: false,
+    isNetworkError: false,
     total_items: 0,
     items: [],
   },
   create: {
     isLoading: false,
     isError: false,
+    isNetworkError: false,
   },
   fetchBasketOrder: {
     isLoading: false,
     isError: false,
+    isNetworkError: false,
   },
   deleteItem: {
     isLoading: false,
     isError: false,
+    isNetworkError: false,
   },
   toOrder: {
     isLoading: false,
     isError: false,
+    isNetworkError: false,
   },
   changeStatus: {
     isLoading: false,
     isError: false,
+    isNetworkError: false,
   },
   cancelOrder: {
     isLoading: false,
     isError: false,
+    isNetworkError: false,
   },
   deliverOrder: {
     isLoading: false,
     isError: false,
+    isNetworkError: false,
   },
 };
 
@@ -119,27 +128,27 @@ const orderSlice = createSlice({
       .addCase(createOrAddOrderThunk.fulfilled, (state: TInitialBasketState): void => {
         state.create.isLoading = false;
         state.create.isError = false;
-        SHOW_SUCCESS('Ապրանքը հաջողությամբ ավելացվեց զամբյուղում');
+        state.create.isNetworkError = false;
       })
       .addCase(createOrAddOrderThunk.pending, (state: TInitialBasketState): void => {
         state.create.isLoading = true;
         state.create.isError = false;
+        state.create.isNetworkError = false;
       })
       .addCase(createOrAddOrderThunk.rejected, (state: TInitialBasketState, action): void => {
         state.create.isLoading = false;
-        state.create.isError = true;
-        if (action.payload) {
-          if (action.payload === 409) {
-            SHOW_ERROR('Ձեր էջը հաստատված չէ, փորձել մի փոքր ուշ');
-          } else if (action.payload === 410) {
-            SHOW_ERROR('Ձեր հաշիվը արգելափակված է');
-          } else if (action.payload === 502) {
-            SHOW_ERROR('Ոչ բավարար ապրանքի քանակ');
-          } else if (action.payload === 401) {
-            SHOW_ERROR('Կխնդրեինք առաջին հերթին մուտք գործել');
-          } else {
-            SHOW_ERROR('Ապրանքի զամբյուղում ավելացնելու հետ կապված խնդրի է առաջացել');
-          }
+        if (action.payload === 'NetworkError') {
+          state.create.isNetworkError = true;
+        } else if (action.payload === 409) {
+          SHOW_ERROR('Ձեր էջը հաստատված չէ, փորձել մի փոքր ուշ');
+        } else if (action.payload === 410) {
+          SHOW_ERROR('Ձեր հաշիվը արգելափակված է');
+        } else if (action.payload === 502) {
+          SHOW_ERROR('Ոչ բավարար ապրանքի քանակ');
+        } else if (action.payload === 401) {
+          SHOW_ERROR('Կխնդրեինք առաջին հերթին մուտք գործել');
+        } else {
+          SHOW_ERROR('Ապրանքի զամբյուղում ավելացնելու հետ կապված խնդրի է առաջացել');
         }
       })
       .addCase(
@@ -148,46 +157,64 @@ const orderSlice = createSlice({
           state.basket = action.payload;
           state.fetchBasketOrder.isLoading = false;
           state.fetchBasketOrder.isError = false;
+          state.fetchBasketOrder.isNetworkError = false;
         }
       )
       .addCase(getOrderByUserInProgressThunk.pending, (state: TInitialBasketState): void => {
         state.fetchBasketOrder.isLoading = true;
         state.fetchBasketOrder.isError = false;
+        state.fetchBasketOrder.isNetworkError = false;
       })
-      .addCase(getOrderByUserInProgressThunk.rejected, (state: TInitialBasketState): void => {
-        state.fetchBasketOrder.isLoading = false;
-        state.fetchBasketOrder.isError = true;
-      })
+      .addCase(
+        getOrderByUserInProgressThunk.rejected,
+        (state: TInitialBasketState, action): void => {
+          state.fetchBasketOrder.isLoading = false;
+          if (action.payload === 'NetworkError') {
+            state.fetchBasketOrder.isNetworkError = true;
+          } else if (action.payload !== 404) {
+            state.fetchBasketOrder.isError = true;
+          }
+        }
+      )
       .addCase(deleteOrderItemThunk.fulfilled, (state, action: PayloadAction<string>): void => {
         state.basket.items = state.basket.items.filter(
           (item: TOrderItem): boolean => item._id !== action.payload
         );
         state.deleteItem.isLoading = false;
         state.deleteItem.isError = false;
+        state.deleteItem.isNetworkError = false;
       })
       .addCase(deleteOrderItemThunk.pending, (state: TInitialBasketState): void => {
         state.deleteItem.isLoading = true;
         state.deleteItem.isError = false;
+        state.deleteItem.isNetworkError = false;
       })
-      .addCase(deleteOrderItemThunk.rejected, (state: TInitialBasketState): void => {
+      .addCase(deleteOrderItemThunk.rejected, (state: TInitialBasketState, action): void => {
         state.deleteItem.isLoading = false;
-        state.deleteItem.isError = true;
+        if (action.payload === 'NetworkError') {
+          state.deleteItem.isNetworkError = true;
+        } else if (action.payload !== 404) {
+          state.deleteItem.isError = true;
+        }
         SHOW_ERROR('Ապրանքի ջնջման հետ կապված խնդիր է առաջացել');
       })
       .addCase(toOrderThunk.fulfilled, (state: TInitialBasketState): void => {
         state.basket = initialState.basket;
         state.toOrder.isLoading = false;
         state.toOrder.isError = false;
+        state.toOrder.isNetworkError = false;
         SHOW_SUCCESS('Պատվերը հաջողությամբ հաստատվեց');
       })
       .addCase(toOrderThunk.pending, (state: TInitialBasketState): void => {
         state.toOrder.isLoading = true;
         state.toOrder.isError = false;
+        state.toOrder.isNetworkError = false;
       })
       .addCase(toOrderThunk.rejected, (state: TInitialBasketState, action): void => {
         state.toOrder.isLoading = false;
-        state.toOrder.isError = true;
-        if (action.payload === 502) {
+        if (action.payload === 'NetworkError') {
+          state.toOrder.isNetworkError = true;
+        } else if (action.payload === 502) {
           SHOW_ERROR('Ոչ բավարար ապրանքի քանակ');
         } else {
           SHOW_ERROR('Պատվերի հաստատման հետ կապված խնդիր է առաջացել');
@@ -204,6 +231,7 @@ const orderSlice = createSlice({
             total_items,
             items,
             isError: false,
+            isNetworkError: false,
             isLoading: false,
           };
         }
@@ -211,14 +239,18 @@ const orderSlice = createSlice({
       .addCase(fetchAllOrdersThunk.pending, (state: TInitialBasketState): void => {
         state.orders.isLoading = true;
         state.orders.isError = false;
+        state.orders.isNetworkError = false;
       })
-      .addCase(fetchAllOrdersThunk.rejected, (state: TInitialBasketState): void => {
-        state.orders = {
-          total_items: 0,
-          items: [],
-          isError: true,
-          isLoading: false,
-        };
+      .addCase(fetchAllOrdersThunk.rejected, (state: TInitialBasketState, action): void => {
+        state.orders.total_items = 0;
+        state.orders.items = [];
+        state.orders.isLoading = false;
+
+        if (action.payload === 'NetworkError') {
+          state.orders.isNetworkError = true;
+        } else if (action.payload !== 404) {
+          state.orders.isError = true;
+        }
       })
       .addCase(
         fetchDeliveredOrdersThunk.fulfilled,
@@ -231,6 +263,7 @@ const orderSlice = createSlice({
             total_items,
             items,
             isError: false,
+            isNetworkError: false,
             isLoading: false,
           };
         }
@@ -238,14 +271,18 @@ const orderSlice = createSlice({
       .addCase(fetchDeliveredOrdersThunk.pending, (state: TInitialBasketState): void => {
         state.ordersHistory.isLoading = true;
         state.ordersHistory.isError = false;
+        state.ordersHistory.isNetworkError = false;
       })
-      .addCase(fetchDeliveredOrdersThunk.rejected, (state: TInitialBasketState): void => {
-        state.ordersHistory = {
-          total_items: 0,
-          items: [],
-          isError: true,
-          isLoading: false,
-        };
+      .addCase(fetchDeliveredOrdersThunk.rejected, (state: TInitialBasketState, action): void => {
+        state.ordersHistory.total_items = 0;
+        state.ordersHistory.items = [];
+        state.ordersHistory.isLoading = false;
+
+        if (action.payload === 'NetworkError') {
+          state.ordersHistory.isNetworkError = true;
+        } else if (action.payload !== 404) {
+          state.ordersHistory.isError = true;
+        }
       })
       .addCase(
         fetchOrdersByAuthorThunk.fulfilled,
@@ -258,6 +295,7 @@ const orderSlice = createSlice({
             total_items,
             items,
             isError: false,
+            isNetworkError: false,
             isLoading: false,
           };
         }
@@ -265,53 +303,76 @@ const orderSlice = createSlice({
       .addCase(fetchOrdersByAuthorThunk.pending, (state: TInitialBasketState): void => {
         state.ordersHistory.isLoading = true;
         state.ordersHistory.isError = false;
+        state.ordersHistory.isNetworkError = false;
       })
-      .addCase(fetchOrdersByAuthorThunk.rejected, (state: TInitialBasketState): void => {
-        state.ordersHistory = {
-          total_items: 0,
-          items: [],
-          isError: true,
-          isLoading: false,
-        };
+      .addCase(fetchOrdersByAuthorThunk.rejected, (state: TInitialBasketState, action): void => {
+        state.ordersHistory.total_items = 0;
+        state.ordersHistory.items = [];
+        state.ordersHistory.isLoading = false;
+
+        if (action.payload === 'NetworkError') {
+          state.ordersHistory.isNetworkError = true;
+        } else if (action.payload !== 404) {
+          state.ordersHistory.isError = true;
+        }
       })
       .addCase(changeOrderStatusThunk.fulfilled, (state: TInitialBasketState): void => {
         state.changeStatus.isLoading = false;
         state.changeStatus.isError = false;
+        state.changeStatus.isNetworkError = false;
         SHOW_SUCCESS('Պատվերի կարգավիճակը փոխվեց');
       })
       .addCase(changeOrderStatusThunk.pending, (state: TInitialBasketState): void => {
         state.changeStatus.isLoading = true;
         state.changeStatus.isError = false;
+        state.changeStatus.isError = false;
       })
-      .addCase(changeOrderStatusThunk.rejected, (state: TInitialBasketState): void => {
+      .addCase(changeOrderStatusThunk.rejected, (state: TInitialBasketState, action): void => {
         state.changeStatus.isLoading = false;
-        state.changeStatus.isError = true;
+
+        if (action.payload === 'NetworkError') {
+          state.changeStatus.isNetworkError = true;
+        } else if (action.payload !== 404) {
+          state.changeStatus.isError = true;
+        }
       })
       .addCase(cancelOrderThunk.fulfilled, (state: TInitialBasketState): void => {
         state.cancelOrder.isLoading = false;
         state.cancelOrder.isError = false;
+        state.cancelOrder.isNetworkError = false;
         SHOW_SUCCESS('Պատվերը հաջողությամբ չեղարկվեց');
       })
       .addCase(cancelOrderThunk.pending, (state: TInitialBasketState): void => {
         state.cancelOrder.isLoading = true;
         state.cancelOrder.isError = false;
+        state.cancelOrder.isNetworkError = false;
       })
-      .addCase(cancelOrderThunk.rejected, (state: TInitialBasketState): void => {
+      .addCase(cancelOrderThunk.rejected, (state: TInitialBasketState, action): void => {
         state.cancelOrder.isLoading = false;
-        state.cancelOrder.isError = true;
+        if (action.payload === 'NetworkError') {
+          state.cancelOrder.isNetworkError = true;
+        } else if (action.payload !== 404) {
+          state.cancelOrder.isError = true;
+        }
       })
       .addCase(deliverOrderThunk.fulfilled, (state: TInitialBasketState): void => {
         state.deliverOrder.isLoading = false;
         state.deliverOrder.isError = false;
+        state.deliverOrder.isNetworkError = false;
         SHOW_SUCCESS('Պատվերը նշվեց որպես առաքված');
       })
       .addCase(deliverOrderThunk.pending, (state: TInitialBasketState): void => {
         state.deliverOrder.isLoading = true;
         state.deliverOrder.isError = false;
+        state.deliverOrder.isNetworkError = false;
       })
-      .addCase(deliverOrderThunk.rejected, (state: TInitialBasketState): void => {
+      .addCase(deliverOrderThunk.rejected, (state: TInitialBasketState, action): void => {
         state.deliverOrder.isLoading = false;
-        state.deliverOrder.isError = true;
+        if (action.payload === 'NetworkError') {
+          state.deliverOrder.isNetworkError = true;
+        } else if (action.payload !== 404) {
+          state.deliverOrder.isError = true;
+        }
       }),
 });
 export const orderReducer = orderSlice.reducer;

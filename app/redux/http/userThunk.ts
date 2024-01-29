@@ -4,7 +4,6 @@ import { FormikValues } from 'formik';
 
 import { $authHost } from './index';
 import { TInitialLoginFormValue } from '../../components/screens/auth/types';
-import { TInitialUserCreateEditFormValue } from '../../components/screens/profile/user-create-edit/types';
 import { SecureStoreService } from '../../services';
 import {
   TCreateItemAndNavigate,
@@ -27,7 +26,11 @@ export const loginThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      return rejectWithValue(error.message || 'Failed to login');
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
     }
   }
 );
@@ -45,7 +48,11 @@ export const registrationThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      return rejectWithValue(error.message || 'Failed registration');
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
     }
   }
 );
@@ -61,7 +68,11 @@ export const fetchUsersThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      return rejectWithValue(error.message || 'Failed to fetch users');
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
     }
   }
 );
@@ -78,7 +89,11 @@ export const fetchUnconfirmedUsers = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      return rejectWithValue(error.message || 'Failed to fetch unconfirmed users');
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
     }
   }
 );
@@ -94,19 +109,11 @@ export const fetchBannedUsers = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      return rejectWithValue(error.message || 'Failed to fetch banned users');
-    }
-  }
-);
-export const updateUserThunk = createAsyncThunk(
-  'update/user',
-  async ({ id, formData }: TUpdateItem<FormikValues>, { rejectWithValue }) => {
-    try {
-      const { data } = await $authHost.put<TUser>(`user/${id}`, formData);
-      return data;
-    } catch (err) {
-      const error = err as AxiosError;
-      return rejectWithValue(error.message || 'Failed to update user');
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
     }
   }
 );
@@ -118,7 +125,9 @@ export const sendOtpToMailThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      if (error.response) {
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
         return rejectWithValue(error.response.status);
       }
     }
@@ -132,7 +141,9 @@ export const confirmOtpThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      if (error.response) {
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
         return rejectWithValue(error.response.status);
       }
     }
@@ -159,7 +170,9 @@ export const resetPasswordThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      if (error.response) {
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
         return rejectWithValue(error.response.status);
       }
     }
@@ -177,8 +190,28 @@ export const createUserThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      console.log(error.response);
-      return rejectWithValue(error.message || 'Failed to create user');
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
+    }
+  }
+);
+export const updateUserThunk = createAsyncThunk(
+  'update/user',
+  async ({ id, formData, navigate }: TUpdateItem<FormikValues>, { rejectWithValue }) => {
+    try {
+      const { data } = await $authHost.put<TUser>(`user/${id}`, formData);
+      navigate && navigate('users-control');
+      return data;
+    } catch (err) {
+      const error = err as AxiosError;
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
     }
   }
 );
@@ -190,7 +223,9 @@ export const updatePasswordThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      if (error.response) {
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
         return rejectWithValue(error.response.status);
       }
     }
@@ -202,7 +237,9 @@ export const fetchMe = createAsyncThunk('me/user', async (_, { rejectWithValue }
     return data;
   } catch (err) {
     const error = err as AxiosError;
-    if (error.response) {
+    if (!error.response) {
+      return rejectWithValue('NetworkError');
+    } else {
       return rejectWithValue(error.response.status);
     }
   }
@@ -216,7 +253,11 @@ export const toggleBanThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      return rejectWithValue(error.message || 'Failed to toggle bun');
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
     }
   }
 );
@@ -229,7 +270,11 @@ export const cancelUserThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      return rejectWithValue(error.message || 'Failed to cancel user');
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
     }
   }
 );

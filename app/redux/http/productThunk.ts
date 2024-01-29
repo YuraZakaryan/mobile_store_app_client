@@ -26,12 +26,26 @@ export const fetchProductsThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      console.log(error);
-      if (error.code) {
-        console.log(error.code);
-        return rejectWithValue(error.code);
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
       } else {
-        return rejectWithValue(error.message || 'Failed to fetch products');
+        return rejectWithValue(error.response.status);
+      }
+    }
+  }
+);
+export const fetchProductThunk = createAsyncThunk(
+  'fetch/product',
+  async (productId: string, { rejectWithValue }) => {
+    try {
+      const { data } = await $authHost.get<TProduct>(`product/${productId}`);
+      return data;
+    } catch (err) {
+      const error = err as AxiosError;
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
       }
     }
   }
@@ -48,7 +62,11 @@ export const fetchDiscountedProductsThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      return rejectWithValue(error.message || 'Failed to fetch discounted products');
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
     }
   }
 );
@@ -64,7 +82,11 @@ export const fetchProductsForHomeCategoryThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      return rejectWithValue(error.message || 'Failed to fetch products');
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
     }
   }
 );
@@ -80,7 +102,11 @@ export const fetchDiscountedProductsForHomeCategoryThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      return rejectWithValue(error.message || 'Failed to fetch discounted products');
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
     }
   }
 );
@@ -96,7 +122,11 @@ export const fetchProductsByCategoryThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      return rejectWithValue(error.message || 'Failed to fetch products by category');
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
     }
   }
 );
@@ -112,7 +142,11 @@ export const searchProductsThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      return rejectWithValue(error.message || 'Failed to search product(s)');
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
     }
   }
 );
@@ -120,7 +154,7 @@ export const createProductThunk = createAsyncThunk(
   'create/product',
   async ({ formData, navigate }: TCreateItemAndNavigate<FormData>, { rejectWithValue }) => {
     try {
-      const { data } = await $authHost.post<TProduct>('product/create', formData, {
+      const { data } = await $authHost.post('product/create', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -129,7 +163,12 @@ export const createProductThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      return rejectWithValue(error.message || 'Failed to create product');
+      console.log(error);
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
     }
   }
 );
@@ -137,7 +176,7 @@ export const updateProductThunk = createAsyncThunk(
   'update/product',
   async ({ id, formData }: TUpdateItem<FormikValues>, { rejectWithValue }) => {
     try {
-      const { data } = await $authHost.put<TProduct>(`product/${id}`, formData, {
+      const { data } = await $authHost.put(`product/${id}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -145,7 +184,11 @@ export const updateProductThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      return rejectWithValue(error.message || 'Failed to create product');
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
     }
   }
 );
@@ -158,7 +201,11 @@ export const deleteProductThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      return rejectWithValue(error.message || 'Failed to create product');
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
     }
   }
 );

@@ -3,6 +3,7 @@ import { Image, TouchableOpacity, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../../../hooks/redux';
 import { setCategory } from '../../../../../redux/reducers/category/categorySlice';
+import { API_URL } from '../../../../../utils/constants';
 import { IProductCategoryItem } from '../../types';
 
 export const ProductCategoryItem: React.FC<IProductCategoryItem> = React.memo(({ item }) => {
@@ -20,7 +21,7 @@ export const ProductCategoryItem: React.FC<IProductCategoryItem> = React.memo(({
           chosen._id === item._id ? ' bg-gray-500' : ''
         }`}>
         <Image
-          source={require('./../../../../../assets/icons/mouse.png')}
+          source={{ uri: `${API_URL}/${item.picture}` ?? '' }}
           className="w-14 h-14"
           alt={item.title}
         />

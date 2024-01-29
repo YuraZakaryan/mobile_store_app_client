@@ -56,6 +56,18 @@ export const Registration = () => {
                 />
               </FieldWithError>
             </LabelInput>
+            <LabelInput label="Էլ․ փոստ" additionalLabel="ոչ պարտադիր">
+              <FieldWithError fieldName="mail" errors={errors} touched={touched}>
+                <TextInput
+                  onChangeText={handleChange('mail')}
+                  onBlur={handleBlur('mail')}
+                  onSubmitEditing={Keyboard.dismiss}
+                  placeholder="Էլ․ փոստ"
+                  value={values.mail}
+                  className="rounded px-3 py-3 border border-gray-600"
+                />
+              </FieldWithError>
+            </LabelInput>
             <LabelInput label="Մուտքանուն" required>
               <FieldWithError fieldName="username" errors={errors} touched={touched}>
                 <TextInput
@@ -64,18 +76,6 @@ export const Registration = () => {
                   value={values.username}
                   onSubmitEditing={Keyboard.dismiss}
                   placeholder="Մուտքանուն"
-                  className="rounded px-3 py-3 border border-gray-600"
-                />
-              </FieldWithError>
-            </LabelInput>
-            <LabelInput label="Էլ․ փոստ" required>
-              <FieldWithError fieldName="mail" errors={errors} touched={touched}>
-                <TextInput
-                  onChangeText={handleChange('mail')}
-                  onBlur={handleBlur('mail')}
-                  onSubmitEditing={Keyboard.dismiss}
-                  placeholder="Էլ․ փոստ"
-                  value={values.mail}
                   className="rounded px-3 py-3 border border-gray-600"
                 />
               </FieldWithError>

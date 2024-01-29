@@ -14,6 +14,7 @@ import {
   toggleBanThunk,
   updateUserThunk,
 } from '../../../../redux/http/userThunk';
+import { SHOW_SUCCESS } from '../../../../toasts';
 import { selectRoles } from '../../../../utils';
 import { ICON_MAIN_COLOR } from '../../../../utils/constants';
 import { registrationFormSchema, updateUserFormSchema } from '../../../../validation';
@@ -62,18 +63,52 @@ export const UserCreateEdit = () => {
 
   const onSubmit = async (values: FormikValues): Promise<void> => {
     if (item) {
-      await dispatch(updateUserThunk({ id: item?._id as string, formData: values }));
+      await dispatch(updateUserThunk({ id: item?._id as string, formData: values, navigate }))
+        .unwrap()
+        .then((res) =>
+          res && user?._id === res._id
+            ? SHOW_SUCCESS('Փոփոխությունները տեսնելու համար նորից մուտք գործեք ծրագիր')
+            : SHOW_SUCCESS('Հաճախորդը հաջողությամբ փոփոխվեց')
+        )
+        .catch((err) => {
+          console.log(err);
+        });
     } else {
-      await dispatch(createUserThunk({ formData: values, navigate }));
+      await dispatch(createUserThunk({ formData: values, navigate }))
+        .unwrap()
+        .then((res) => res && SHOW_SUCCESS('Հաճախորդը հաջողությամբ ստեղծվեց'))
+        .catch((err) => {
+          console.log(err);
+        });
     }
   };
 
   const toggleBan = async (): Promise<void> => {
-    await dispatch(toggleBanThunk({ _id: item?._id as string, navigate }));
+    await dispatch(toggleBanThunk({ _id: item?._id as string, navigate }))
+      .unwrap()
+      .then(
+        (res) =>
+          res &&
+          SHOW_SUCCESS(
+            `${
+              res.message === 'User banned'
+                ? 'Բաժանորդը հաջողությամբ ապաակտիվացվեց'
+                : 'Բաժանորդը հաջողությամբ ակտիվացվեց'
+            }`
+          )
+      )
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   const handleCancel = async (): Promise<void> => {
-    await dispatch(cancelUserThunk({ _id: item?._id as string, navigate }));
+    await dispatch(cancelUserThunk({ _id: item?._id as string, navigate }))
+      .unwrap()
+      .then((res) => res && SHOW_SUCCESS('Հաճախորդը հաջողությամբ չեղարկվեց'))
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   return (
@@ -131,6 +166,18 @@ export const UserCreateEdit = () => {
                   />
                 </FieldWithError>
               </LabelInput>
+              <LabelInput label="Էլ․ փոստ" additionalLabel="ոչ պարտադիր">
+                <FieldWithError fieldName="mail" errors={errors} touched={touched}>
+                  <TextInput
+                    onChangeText={handleChange('mail')}
+                    onBlur={handleBlur('mail')}
+                    onSubmitEditing={Keyboard.dismiss}
+                    placeholder="Էլ․ փոստ"
+                    value={values.mail}
+                    className="rounded px-3 py-3 border border-gray-600"
+                  />
+                </FieldWithError>
+              </LabelInput>
               <LabelInput label="Մուտքանուն" required>
                 <FieldWithError fieldName="username" errors={errors} touched={touched}>
                   <TextInput
@@ -139,18 +186,6 @@ export const UserCreateEdit = () => {
                     onSubmitEditing={Keyboard.dismiss}
                     placeholder="Մուտքանուն"
                     value={values.username}
-                    className="rounded px-3 py-3 border border-gray-600"
-                  />
-                </FieldWithError>
-              </LabelInput>
-              <LabelInput label="Էլ․ փոստ" required>
-                <FieldWithError fieldName="mail" errors={errors} touched={touched}>
-                  <TextInput
-                    onChangeText={handleChange('mail')}
-                    onBlur={handleBlur('mail')}
-                    onSubmitEditing={Keyboard.dismiss}
-                    placeholder="Էլ․ փոստ"
-                    value={values.mail}
                     className="rounded px-3 py-3 border border-gray-600"
                   />
                 </FieldWithError>

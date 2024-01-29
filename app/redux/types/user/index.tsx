@@ -27,7 +27,8 @@ export type TUser = {
 
 export type TStateStatus = {
   isLoading: boolean;
-  isError: boolean;
+  isError?: boolean;
+  isNetworkError?: boolean;
 };
 export type TResetPassword = {
   mode: EResetPasswordMode;

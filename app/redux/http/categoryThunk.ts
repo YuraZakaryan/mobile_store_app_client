@@ -24,7 +24,11 @@ export const fetchCategoriesThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      return rejectWithValue(error.message || 'Failed to fetch categories');
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
     }
   }
 );
@@ -41,7 +45,11 @@ export const createCategoryThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      return rejectWithValue(error.message || 'Failed to create category');
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
     }
   }
 );
@@ -57,7 +65,11 @@ export const updateCategoryThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      return rejectWithValue(error.message || 'Failed to create category');
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
     }
   }
 );
@@ -70,7 +82,9 @@ export const deleteCategoryThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      if (error.response) {
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
         return rejectWithValue(error.response.status);
       }
     }

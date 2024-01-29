@@ -7,13 +7,13 @@ import DropDownPicker from 'react-native-dropdown-picker';
 
 import { TInitialProductCreateEditFormValue, TProductCreateEditRouteParams } from './types';
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
-import { fetchCategoriesThunk } from '../../../../redux/http/categoryThunk';
 import {
   createProductThunk,
   deleteProductThunk,
   updateProductThunk,
 } from '../../../../redux/http/productThunk';
 import { TCategory } from '../../../../redux/types';
+import { SHOW_SUCCESS } from '../../../../toasts';
 import { API_URL, ICON_MAIN_COLOR } from '../../../../utils/constants';
 import { pickImageSetFormik } from '../../../../utils/image';
 import { createAndEditProductFormSchema } from '../../../../validation';
@@ -49,7 +49,6 @@ export const ProductCreateEdit = () => {
     setOptions({
       headerTitle: item ? item.title : 'Ստեղծել ապրանք',
     });
-    dispatch(fetchCategoriesThunk({}));
   }, [item]);
 
   const initialProductCreateEditFormValue: TInitialProductCreateEditFormValue = {
@@ -86,13 +85,28 @@ export const ProductCreateEdit = () => {
       formData.append('picture', values.picture);
     }
     if (item) {
-      await dispatch(updateProductThunk({ id: item?._id as string, formData }));
+      await dispatch(updateProductThunk({ id: item?._id as string, formData }))
+        .unwrap()
+        .then((res) => res && SHOW_SUCCESS('Ապրանքը հաջողությամբ փոփոխվեց'))
+        .catch((err) => {
+          console.log(err);
+        });
     } else {
-      await dispatch(createProductThunk({ formData, navigate }));
+      await dispatch(createProductThunk({ formData, navigate }))
+        .unwrap()
+        .then((res) => res && SHOW_SUCCESS('Ապրանքը հաջողությամբ ստեղծվեց'))
+        .catch((err) => {
+          console.log(err);
+        });
     }
   };
   const handleDelete = async () => {
-    await dispatch(deleteProductThunk({ _id: item?._id as string, navigate }));
+    await dispatch(deleteProductThunk({ _id: item?._id as string, navigate }))
+      .unwrap()
+      .then((res) => res && SHOW_SUCCESS('Ապրանքը հաջողությամբ ջնջվեց'))
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   return (

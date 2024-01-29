@@ -1,15 +1,17 @@
-import { Foundation, MaterialCommunityIcons, AntDesign } from '@expo/vector-icons';
+import { AntDesign, Foundation, MaterialCommunityIcons } from '@expo/vector-icons';
 import { NavigationProp, ParamListBase, useNavigation } from '@react-navigation/native';
 import React from 'react';
-import { RefreshControl, SafeAreaView, ScrollView, TouchableOpacity, View } from 'react-native';
+import { RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 import { ItemsByCategory } from './ui';
 import { useAppDispatch, useAppSelector } from '../../../hooks/redux';
 import { getOrderByUserInProgressThunk } from '../../../redux/http/orderThunk';
 import { fetchDiscountedProductsThunk, fetchProductsThunk } from '../../../redux/http/productThunk';
-import { ICON_MAIN_COLOR, LIMIT_NUMBER } from '../../../utils/constants';
+import { ETypeError } from '../../../types';
+import { API_URL, ICON_MAIN_COLOR, LIMIT_NUMBER } from '../../../utils/constants';
 import { categoryHome } from '../../../utils/product';
-import { Loading } from '../../ui';
+import { Loading, NetworkError } from '../../ui';
+import { Main } from '../../wrappers';
 
 export const Home = () => {
   const dispatch = useAppDispatch();
@@ -64,29 +66,43 @@ export const Home = () => {
     fetchData();
   };
 
+  const isNetworkError: boolean = products.isNetworkError || discountedProducts.isNetworkError;
+  const isTechnicalError: boolean = products.isError || discountedProducts.isError;
+
   return products.isLoading || discountedProducts.isLoading ? (
     <Loading />
   ) : (
-    <SafeAreaView>
+    <Main>
       <ScrollView
         refreshControl={
           <RefreshControl refreshing={products.isLoading} onRefresh={handleRefresh} />
         }>
-        <View className="mx-4 mb-3">
-          <ItemsByCategory
-            products={products.items}
-            categoryTitle={categoryHome.newProducts}
-            icon={<Foundation name="burst-new" size={34} color={ICON_MAIN_COLOR} />}
+        {isNetworkError || isTechnicalError ? (
+          <NetworkError
+            handleRefresh={handleRefresh}
+            type={isTechnicalError ? ETypeError.TECHNICAL : ETypeError.NETWORK}
           />
-          <ItemsByCategory
-            products={discountedProducts.items}
-            categoryTitle={categoryHome.discountProducts}
-            icon={
-              <MaterialCommunityIcons name="brightness-percent" size={28} color={ICON_MAIN_COLOR} />
-            }
-          />
-        </View>
+        ) : (
+          <View className="mx-4 mb-3">
+            <ItemsByCategory
+              products={products.items}
+              categoryTitle={categoryHome.newProducts}
+              icon={<Foundation name="burst-new" size={34} color={ICON_MAIN_COLOR} />}
+            />
+            <ItemsByCategory
+              products={discountedProducts.items}
+              categoryTitle={categoryHome.discountProducts}
+              icon={
+                <MaterialCommunityIcons
+                  name="brightness-percent"
+                  size={28}
+                  color={ICON_MAIN_COLOR}
+                />
+              }
+            />
+          </View>
+        )}
       </ScrollView>
-    </SafeAreaView>
+    </Main>
   );
 };

@@ -5,7 +5,7 @@ const pickImageSetFormik = async (setFieldValue: FormikValues['setFieldValue'], 
   const result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ImagePicker.MediaTypeOptions.All,
     allowsEditing: true,
-    aspect: [4, 3],
+    aspect: [5, 4],
     quality: 1,
   });
   if (!result.canceled) {
