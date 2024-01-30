@@ -70,9 +70,9 @@ const initialState: TInitialProductState = {
   },
   history: historyProducts,
   search: {
-    isLoading: false,
+    isLoading: null,
     isError: false,
-    isNetworkError: true,
+    isNetworkError: false,
     total_items: 0,
     items: [],
   },
@@ -121,11 +121,12 @@ export const productSlice = createSlice({
         state.products.total_items = 0;
         state.products.items = [];
         state.products.isLoading = false;
-        if (action.payload === 'NetworkError') {
-          state.products.isNetworkError = true;
-        } else if (action.payload !== 404) {
-          state.products.isError = true;
-        }
+        state.products.showErrorTest = action.payload as string;
+        // if (action.payload === 'NetworkError') {
+        //   state.products.isNetworkError = true;
+        // } else if (action.payload !== 404) {
+        //   state.products.isError = true;
+        // }
       })
       .addCase(fetchProductThunk.fulfilled, (state: TInitialProductState, action): void => {
         state.currentProduct = {
@@ -268,8 +269,8 @@ export const productSlice = createSlice({
             total_items,
             items,
             isError: false,
-            isLoading: false,
             isNetworkError: false,
+            isLoading: false,
           };
         }
       )

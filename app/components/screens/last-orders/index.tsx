@@ -76,7 +76,10 @@ export const LastOrders = () => {
       ) : (
         <ScrollView
           refreshControl={
-            <RefreshControl refreshing={ordersHistory.isLoading} onRefresh={handleRefresh} />
+            <RefreshControl
+              refreshing={ordersHistory.isLoading as boolean}
+              onRefresh={handleRefresh}
+            />
           }>
           {Object.entries(groupedProducts).map(([dateTime, orders]) => {
             return (

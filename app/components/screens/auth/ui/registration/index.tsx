@@ -147,7 +147,7 @@ export const Registration = () => {
             <View>
               <SignButton
                 handleSubmit={handleSubmit}
-                isLoading={registration.isLoading}
+                isLoading={registration.isLoading ?? false}
                 disabled={!isValid}>
                 Գրանցվել
               </SignButton>

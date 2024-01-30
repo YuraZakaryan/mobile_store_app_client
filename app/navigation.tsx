@@ -31,7 +31,6 @@ import {
   ResetPassword,
 } from './components/screens';
 import { Auth } from './components/screens/auth';
-import { Loading } from './components/ui';
 import { useAppDispatch, useAppSelector } from './hooks/redux';
 import { getOrderByUserInProgressThunk } from './redux/http/orderThunk';
 import { fetchMe } from './redux/http/userThunk';
@@ -381,7 +380,7 @@ const TabGroup = () => {
 
   return (
     <Tab.Navigator
-      screenOptions={({ route, navigation }) => ({
+      screenOptions={({ route }) => ({
         tabBarIcon: ({ color }) => {
           let iconName: TIconName = 'home';
           if (route.name === tabsName.homeGroup) {

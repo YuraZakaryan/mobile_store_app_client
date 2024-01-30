@@ -68,7 +68,7 @@ export const Login = () => {
             <View>
               <SignButton
                 handleSubmit={handleSubmit}
-                isLoading={login.isLoading}
+                isLoading={login.isLoading ?? false}
                 disabled={!isValid}>
                 Մուտք
               </SignButton>

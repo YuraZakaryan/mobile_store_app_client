@@ -182,13 +182,15 @@ export const CategoryCreateEdit = () => {
                   <CrudMainButton
                     handleSubmit={handleSubmit}
                     disabled={!isValid || !dirty}
-                    isLoading={update.isLoading || create.isLoading}>
+                    isLoading={(update.isLoading || create.isLoading) ?? false}>
                     {item ? 'Պահպանել' : 'Ստեղծել'}
                   </CrudMainButton>
                 </View>
                 {item ? (
                   <View>
-                    <DeleteButton handleDelete={handleDelete} isLoading={deleteStatus.isLoading}>
+                    <DeleteButton
+                      handleDelete={handleDelete}
+                      isLoading={deleteStatus.isLoading ?? false}>
                       Ջնջել
                     </DeleteButton>
                   </View>

@@ -34,7 +34,7 @@ export const Search = () => {
   const { deleteItem, create, changeStatus, toOrder } = useAppSelector((state) => state.order);
 
   // Determine overall loading status for multiple order-related actions
-  const isLoading: boolean =
+  const isLoading =
     create.isLoading || deleteItem.isLoading || changeStatus.isLoading || toOrder.isLoading;
   // Custom hook for debouncing the search query
   const debouncedSearch = useDebounce(searchQuery, 500);
@@ -62,15 +62,17 @@ export const Search = () => {
     fetchDataByQuery();
   };
 
-  const isNetworkError: boolean = search.isNetworkError;
-  const isTechnicalError: boolean = search.isError;
+  const { isNetworkError, isError: isTechnicalError } = search || {};
+  const isError: boolean = isNetworkError || isTechnicalError;
 
   return search.isLoading && !initialSearch ? (
     <Loading />
   ) : (
     <SafeAreaView>
       <ScrollView
-        refreshControl={<RefreshControl refreshing={search.isLoading} onRefresh={handleRefresh} />}
+        refreshControl={
+          <RefreshControl refreshing={search.isLoading as boolean} onRefresh={handleRefresh} />
+        }
         style={{
           minHeight: '100%',
         }}
@@ -84,61 +86,59 @@ export const Search = () => {
                 value={searchQuery}
                 onChangeText={handleSearchChange}
               />
-              {isNetworkError || isTechnicalError ? (
-                <NetworkError
-                  handleRefresh={handleRefresh}
-                  type={isTechnicalError ? ETypeError.TECHNICAL : ETypeError.NETWORK}
-                />
-              ) : (
-                <>
-                  <View className="absolute right-3">
-                    {searchQuery.length !== 0 ? (
-                      <TouchableOpacity onPress={handleClearSearch}>
-                        <AntDesign name="close" size={21} color="gray" />
-                      </TouchableOpacity>
-                    ) : (
-                      <View>
-                        <AntDesign name="search1" size={21} color="gray" />
-                      </View>
-                    )}
+              <View className="absolute right-3">
+                {searchQuery.length !== 0 ? (
+                  <TouchableOpacity onPress={handleClearSearch}>
+                    <AntDesign name="close" size={21} color="gray" />
+                  </TouchableOpacity>
+                ) : (
+                  <View>
+                    <AntDesign name="search1" size={21} color="gray" />
                   </View>
-                  <View className="mt-5">
-                    {!Array.isArray(search.items) ||
-                    (!search.isLoading && search.items.length === 0) ? (
-                      <View className="items-center">
-                        <Image
-                          source={require('./../../../assets/images/products/sad-search.png')}
-                          alt="products are not found"
-                          className="w-52 h-52"
-                        />
-                        <Text className="text-center text-xl text-orange-500 font-bold w-full">
-                          Չի գտնվել ապրանք այդպիսի անվանումով
-                        </Text>
-                      </View>
-                    ) : (
-                      <FlatList
-                        scrollEnabled={false}
-                        data={search.items}
-                        ItemSeparatorComponent={() => <View style={{ height: 20 }} />}
-                        renderItem={({ index, item }) => (
-                          <ProductItem
-                            item={item}
-                            index={index}
-                            key={item._id}
-                            isLastInRow={
-                              search.items.length % 2 === 0 || index === search.items.length - 1
-                            }
-                          />
-                        )}
-                        numColumns={2}
-                        horizontal={false}
-                        keyExtractor={(item: TProduct) => item._id}
+                )}
+              </View>
+            </View>
+            {isError ? (
+              <NetworkError
+                handleRefresh={handleRefresh}
+                type={isTechnicalError ? ETypeError.TECHNICAL : ETypeError.NETWORK}
+              />
+            ) : (
+              <View className="mt-5">
+                {!Array.isArray(search.items) ||
+                (search.isLoading !== null && search.items.length === 0) ? (
+                  <View className="items-center">
+                    <Image
+                      source={require('./../../../assets/images/products/sad-search.png')}
+                      alt="products are not found"
+                      className="w-52 h-52"
+                    />
+                    <Text className="text-center text-xl text-orange-500 font-bold w-full">
+                      Չի գտնվել ապրանք այդպիսի անվանումով
+                    </Text>
+                  </View>
+                ) : (
+                  <FlatList
+                    scrollEnabled={false}
+                    data={search.items}
+                    ItemSeparatorComponent={() => <View style={{ height: 20 }} />}
+                    renderItem={({ index, item }) => (
+                      <ProductItem
+                        item={item}
+                        index={index}
+                        key={item._id}
+                        isLastInRow={
+                          search.items.length % 2 === 0 || index === search.items.length - 1
+                        }
                       />
                     )}
-                  </View>
-                </>
-              )}
-            </View>
+                    numColumns={2}
+                    horizontal={false}
+                    keyExtractor={(item: TProduct) => item._id}
+                  />
+                )}
+              </View>
+            )}
           </View>
         </TouchableWithoutFeedback>
       </ScrollView>

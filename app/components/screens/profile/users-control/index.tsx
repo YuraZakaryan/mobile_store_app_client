@@ -96,7 +96,7 @@ export const UsersControl = () => {
       <ScrollView
         refreshControl={
           <RefreshControl
-            refreshing={users.isLoading && unconfirmedUsers.isLoading}
+            refreshing={(users.isLoading && unconfirmedUsers.isLoading) as boolean}
             onRefresh={handleRefresh}
           />
         }>

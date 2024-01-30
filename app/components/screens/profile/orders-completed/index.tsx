@@ -13,7 +13,7 @@ export const OrdersCompleted = () => {
   const dispatch = useAppDispatch();
   const { ordersHistory, cancelOrder } = useAppSelector((state) => state.order);
   const [currentStatusOrderPage, setStatusOrderCurrentPage] = React.useState<number>(1);
-  const isLoading: boolean = cancelOrder.isLoading;
+  const isLoading = cancelOrder.isLoading;
 
   const fetchData = (): void => {
     dispatch(
@@ -54,7 +54,10 @@ export const OrdersCompleted = () => {
       ) : (
         <ScrollView
           refreshControl={
-            <RefreshControl refreshing={ordersHistory.isLoading} onRefresh={handleRefresh} />
+            <RefreshControl
+              refreshing={ordersHistory.isLoading as boolean}
+              onRefresh={handleRefresh}
+            />
           }>
           <View className="m-4">
             <CrudList

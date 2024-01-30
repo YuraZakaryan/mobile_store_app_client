@@ -95,7 +95,10 @@ export const ProductPage = () => {
     <SafeAreaView>
       <ScrollView
         refreshControl={
-          <RefreshControl refreshing={currentProduct.isLoading} onRefresh={handleRefresh} />
+          <RefreshControl
+            refreshing={currentProduct.isLoading ?? false}
+            onRefresh={handleRefresh}
+          />
         }>
         <View className="p-4 gap">
           {product && (

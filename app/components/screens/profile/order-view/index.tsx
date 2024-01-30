@@ -50,28 +50,28 @@ export const OrderView = () => {
             active={item?.status === EOrderStatus.ORDERED}
             status={EOrderStatus.ORDERED}
             handleChangeStatus={handleChangeStatus}
-            isLoading={changeStatus.isLoading}
+            isLoading={changeStatus.isLoading ?? false}
           />
           <ButtonStatusViewOrder
             label="Ընդունված"
             active={item?.status === EOrderStatus.ACCEPTED}
             status={EOrderStatus.ACCEPTED}
             handleChangeStatus={handleChangeStatus}
-            isLoading={changeStatus.isLoading}
+            isLoading={changeStatus.isLoading ?? false}
           />
           <ButtonStatusViewOrder
             label="Առաքված"
             active={item?.status === EOrderStatus.DELIVERED}
             status={EOrderStatus.DELIVERED}
             handleChangeStatus={handleDeliverOrder}
-            isLoading={changeStatus.isLoading}
+            isLoading={changeStatus.isLoading ?? false}
           />
           <ButtonStatusViewOrder
             label="Մերժել"
             active={item?.status === EOrderStatus.REJECTED}
             status={EOrderStatus.REJECTED}
             handleChangeStatus={handleChangeStatus}
-            isLoading={changeStatus.isLoading}
+            isLoading={changeStatus.isLoading ?? false}
           />
         </View>
       </OrdersList>

@@ -285,7 +285,7 @@ export const UserCreateEdit = () => {
                 <View>
                   <CrudMainButton
                     handleSubmit={handleSubmit}
-                    isLoading={createUser.isLoading || updateUser.isLoading}
+                    isLoading={(createUser.isLoading || updateUser.isLoading) ?? false}
                     disabled={!isValid || ((item?.confirmed && !dirty) as boolean)}>
                     {item ? (item.confirmed ? 'Պահպանել' : 'Հաստատել') : 'Ստեղծել'}
                   </CrudMainButton>
@@ -295,7 +295,7 @@ export const UserCreateEdit = () => {
                     <DeleteButton
                       handleDelete={!item.confirmed ? handleCancel : toggleBan}
                       className={`${item.banned && 'bg-green-500'}`}
-                      isLoading={cancelUser.isLoading || banUser.isLoading}>
+                      isLoading={(cancelUser.isLoading || banUser.isLoading) ?? false}>
                       {(item.confirmed && (!item.banned ? 'Ապաակտիվացնել' : 'Ակտիվացնել')) ||
                         'Չեղարկել'}
                     </DeleteButton>

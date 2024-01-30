@@ -39,7 +39,7 @@ export const Home = () => {
   const { deleteItem, create, changeStatus, toOrder } = useAppSelector((state) => state.order);
 
   // Determine overall loading status for multiple actions
-  const isLoading: boolean =
+  const isLoading =
     create.isLoading || deleteItem.isLoading || changeStatus.isLoading || toOrder.isLoading;
 
   const fetchData = (): void => {
@@ -75,8 +75,9 @@ export const Home = () => {
     <Main>
       <ScrollView
         refreshControl={
-          <RefreshControl refreshing={products.isLoading} onRefresh={handleRefresh} />
+          <RefreshControl refreshing={products.isLoading as boolean} onRefresh={handleRefresh} />
         }>
+        <Text>{API_URL}</Text>
         {isNetworkError || isTechnicalError ? (
           <NetworkError
             handleRefresh={handleRefresh}

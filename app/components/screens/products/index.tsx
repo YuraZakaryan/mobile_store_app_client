@@ -22,7 +22,7 @@ export const Products = () => {
   const [currentProductPage, setProductCurrentPage] = React.useState<number>(1);
 
   // Loading status based on multiple order-related actions
-  const isLoading: boolean =
+  const isLoading =
     create.isLoading || deleteItem.isLoading || changeStatus.isLoading || toOrder.isLoading;
 
   const dispatch = useAppDispatch();
@@ -109,7 +109,7 @@ export const Products = () => {
             <FlatList
               refreshControl={
                 <RefreshControl
-                  refreshing={productsByCategory.isLoading}
+                  refreshing={productsByCategory.isLoading as boolean}
                   onRefresh={handleRefresh}
                 />
               }

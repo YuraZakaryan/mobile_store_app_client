@@ -39,7 +39,7 @@ export const OrderCompletedView = () => {
               <ButtonStatusViewOrder
                 label="Չեղարկել"
                 status={EOrderStatus.ACCEPTED}
-                isLoading={cancelOrder.isLoading}
+                isLoading={cancelOrder.isLoading ?? false}
                 handleChangeStatus={handleCancelOrder}
               />
               <View className="p-3">

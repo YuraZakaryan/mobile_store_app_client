@@ -26,7 +26,7 @@ export type TUser = {
 };
 
 export type TStateStatus = {
-  isLoading: boolean;
+  isLoading: boolean | null;
   isError?: boolean;
   isNetworkError?: boolean;
 };

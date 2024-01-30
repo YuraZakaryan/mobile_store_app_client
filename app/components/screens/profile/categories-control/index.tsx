@@ -51,7 +51,7 @@ export const CategoriesControl = () => {
     <Main>
       <ScrollView
         refreshControl={
-          <RefreshControl refreshing={categories.isLoading} onRefresh={handleRefresh} />
+          <RefreshControl refreshing={categories.isLoading as boolean} onRefresh={handleRefresh} />
         }>
         <View className="m-4">
           {categories.total_items > 0 ? (

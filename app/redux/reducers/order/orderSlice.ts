@@ -59,7 +59,7 @@ const initialState: TInitialBasketState = {
     isNetworkError: false,
   },
   fetchBasketOrder: {
-    isLoading: false,
+    isLoading: null,
     isError: false,
     isNetworkError: false,
   },

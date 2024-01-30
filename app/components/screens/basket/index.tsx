@@ -41,7 +41,7 @@ export const Basket = () => {
   );
   const { user } = useAppSelector((state) => state.user);
   const isAnyItemCountZero = basket.items.some((item) => item.itemCount === 0);
-  const isLoading: boolean = create.isLoading;
+  const isLoading: boolean = create.isLoading as boolean;
 
   const fetchData = (): void => {
     dispatch(getOrderByUserInProgressThunk(user?._id as string));
@@ -129,12 +129,15 @@ export const Basket = () => {
 
   return (
     <Main>
-      {!basket.items.length || basket.items.length === 0 ? (
+      {fetchBasketOrder.isLoading !== null || !basket.items.length || basket.items.length === 0 ? (
         <EmptyOrder text="Զամբյուղը դատարկ է" />
       ) : (
         <ScrollView
           refreshControl={
-            <RefreshControl refreshing={fetchBasketOrder.isLoading} onRefresh={handleRefresh} />
+            <RefreshControl
+              refreshing={fetchBasketOrder.isLoading ?? false}
+              onRefresh={handleRefresh}
+            />
           }>
           <View className="w-full p-4 gap-6">
             <View className="w-full">

@@ -46,7 +46,7 @@ export const OrdersControl = () => {
       ) : (
         <ScrollView
           refreshControl={
-            <RefreshControl refreshing={orders.isLoading} onRefresh={handleRefresh} />
+            <RefreshControl refreshing={orders.isLoading as boolean} onRefresh={handleRefresh} />
           }>
           <View className="m-4">
             <View />

@@ -12,9 +12,10 @@ export interface ISearchProductOptions extends TFetchOptions {
   query: string;
 }
 export type TItemsWithTotalLength<T> = {
-  isLoading: boolean;
+  isLoading: boolean | null;
   isError: boolean;
   isNetworkError: boolean;
+  showErrorTest?: string;
   total_items: number;
   items: T;
 };

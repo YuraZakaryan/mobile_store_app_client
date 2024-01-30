@@ -103,8 +103,8 @@ export const UserPasswordEdit = () => {
                 <View>
                   <CrudMainButton
                     handleSubmit={handleSubmit}
-                    isLoading={updatePassword.isLoading}
-                    disabled={!dirty || !isValid || updatePassword.isLoading}>
+                    isLoading={updatePassword.isLoading ?? false}
+                    disabled={(!dirty || !isValid || updatePassword.isLoading) ?? false}>
                     Փոխել
                   </CrudMainButton>
                 </View>
