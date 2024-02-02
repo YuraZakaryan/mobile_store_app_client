@@ -56,7 +56,7 @@ export const Registration = () => {
                 />
               </FieldWithError>
             </LabelInput>
-            <LabelInput label="Էլ․ փոստ" additionalLabel="ոչ պարտադիր">
+            <LabelInput label="Էլ․ փոստ" required>
               <FieldWithError fieldName="mail" errors={errors} touched={touched}>
                 <TextInput
                   onChangeText={handleChange('mail')}

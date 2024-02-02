@@ -169,6 +169,7 @@ const orderSlice = createSlice({
         getOrderByUserInProgressThunk.rejected,
         (state: TInitialBasketState, action): void => {
           state.fetchBasketOrder.isLoading = false;
+          state.basket = initialState.basket;
           if (action.payload === 'NetworkError') {
             state.fetchBasketOrder.isNetworkError = true;
           } else if (action.payload !== 404) {

@@ -166,7 +166,7 @@ export const UserCreateEdit = () => {
                   />
                 </FieldWithError>
               </LabelInput>
-              <LabelInput label="Էլ․ փոստ" additionalLabel="ոչ պարտադիր">
+              <LabelInput label="Էլ․ փոստ" required>
                 <FieldWithError fieldName="mail" errors={errors} touched={touched}>
                   <TextInput
                     onChangeText={handleChange('mail')}
@@ -237,7 +237,7 @@ export const UserCreateEdit = () => {
                         onChangeText={handleChange('password')}
                         onBlur={handleBlur('password')}
                         onSubmitEditing={Keyboard.dismiss}
-                        placeholder="Մուտքանուն"
+                        placeholder="Գաղտնաբառ"
                         value={values.password}
                         secureTextEntry
                         className="rounded px-3 py-3 border border-gray-600"

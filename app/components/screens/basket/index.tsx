@@ -129,7 +129,8 @@ export const Basket = () => {
 
   return (
     <Main>
-      {fetchBasketOrder.isLoading !== null || !basket.items.length || basket.items.length === 0 ? (
+      {fetchBasketOrder.isLoading !== null &&
+      (!basket.items.length || basket.items.length === 0) ? (
         <EmptyOrder text="Զամբյուղը դատարկ է" />
       ) : (
         <ScrollView

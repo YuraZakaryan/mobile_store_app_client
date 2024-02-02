@@ -1,14 +1,14 @@
 import { AntDesign, Foundation, MaterialCommunityIcons } from '@expo/vector-icons';
 import { NavigationProp, ParamListBase, useNavigation } from '@react-navigation/native';
 import React from 'react';
-import { RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { RefreshControl, ScrollView, TouchableOpacity, View } from 'react-native';
 
 import { ItemsByCategory } from './ui';
 import { useAppDispatch, useAppSelector } from '../../../hooks/redux';
 import { getOrderByUserInProgressThunk } from '../../../redux/http/orderThunk';
 import { fetchDiscountedProductsThunk, fetchProductsThunk } from '../../../redux/http/productThunk';
 import { ETypeError } from '../../../types';
-import { API_URL, ICON_MAIN_COLOR, LIMIT_NUMBER } from '../../../utils/constants';
+import { ICON_MAIN_COLOR, LIMIT_NUMBER } from '../../../utils/constants';
 import { categoryHome } from '../../../utils/product';
 import { Loading, NetworkError } from '../../ui';
 import { Main } from '../../wrappers';
@@ -77,7 +77,6 @@ export const Home = () => {
         refreshControl={
           <RefreshControl refreshing={products.isLoading as boolean} onRefresh={handleRefresh} />
         }>
-        <Text>{API_URL}</Text>
         {isNetworkError || isTechnicalError ? (
           <NetworkError
             handleRefresh={handleRefresh}
