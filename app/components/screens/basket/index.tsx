@@ -24,7 +24,9 @@ import {
   setPackaging,
   updateItemCount,
 } from '../../../redux/reducers/order/orderSlice';
-import { EPackage, TOrderItem } from '../../../redux/types/order';
+import { TProduct } from '../../../redux/types';
+import { EPackage, TOrder, TOrderItem } from '../../../redux/types/order';
+import { SHOW_ERROR, SHOW_SUCCESS } from '../../../toasts';
 import { API_URL } from '../../../utils/constants';
 import { calculateDiscountedPrice, formattedPrice } from '../../../utils/product';
 import { EmptyOrder } from '../../ui';
@@ -109,17 +111,30 @@ export const Basket = () => {
       [_id]: true,
     }));
 
-    dispatch(deleteOrderItemThunk(_id)).then(() => {
-      setItemLoadingStates((prevLoadingStates) => ({
-        ...prevLoadingStates,
-        [_id]: false,
-      }));
-    });
+    dispatch(deleteOrderItemThunk(_id))
+      .then((): void => {
+        setItemLoadingStates((prevLoadingStates) => ({
+          ...prevLoadingStates,
+          [_id]: false,
+        }));
+      })
+      .catch((err): void => {
+        err && SHOW_ERROR('Ապրանքի ջնջման հետ կապված խնդիր է առաջացել');
+      });
   };
 
   // Move items to the order
   const handleClick = (): void => {
-    dispatch(toOrderThunk(basket));
+    dispatch(toOrderThunk(basket))
+      .unwrap()
+      .then((res: TOrder) => res && SHOW_SUCCESS('Պատվերը հաջողությամբ հաստատվեց'))
+      .catch((err): void => {
+        if (err === 502) {
+          SHOW_ERROR('Ոչ բավարար ապրանքի քանակ');
+        } else {
+          SHOW_ERROR('Պատվերի հաստատման հետ կապված խնդիր է առաջացել');
+        }
+      });
   };
 
   // Refresh data

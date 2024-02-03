@@ -26,6 +26,7 @@ export interface ICurrentProduct extends TStateStatus {
 export type TInitialProductState = {
   currentProduct: ICurrentProduct;
   products: TItemsWithTotalLength<TProduct[]>;
+  productsControl: TItemsWithTotalLength<TProduct[]>;
   discountedProducts: TItemsWithTotalLength<TProduct[]>;
   discountedProductsForHomeScreen: TItemsWithTotalLength<TProduct[]>;
   productsForHomeScreen: TItemsWithTotalLength<TProduct[]>;

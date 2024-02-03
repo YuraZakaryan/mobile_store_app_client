@@ -5,6 +5,9 @@ import { Keyboard, Text, TextInput, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../../../hooks/redux';
 import { resetPasswordThunk } from '../../../../../redux/http/userThunk';
+import { TOtpData } from '../../../../../redux/types';
+import { SHOW_ERROR, SHOW_SUCCESS } from '../../../../../toasts';
+import { NETWORK_ERROR_MESSAGE } from '../../../../../utils/constants';
 import { setNewPasswordFormSchema } from '../../../../../validation';
 import { FieldWithError, LabelInput } from '../../../../wrappers';
 import { TInitialSetNewPassFormValue } from '../../types';
@@ -34,7 +37,18 @@ export const NewPassSection = () => {
         mail: resetPassword.mail,
         navigate,
       })
-    );
+    )
+      .unwrap()
+      .then((res: TOtpData) => res && SHOW_SUCCESS('Գաղտնաբառը հաջողությամբ փոխվեց'))
+      .catch((err): void => {
+        if (err === 'NetworkError') {
+          SHOW_ERROR(NETWORK_ERROR_MESSAGE);
+        } else if (err === 404) {
+          SHOW_ERROR('Այս էլ․ փոստով բաժանորդ չի գտնվել');
+        } else if (err === 403) {
+          SHOW_ERROR('Սխալ մեկ անգամյա գաղտնաբառ');
+        }
+      });
   };
 
   return (

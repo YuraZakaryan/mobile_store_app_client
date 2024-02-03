@@ -14,12 +14,32 @@ import {
 
 export const fetchCategoriesThunk = createAsyncThunk(
   'fetch/categories',
-  async ({ page = 1, limit = 5 }: TFetchOptions, { rejectWithValue }) => {
+  async ({ page = 1, limit = 5, query = '' }: TFetchOptions, { rejectWithValue }) => {
     const skip = (page - 1) * limit;
 
     try {
       const { data } = await $authHost.get<TItemsWithTotalLength<TCategory[]>>(
         `category/all?limit=${limit}&skip=${skip}`
+      );
+      return data;
+    } catch (err) {
+      const error = err as AxiosError;
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
+    }
+  }
+);
+export const fetchControlCategoriesThunk = createAsyncThunk(
+  'fetchForControl/categories',
+  async ({ page = 1, limit = 5, query = '' }: TFetchOptions, { rejectWithValue }) => {
+    const skip = (page - 1) * limit;
+
+    try {
+      const { data } = await $authHost.get<TItemsWithTotalLength<TCategory[]>>(
+        `category/all?limit=${limit}&skip=${skip}&title=${query}`
       );
       return data;
     } catch (err) {

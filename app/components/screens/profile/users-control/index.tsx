@@ -4,6 +4,7 @@ import { RefreshControl, ScrollView, View } from 'react-native';
 
 import { UserList } from './wrappers/user-list';
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
+import { useDebounce } from '../../../../hooks/useDebounce';
 import {
   fetchBannedUsers,
   fetchUnconfirmedUsers,
@@ -20,28 +21,54 @@ export const UsersControl = () => {
   const [currentUserPage, setUserCurrentPage] = React.useState<number>(1);
   const [currentUnConfirmedUserPage, setUserConfirmedCurrentPage] = React.useState<number>(1);
   const [currentBannedUserPage, setUserBannedCurrentPage] = React.useState<number>(1);
-  const isLoading =
+  const [searchUserQuery, setSearchUserQuery] = React.useState<string>('');
+  const [searchUnConfirmedUserQuery, setSearchUnConfirmedUserQuery] = React.useState<string>('');
+  const [searchBannedUserQuery, setSearchBannedUserQuery] = React.useState<string>('');
+  const [hasSearchedUser, setHasSearchedUser] = React.useState<boolean>(false);
+  const [hasSearchedUnConfirmedUser, setHasSearchedUnConfirmedUser] =
+    React.useState<boolean>(false);
+  const [hasSearchedBannedUser, setHasSearchedBannedUser] = React.useState<boolean>(false);
+
+  const debouncedSearchUser: string = useDebounce(searchUserQuery, 500);
+  const debouncedSearchUnConfirmedUser: string = useDebounce(searchUnConfirmedUserQuery, 500);
+  const debouncedSearchBannedUser: string = useDebounce(searchBannedUserQuery, 500);
+
+  const isLoading: boolean | null =
     createUser.isLoading || updateUser.isLoading || cancelUser.isLoading || banUser.isLoading;
   const fetchUsersData = (): void => {
-    dispatch(fetchUsersThunk({ page: currentUserPage, limit: LIMIT_NUMBER }));
+    dispatch(
+      fetchUsersThunk({ page: currentUserPage, limit: LIMIT_NUMBER, query: debouncedSearchUser })
+    );
   };
   const fetchUnconfirmedUsersData = (): void => {
-    dispatch(fetchUnconfirmedUsers({ page: currentUnConfirmedUserPage, limit: LIMIT_NUMBER }));
+    dispatch(
+      fetchUnconfirmedUsers({
+        page: currentUnConfirmedUserPage,
+        limit: LIMIT_NUMBER,
+        query: debouncedSearchUnConfirmedUser,
+      })
+    );
   };
   const fetchBannedUsersData = (): void => {
-    dispatch(fetchBannedUsers({ page: currentBannedUserPage, limit: LIMIT_NUMBER }));
+    dispatch(
+      fetchBannedUsers({
+        page: currentBannedUserPage,
+        limit: LIMIT_NUMBER,
+        query: debouncedSearchBannedUser,
+      })
+    );
   };
   React.useEffect((): void => {
     fetchUsersData();
-  }, [currentUserPage, isLoading]);
+  }, [currentUserPage, debouncedSearchUser, isLoading]);
 
   React.useEffect((): void => {
     fetchUnconfirmedUsersData();
-  }, [currentUnConfirmedUserPage, isLoading]);
+  }, [currentUnConfirmedUserPage, debouncedSearchUnConfirmedUser, isLoading]);
 
   React.useEffect((): void => {
     fetchBannedUsersData();
-  }, [currentBannedUserPage, isLoading]);
+  }, [currentBannedUserPage, debouncedSearchBannedUser, isLoading]);
 
   const handleClick = (): void => {
     navigate('userCreateEdit');
@@ -86,7 +113,7 @@ export const UsersControl = () => {
     }
   };
 
-  const handleRefresh = () => {
+  const handleRefresh = (): void => {
     fetchUsersData();
     fetchUnconfirmedUsersData();
     fetchBannedUsersData();
@@ -99,9 +126,10 @@ export const UsersControl = () => {
             refreshing={(users.isLoading && unconfirmedUsers.isLoading) as boolean}
             onRefresh={handleRefresh}
           />
-        }>
+        }
+        keyboardShouldPersistTaps="handled">
         <View className="m-4">
-          {users.total_items > 0 ? (
+          {users.total_items > 0 || hasSearchedUser ? (
             <UserList
               users={users.items}
               label="Հաճախորդներ"
@@ -110,9 +138,13 @@ export const UsersControl = () => {
               previousButtonDisable={currentUserPage <= 1}
               nextButtonDisable={currentUserPage * LIMIT_NUMBER >= users.total_items}
               totalItems={users.total_items}
+              searchQuery={searchUserQuery}
+              setSearchQuery={setSearchUserQuery}
+              hasSearched={hasSearchedUser}
+              setHasSearched={setHasSearchedUser}
             />
           ) : null}
-          {unconfirmedUsers.total_items > 0 ? (
+          {unconfirmedUsers.total_items > 0 || hasSearchedUnConfirmedUser ? (
             <UserList
               users={unconfirmedUsers.items}
               label="Գրանցման հայտեր"
@@ -123,9 +155,13 @@ export const UsersControl = () => {
                 currentUnConfirmedUserPage * LIMIT_NUMBER >= unconfirmedUsers.total_items
               }
               totalItems={unconfirmedUsers.total_items}
+              searchQuery={searchUnConfirmedUserQuery}
+              setSearchQuery={setSearchUnConfirmedUserQuery}
+              hasSearched={hasSearchedUnConfirmedUser}
+              setHasSearched={setHasSearchedUnConfirmedUser}
             />
           ) : null}
-          {bannedUsers.total_items > 0 ? (
+          {bannedUsers.total_items > 0 || hasSearchedBannedUser ? (
             <UserList
               users={bannedUsers.items}
               label="Ապաակտիվացված հաճախորդներ"
@@ -134,6 +170,10 @@ export const UsersControl = () => {
               previousButtonDisable={currentBannedUserPage <= 1}
               nextButtonDisable={currentBannedUserPage * LIMIT_NUMBER >= bannedUsers.total_items}
               totalItems={bannedUsers.total_items}
+              searchQuery={searchBannedUserQuery}
+              setSearchQuery={setSearchBannedUserQuery}
+              hasSearched={hasSearchedBannedUser}
+              setHasSearched={setHasSearchedBannedUser}
             />
           ) : null}
           <CreateItemButton handleClick={handleClick} createButtonLabel="Ստեղծել հաճախորդ" />

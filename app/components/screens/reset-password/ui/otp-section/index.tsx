@@ -5,7 +5,8 @@ import OTPTextInput from 'react-native-otp-textinput';
 
 import { useAppDispatch, useAppSelector } from '../../../../../hooks/redux';
 import { confirmOtpThunk } from '../../../../../redux/http/userThunk';
-import { ICON_MAIN_COLOR } from '../../../../../utils/constants';
+import { SHOW_ERROR } from '../../../../../toasts';
+import { ICON_MAIN_COLOR, NETWORK_ERROR_MESSAGE } from '../../../../../utils/constants';
 import { resetPasswordOtpFormSchema } from '../../../../../validation';
 import { FieldWithError } from '../../../../wrappers';
 import { TInitialSendOtpFormValue } from '../../types';
@@ -23,7 +24,15 @@ export const OtpSection = () => {
 
   // Form submission handler for confirming OTP with the provided OTP and mail
   const onSubmit = (values: FormikValues): void => {
-    dispatch(confirmOtpThunk({ otp: values.otp, mail: resetPassword.mail }));
+    dispatch(confirmOtpThunk({ otp: values.otp, mail: resetPassword.mail })).catch((err): void => {
+      if (err === 'NetworkError') {
+        SHOW_ERROR(NETWORK_ERROR_MESSAGE);
+      } else if (err === 410) {
+        SHOW_ERROR('Նշված մեկ անգամյա գաղտմաբառը այլևս վավեր չէ, խնդրում ենք պահանջել նորը');
+      } else if (err === 403) {
+        SHOW_ERROR('Սխալ մեկ անգամյա գաղտնաբառ');
+      }
+    });
   };
   return (
     <LayoutResetPassword>

@@ -81,12 +81,12 @@ export const toOrderThunk = createAsyncThunk(
 );
 export const fetchDeliveredOrdersThunk = createAsyncThunk(
   'fetchDelivered/order',
-  async ({ page = 1, limit = 5 }: TFetchOptions, { rejectWithValue }) => {
+  async ({ page = 1, limit = 5, query = '' }: TFetchOptions, { rejectWithValue }) => {
     const skip: number = (page - 1) * limit;
 
     try {
       const { data } = await $authHost.get<TItemsWithTotalLength<TOrder[]>>(
-        `order/history?skip=${skip}&limit=${limit}`
+        `order/history?skip=${skip}&limit=${limit}&name=${query}`
       );
       return data;
     } catch (err) {
@@ -101,12 +101,12 @@ export const fetchDeliveredOrdersThunk = createAsyncThunk(
 );
 export const fetchAllOrdersThunk = createAsyncThunk(
   'fetchAllOrders/order',
-  async ({ page = 1, limit = 5 }: TFetchOptions, { rejectWithValue }) => {
-    const skip = (page - 1) * limit;
+  async ({ page = 1, limit = 5, query = '' }: TFetchOptions, { rejectWithValue }) => {
+    const skip: number = (page - 1) * limit;
 
     try {
       const { data } = await $authHost.get<TItemsWithTotalLength<TOrder[]>>(
-        `order/all?limit=${limit}&skip=${skip}`
+        `order/all?limit=${limit}&skip=${skip}&name=${query}`
       );
       return data;
     } catch (err) {

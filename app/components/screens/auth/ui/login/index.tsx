@@ -5,6 +5,8 @@ import { Keyboard, TextInput, View } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../../../../../hooks/redux';
 import { loginThunk } from '../../../../../redux/http/userThunk';
 import { EAuthMode } from '../../../../../redux/types';
+import { SHOW_ERROR } from '../../../../../toasts';
+import { NETWORK_ERROR_MESSAGE } from '../../../../../utils/constants';
 import { loginFormSchema } from '../../../../../validation';
 import { FieldWithError, LabelInput } from '../../../../wrappers';
 import { initialLoginFormValue } from '../../data';
@@ -22,7 +24,15 @@ export const Login = () => {
   // Define a function for handling form submission
   const onSubmit = async (values: TInitialLoginFormValue) => {
     // Dispatch the loginThunk action with the provided form values
-    await dispatch(loginThunk(values));
+    await dispatch(loginThunk(values))
+      .unwrap()
+      .catch((err): void => {
+        if (err === 'NetworkError') {
+          SHOW_ERROR(NETWORK_ERROR_MESSAGE);
+        } else {
+          SHOW_ERROR('Մուտքանունը կամ գաղտնաբառը սխալ է');
+        }
+      });
   };
 
   return (

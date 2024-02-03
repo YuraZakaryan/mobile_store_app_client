@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-import { SHOW_ERROR, SHOW_SUCCESS } from '../../../toasts';
 import {
   cancelOrderThunk,
   changeOrderStatusThunk,
@@ -139,16 +138,6 @@ const orderSlice = createSlice({
         state.create.isLoading = false;
         if (action.payload === 'NetworkError') {
           state.create.isNetworkError = true;
-        } else if (action.payload === 409) {
-          SHOW_ERROR('Ձեր էջը հաստատված չէ, փորձել մի փոքր ուշ');
-        } else if (action.payload === 410) {
-          SHOW_ERROR('Ձեր հաշիվը արգելափակված է');
-        } else if (action.payload === 502) {
-          SHOW_ERROR('Ոչ բավարար ապրանքի քանակ');
-        } else if (action.payload === 401) {
-          SHOW_ERROR('Կխնդրեինք առաջին հերթին մուտք գործել');
-        } else {
-          SHOW_ERROR('Ապրանքի զամբյուղում ավելացնելու հետ կապված խնդրի է առաջացել');
         }
       })
       .addCase(
@@ -197,14 +186,12 @@ const orderSlice = createSlice({
         } else if (action.payload !== 404) {
           state.deleteItem.isError = true;
         }
-        SHOW_ERROR('Ապրանքի ջնջման հետ կապված խնդիր է առաջացել');
       })
       .addCase(toOrderThunk.fulfilled, (state: TInitialBasketState): void => {
         state.basket = initialState.basket;
         state.toOrder.isLoading = false;
         state.toOrder.isError = false;
         state.toOrder.isNetworkError = false;
-        SHOW_SUCCESS('Պատվերը հաջողությամբ հաստատվեց');
       })
       .addCase(toOrderThunk.pending, (state: TInitialBasketState): void => {
         state.toOrder.isLoading = true;
@@ -215,10 +202,6 @@ const orderSlice = createSlice({
         state.toOrder.isLoading = false;
         if (action.payload === 'NetworkError') {
           state.toOrder.isNetworkError = true;
-        } else if (action.payload === 502) {
-          SHOW_ERROR('Ոչ բավարար ապրանքի քանակ');
-        } else {
-          SHOW_ERROR('Պատվերի հաստատման հետ կապված խնդիր է առաջացել');
         }
       })
       .addCase(
@@ -321,7 +304,6 @@ const orderSlice = createSlice({
         state.changeStatus.isLoading = false;
         state.changeStatus.isError = false;
         state.changeStatus.isNetworkError = false;
-        SHOW_SUCCESS('Պատվերի կարգավիճակը փոխվեց');
       })
       .addCase(changeOrderStatusThunk.pending, (state: TInitialBasketState): void => {
         state.changeStatus.isLoading = true;
@@ -341,7 +323,6 @@ const orderSlice = createSlice({
         state.cancelOrder.isLoading = false;
         state.cancelOrder.isError = false;
         state.cancelOrder.isNetworkError = false;
-        SHOW_SUCCESS('Պատվերը հաջողությամբ չեղարկվեց');
       })
       .addCase(cancelOrderThunk.pending, (state: TInitialBasketState): void => {
         state.cancelOrder.isLoading = true;
@@ -360,7 +341,6 @@ const orderSlice = createSlice({
         state.deliverOrder.isLoading = false;
         state.deliverOrder.isError = false;
         state.deliverOrder.isNetworkError = false;
-        SHOW_SUCCESS('Պատվերը նշվեց որպես առաքված');
       })
       .addCase(deliverOrderThunk.pending, (state: TInitialBasketState): void => {
         state.deliverOrder.isLoading = true;

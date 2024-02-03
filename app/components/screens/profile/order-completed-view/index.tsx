@@ -5,6 +5,7 @@ import { Text, View } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
 import { cancelOrderThunk } from '../../../../redux/http/orderThunk';
 import { EOrderStatus, TOrder } from '../../../../redux/types/order';
+import { SHOW_SUCCESS } from '../../../../toasts';
 import { formatDate, hasTimePassed } from '../../../../utils';
 import { Main, OrdersList } from '../../../wrappers';
 import { TOrderViewRouteParams } from '../order-view/types';
@@ -23,7 +24,9 @@ export const OrderCompletedView = () => {
         _id: item?._id as string,
         navigate,
       })
-    );
+    )
+      .unwrap()
+      .then((res: TOrder) => res && SHOW_SUCCESS('Պատվերը հաջողությամբ չեղարկվեց'));
   }, [item]);
 
   return (

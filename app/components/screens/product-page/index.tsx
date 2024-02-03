@@ -21,6 +21,7 @@ import { fetchProductThunk } from '../../../redux/http/productThunk';
 import { changeForm, setProductId } from '../../../redux/reducers/order/orderSlice';
 import { TProduct } from '../../../redux/types';
 import { TOrderItem } from '../../../redux/types/order';
+import { SHOW_ERROR } from '../../../toasts';
 import { API_URL, ICON_MAIN_COLOR } from '../../../utils/constants';
 import { SaleIcon } from '../../wrappers';
 
@@ -83,8 +84,20 @@ export const ProductPage = () => {
   const handleClick = (): void => {
     dispatch(createOrAddOrderThunk(newItemForm))
       .unwrap()
-      .then((res) => res && setOrderExistsAfterClick(true))
-      .catch((err) => console.log(err));
+      .then((res: TProduct) => res && setOrderExistsAfterClick(true))
+      .catch((err): void => {
+        if (err === 409) {
+          SHOW_ERROR('Ձեր էջը հաստատված չէ, փորձել մի փոքր ուշ');
+        } else if (err === 410) {
+          SHOW_ERROR('Ձեր հաշիվը արգելափակված է');
+        } else if (err === 502) {
+          SHOW_ERROR('Ոչ բավարար ապրանքի քանակ');
+        } else if (err === 401) {
+          SHOW_ERROR('Կխնդրեինք առաջին հերթին մուտք գործել');
+        } else {
+          SHOW_ERROR('Ապրանքի զամբյուղում ավելացնելու հետ կապված խնդրի է առաջացել');
+        }
+      });
   };
 
   const handleRefresh = (): void => {

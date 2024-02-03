@@ -6,7 +6,8 @@ import { Keyboard, TextInput, View } from 'react-native';
 import { TInitialPasswordChangeFormValue } from './types';
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
 import { updatePasswordThunk } from '../../../../redux/http/userThunk';
-import { ICON_MAIN_COLOR } from '../../../../utils/constants';
+import { SHOW_ERROR, SHOW_SUCCESS } from '../../../../toasts';
+import { ICON_MAIN_COLOR, NETWORK_ERROR_MESSAGE } from '../../../../utils/constants';
 import { changePasswordFormSchema } from '../../../../validation';
 import {
   CreateEditForm,
@@ -27,8 +28,17 @@ export const UserPasswordEdit = () => {
     confirmPassword: '',
   };
 
-  const onSubmit = async (values: FormikValues) => {
-    await dispatch(updatePasswordThunk({ id: user?._id as string, formData: values }));
+  const onSubmit = async (values: FormikValues): Promise<void> => {
+    await dispatch(updatePasswordThunk({ id: user?._id as string, formData: values }))
+      .unwrap()
+      .then((res: string) => res && SHOW_SUCCESS('Գաղտնաբառը հաջողությամբ փոխվեց'))
+      .catch((err): void => {
+        if (err === 'NetworkError') {
+          SHOW_ERROR(NETWORK_ERROR_MESSAGE);
+        } else if (err === 400) {
+          SHOW_ERROR('Հին գաղտնաբառը սխալ է');
+        }
+      });
   };
 
   return (

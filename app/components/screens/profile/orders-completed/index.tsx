@@ -2,6 +2,7 @@ import React from 'react';
 import { RefreshControl, ScrollView, Text, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
+import { useDebounce } from '../../../../hooks/useDebounce';
 import { fetchDeliveredOrdersThunk } from '../../../../redux/http/orderThunk';
 import { EOrderStatus, TOrder } from '../../../../redux/types/order';
 import { formatDate } from '../../../../utils';
@@ -13,20 +14,25 @@ export const OrdersCompleted = () => {
   const dispatch = useAppDispatch();
   const { ordersHistory, cancelOrder } = useAppSelector((state) => state.order);
   const [currentStatusOrderPage, setStatusOrderCurrentPage] = React.useState<number>(1);
-  const isLoading = cancelOrder.isLoading;
+  const [searchQuery, setSearchQuery] = React.useState<string>('');
+  const [hasSearched, setHasSearched] = React.useState<boolean>(false);
+  const isLoading: boolean | null = cancelOrder.isLoading;
+
+  const debouncedSearch: string = useDebounce(searchQuery, 500);
 
   const fetchData = (): void => {
     dispatch(
       fetchDeliveredOrdersThunk({
         page: currentStatusOrderPage,
         limit: LIMIT_NUMBER,
+        query: debouncedSearch,
       })
     );
   };
 
   React.useEffect((): void => {
     fetchData();
-  }, [currentStatusOrderPage, isLoading]);
+  }, [currentStatusOrderPage, debouncedSearch, isLoading]);
 
   const handlePrevUserPage = (): void => {
     if (currentStatusOrderPage > 1) {
@@ -45,20 +51,17 @@ export const OrdersCompleted = () => {
     fetchData();
   };
 
-  return ordersHistory.isLoading ? (
-    <Loading />
-  ) : (
+  return (
     <Main>
-      {!Array.isArray(ordersHistory.items) || ordersHistory.items.length === 0 ? (
-        <EmptyOrder text="Պատվերների պատմությունը առկա չէ" />
-      ) : (
+      {ordersHistory.items.length > 0 || hasSearched ? (
         <ScrollView
           refreshControl={
             <RefreshControl
               refreshing={ordersHistory.isLoading as boolean}
               onRefresh={handleRefresh}
             />
-          }>
+          }
+          keyboardShouldPersistTaps="handled">
           <View className="m-4">
             <CrudList
               data={ordersHistory.items}
@@ -69,6 +72,11 @@ export const OrdersCompleted = () => {
               handleNextPage={handleNextUserPage}
               totalItems={ordersHistory.total_items}
               fieldButtonType="view"
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              hasSearched={hasSearched}
+              setHasSearched={setHasSearched}
+              searchFieldPlaceholder="Փնտրել հաճախորդի անունով"
               renderItemComponent={(index: number, item: TOrder) => (
                 <>
                   <View className="flex-row items-center gap-2">
@@ -97,6 +105,8 @@ export const OrdersCompleted = () => {
             />
           </View>
         </ScrollView>
+      ) : (
+        <EmptyOrder text="Պատվերների պատմությունը առկա չէ" />
       )}
     </Main>
   );

@@ -1,10 +1,9 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-import { SHOW_ERROR, SHOW_SUCCESS } from '../../../toasts';
-import { NETWORK_ERROR_MESSAGE } from '../../../utils/constants';
 import {
   createProductThunk,
   deleteProductThunk,
+  fetchControlProductsThunk,
   fetchDiscountedProductsForHomeCategoryThunk,
   fetchDiscountedProductsThunk,
   fetchProductsByCategoryThunk,
@@ -25,6 +24,13 @@ const initialState: TInitialProductState = {
     isNetworkError: true,
   },
   products: {
+    isLoading: false,
+    isError: false,
+    isNetworkError: true,
+    total_items: 0,
+    items: [],
+  },
+  productsControl: {
     isLoading: false,
     isError: false,
     isNetworkError: true,
@@ -117,16 +123,37 @@ export const productSlice = createSlice({
         state.products.isError = false;
         state.products.isNetworkError = false;
       })
-      .addCase(fetchProductsThunk.rejected, (state: TInitialProductState, action): void => {
+      .addCase(fetchProductsThunk.rejected, (state: TInitialProductState): void => {
         state.products.total_items = 0;
         state.products.items = [];
         state.products.isLoading = false;
-        state.products.showErrorTest = action.payload as string;
-        // if (action.payload === 'NetworkError') {
-        //   state.products.isNetworkError = true;
-        // } else if (action.payload !== 404) {
-        //   state.products.isError = true;
-        // }
+      })
+      .addCase(
+        fetchControlProductsThunk.fulfilled,
+        (
+          state: TInitialProductState,
+          action: PayloadAction<TItemsWithTotalLength<TProduct[]>>
+        ): void => {
+          const { total_items, items } = action.payload;
+
+          state.productsControl = {
+            total_items,
+            items,
+            isError: false,
+            isNetworkError: false,
+            isLoading: false,
+          };
+        }
+      )
+      .addCase(fetchControlProductsThunk.pending, (state: TInitialProductState): void => {
+        state.productsControl.isLoading = true;
+        state.productsControl.isError = false;
+        state.productsControl.isNetworkError = false;
+      })
+      .addCase(fetchControlProductsThunk.rejected, (state: TInitialProductState): void => {
+        state.productsControl.total_items = 0;
+        state.productsControl.items = [];
+        state.productsControl.isLoading = false;
       })
       .addCase(fetchProductThunk.fulfilled, (state: TInitialProductState, action): void => {
         state.currentProduct = {
@@ -326,20 +353,12 @@ export const productSlice = createSlice({
       )
       .addCase(createProductThunk.fulfilled, (state: TInitialProductState): void => {
         state.create.isLoading = false;
-        SHOW_SUCCESS('Ապրանքը հաջողությամբ ստեղծվեց');
       })
       .addCase(createProductThunk.pending, (state: TInitialProductState): void => {
         state.create.isLoading = true;
       })
-      .addCase(createProductThunk.rejected, (state: TInitialProductState, action): void => {
+      .addCase(createProductThunk.rejected, (state: TInitialProductState): void => {
         state.create.isLoading = false;
-        if (action.payload === 'NetworkError') {
-          SHOW_ERROR(NETWORK_ERROR_MESSAGE);
-        } else if (action.payload === 403) {
-          SHOW_ERROR('Դուք չունեք բավարար իրավունքներ');
-        } else {
-          SHOW_ERROR('Ապրանքի ստեղծման հետ կապված խնդիր է առաջացել');
-        }
       })
       .addCase(updateProductThunk.fulfilled, (state: TInitialProductState): void => {
         state.update.isLoading = false;
@@ -347,15 +366,8 @@ export const productSlice = createSlice({
       .addCase(updateProductThunk.pending, (state: TInitialProductState): void => {
         state.update.isLoading = true;
       })
-      .addCase(updateProductThunk.rejected, (state: TInitialProductState, action): void => {
+      .addCase(updateProductThunk.rejected, (state: TInitialProductState): void => {
         state.update.isLoading = false;
-        if (action.payload === 'NetworkError') {
-          SHOW_ERROR(NETWORK_ERROR_MESSAGE);
-        } else if (action.payload === 403) {
-          SHOW_ERROR('Դուք չունեք բավարար իրավունքներ');
-        } else {
-          SHOW_ERROR('Ապրանքի փոփոխման հետ կապված խնդիր է առաջացել');
-        }
       })
       .addCase(deleteProductThunk.fulfilled, (state: TInitialProductState): void => {
         state.delete.isLoading = false;
@@ -363,15 +375,8 @@ export const productSlice = createSlice({
       .addCase(deleteProductThunk.pending, (state: TInitialProductState): void => {
         state.delete.isLoading = true;
       })
-      .addCase(deleteProductThunk.rejected, (state: TInitialProductState, action): void => {
+      .addCase(deleteProductThunk.rejected, (state: TInitialProductState): void => {
         state.delete.isLoading = false;
-        if (action.payload === 'NetworkError') {
-          SHOW_ERROR(NETWORK_ERROR_MESSAGE);
-        } else if (action.payload === 403) {
-          SHOW_ERROR('Դուք չունեք բավարար իրավունքներ');
-        } else {
-          SHOW_ERROR('Ապրանքի ջնջման հետ կապված խնդիր է առաջացել');
-        }
       });
   },
 });

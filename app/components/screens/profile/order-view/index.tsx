@@ -7,6 +7,7 @@ import { ButtonStatusViewOrder } from './wrappers';
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
 import { changeOrderStatusThunk, deliverOrderThunk } from '../../../../redux/http/orderThunk';
 import { EOrderStatus, TOrder, TOrderItem } from '../../../../redux/types/order';
+import { SHOW_SUCCESS } from '../../../../toasts';
 import { Main, OrdersList } from '../../../wrappers';
 
 export const OrderView = () => {
@@ -26,7 +27,9 @@ export const OrderView = () => {
           navigateTo: 'orders-control',
           items: item?.items as TOrderItem[],
         })
-      );
+      )
+        .unwrap()
+        .then((res: TOrder) => res && SHOW_SUCCESS('Պատվերի կարգավիճակը փոխվեց'));
     },
     [item]
   );
@@ -38,7 +41,9 @@ export const OrderView = () => {
         navigate,
         items: item?.items as TOrderItem[],
       })
-    );
+    )
+      .unwrap()
+      .then((res: TOrder) => res && SHOW_SUCCESS('Պատվերը նշվեց որպես առաքված'));
   };
 
   return (

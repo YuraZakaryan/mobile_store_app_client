@@ -6,6 +6,8 @@ import MaskInput from 'react-native-mask-input';
 import { useAppDispatch, useAppSelector } from '../../../../../hooks/redux';
 import { registrationThunk } from '../../../../../redux/http/userThunk';
 import { EAuthMode } from '../../../../../redux/types';
+import { SHOW_ERROR } from '../../../../../toasts';
+import { NETWORK_ERROR_MESSAGE } from '../../../../../utils/constants';
 import { registrationFormSchema } from '../../../../../validation';
 import { FieldWithError, LabelInput } from '../../../../wrappers';
 import { initialRegistrationFormValue } from '../../data';
@@ -22,7 +24,15 @@ export const Registration = () => {
   // Define a function for handling form submission
   const onSubmit = async (values: TInitialRegistrationFormValue): Promise<void> => {
     // Dispatch the registrationThunk action with the provided form values
-    await dispatch(registrationThunk(values));
+    await dispatch(registrationThunk(values))
+      .unwrap()
+      .catch((err): void => {
+        if (err === 'NetworkError') {
+          SHOW_ERROR(NETWORK_ERROR_MESSAGE);
+        } else {
+          SHOW_ERROR('Մուտքանունը զբաղված է, խնդրում ենք փորձել մեկ ուրիշ');
+        }
+      });
   };
   return (
     <LayoutAuth title="Գրանցվել" buttonTitle="Մուտք գործել" switchTo={EAuthMode.LOGIN}>

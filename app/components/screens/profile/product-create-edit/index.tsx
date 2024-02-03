@@ -13,8 +13,8 @@ import {
   updateProductThunk,
 } from '../../../../redux/http/productThunk';
 import { TCategory } from '../../../../redux/types';
-import { SHOW_SUCCESS } from '../../../../toasts';
-import { API_URL, ICON_MAIN_COLOR } from '../../../../utils/constants';
+import { SHOW_ERROR, SHOW_SUCCESS } from '../../../../toasts';
+import { API_URL, ICON_MAIN_COLOR, NETWORK_ERROR_MESSAGE } from '../../../../utils/constants';
 import { pickImageSetFormik } from '../../../../utils/image';
 import { createAndEditProductFormSchema } from '../../../../validation';
 import {
@@ -62,11 +62,14 @@ export const ProductCreateEdit = () => {
     category: item?.category || categoryData[0].value,
     author: user?._id as string,
   };
-  const clearPicture = (setFieldValue: FormikValues['setFieldValue']) => {
+  const clearPicture = (setFieldValue: FormikValues['setFieldValue']): void => {
     setFieldValue('picture', null);
   };
 
-  const handleSelectChange = (value: string, setFieldValue: FormikValues['setFieldValue']) => {
+  const handleSelectChange = (
+    value: string,
+    setFieldValue: FormikValues['setFieldValue']
+  ): void => {
     setFieldValue('category', value);
   };
 
@@ -88,24 +91,42 @@ export const ProductCreateEdit = () => {
       await dispatch(updateProductThunk({ id: item?._id as string, formData }))
         .unwrap()
         .then((res) => res && SHOW_SUCCESS('Ապրանքը հաջողությամբ փոփոխվեց'))
-        .catch((err) => {
-          console.log(err);
+        .catch((err): void => {
+          if (err === 'NetworkError') {
+            SHOW_ERROR(NETWORK_ERROR_MESSAGE);
+          } else if (err === 403) {
+            SHOW_ERROR('Դուք չունեք բավարար իրավունքներ');
+          } else {
+            SHOW_ERROR('Ապրանքի փոփոխման հետ կապված խնդիր է առաջացել');
+          }
         });
     } else {
       await dispatch(createProductThunk({ formData, navigate }))
         .unwrap()
         .then((res) => res && SHOW_SUCCESS('Ապրանքը հաջողությամբ ստեղծվեց'))
-        .catch((err) => {
-          console.log(err);
+        .catch((err): void => {
+          if (err === 'NetworkError') {
+            SHOW_ERROR(NETWORK_ERROR_MESSAGE);
+          } else if (err === 403) {
+            SHOW_ERROR('Դուք չունեք բավարար իրավունքներ');
+          } else {
+            SHOW_ERROR('Ապրանքի ստեղծման հետ կապված խնդիր է առաջացել');
+          }
         });
     }
   };
-  const handleDelete = async () => {
+  const handleDelete = async (): Promise<void> => {
     await dispatch(deleteProductThunk({ _id: item?._id as string, navigate }))
       .unwrap()
-      .then((res) => res && SHOW_SUCCESS('Ապրանքը հաջողությամբ ջնջվեց'))
-      .catch((err) => {
-        console.log(err);
+      .then((res: string) => res && SHOW_SUCCESS('Ապրանքը հաջողությամբ ջնջվեց'))
+      .catch((err): void => {
+        if (err === 'NetworkError') {
+          SHOW_ERROR(NETWORK_ERROR_MESSAGE);
+        } else if (err === 403) {
+          SHOW_ERROR('Դուք չունեք բավարար իրավունքներ');
+        } else {
+          SHOW_ERROR('Ապրանքի ջնջման հետ կապված խնդիր է առաջացել');
+        }
       });
   };
 

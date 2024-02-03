@@ -3,8 +3,9 @@ import React from 'react';
 import { Image, RefreshControl, ScrollView, Text, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
+import { useDebounce } from '../../../../hooks/useDebounce';
 import { fetchCategoriesThunk } from '../../../../redux/http/categoryThunk';
-import { fetchProductsThunk } from '../../../../redux/http/productThunk';
+import { fetchControlProductsThunk } from '../../../../redux/http/productThunk';
 import { TProduct } from '../../../../redux/types';
 import { SHOW_ERROR } from '../../../../toasts';
 import { API_URL, LIMIT_NUMBER } from '../../../../utils/constants';
@@ -12,32 +13,45 @@ import { CreateItemButton, CrudList, Main } from '../../../wrappers';
 
 export const ProductsControl = () => {
   const dispatch = useAppDispatch();
-  const { create, update, delete: deleteProduct } = useAppSelector((state) => state.product);
+  const {
+    productsControl: products,
+    create,
+    update,
+    delete: deleteProduct,
+  } = useAppSelector((state) => state.product);
   const { categories } = useAppSelector((state) => state.category);
+  const { navigate } = useNavigation<NavigationProp<ParamListBase>>();
+  const [hasSearched, setHasSearched] = React.useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = React.useState<string>('');
   const [currentProductPage, setProductCurrentPage] = React.useState<number>(1);
   const isLoading = create.isLoading || update.isLoading || deleteProduct.isLoading;
 
+  const debouncedSearch: string = useDebounce(searchQuery, 500);
+
   const fetchData = (): void => {
-    dispatch(fetchProductsThunk({ page: currentProductPage, limit: LIMIT_NUMBER }));
+    dispatch(
+      fetchControlProductsThunk({
+        page: currentProductPage,
+        limit: LIMIT_NUMBER,
+        query: debouncedSearch,
+      })
+    );
     dispatch(fetchCategoriesThunk({}));
   };
 
   React.useEffect((): void => {
     fetchData();
-  }, [currentProductPage, isLoading]);
+  }, [currentProductPage, debouncedSearch, isLoading]);
 
-  const { products } = useAppSelector((state) => state.product);
-  const { navigate } = useNavigation<NavigationProp<ParamListBase>>();
-
-  const handlePrevUserPage = (): void => {
+  const handlePrevProductPage = (): void => {
     if (currentProductPage > 1) {
       setProductCurrentPage((prevPage: number) => prevPage - 1);
     }
   };
 
-  const handleNextUserPage = (): void => {
-    const totalUnconfirmedUsers: number = products.total_items;
-    if (currentProductPage * LIMIT_NUMBER < totalUnconfirmedUsers) {
+  const handleNextProductPage = (): void => {
+    const totalProducts: number = products.total_items;
+    if (currentProductPage * LIMIT_NUMBER < totalProducts) {
       setProductCurrentPage((prevPage: number) => prevPage + 1);
     }
   };
@@ -59,18 +73,23 @@ export const ProductsControl = () => {
       <ScrollView
         refreshControl={
           <RefreshControl refreshing={products.isLoading as boolean} onRefresh={handleRefresh} />
-        }>
+        }
+        keyboardShouldPersistTaps="handled">
         <View className="m-4">
-          {products.total_items > 0 ? (
+          {products.total_items > 0 || hasSearched ? (
             <CrudList
               labelList="Ապրանքներ"
               data={products.items}
               navigateTo="productCreateEdit"
               previousButtonDisable={currentProductPage <= 1}
               nextButtonDisable={currentProductPage * LIMIT_NUMBER >= products.total_items}
-              handlePreviousPage={handlePrevUserPage}
-              handleNextPage={handleNextUserPage}
+              handlePreviousPage={handlePrevProductPage}
+              handleNextPage={handleNextProductPage}
               totalItems={products.total_items}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              hasSearched={hasSearched}
+              setHasSearched={setHasSearched}
               renderItemComponent={(index: number, item: TProduct) => (
                 <>
                   <View className="flex-row items-center gap-2">

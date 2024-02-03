@@ -2,6 +2,7 @@ import React from 'react';
 import { RefreshControl, ScrollView, Text, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
+import { useDebounce } from '../../../../hooks/useDebounce';
 import { fetchAllOrdersThunk } from '../../../../redux/http/orderThunk';
 import { TOrder } from '../../../../redux/types/order';
 import { LIMIT_NUMBER } from '../../../../utils/constants';
@@ -12,14 +13,21 @@ export const OrdersControl = () => {
   const dispatch = useAppDispatch();
   const { orders, deliverOrder, changeStatus } = useAppSelector((state) => state.order);
   const [currentOrderPage, setOrderCurrentPage] = React.useState<number>(1);
+  const [searchQuery, setSearchQuery] = React.useState<string>('');
+  const [hasSearched, setHasSearched] = React.useState<boolean>(false);
   const isLoading = deliverOrder.isLoading || changeStatus.isLoading;
-  const fetchData = () => {
-    dispatch(fetchAllOrdersThunk({ page: currentOrderPage, limit: LIMIT_NUMBER }));
+
+  const debouncedSearch: string = useDebounce(searchQuery, 500);
+
+  const fetchData = (): void => {
+    dispatch(
+      fetchAllOrdersThunk({ page: currentOrderPage, limit: LIMIT_NUMBER, query: debouncedSearch })
+    );
   };
 
   React.useEffect(() => {
     fetchData();
-  }, [currentOrderPage, isLoading]);
+  }, [currentOrderPage, debouncedSearch, isLoading]);
 
   const handlePrevUserPage = (): void => {
     if (currentOrderPage > 1) {
@@ -33,21 +41,18 @@ export const OrdersControl = () => {
     }
   };
 
-  const handleRefresh = () => {
+  const handleRefresh = (): void => {
     fetchData();
   };
 
-  return orders.isLoading ? (
-    <Loading />
-  ) : (
+  return (
     <Main>
-      {!Array.isArray(orders.items) || orders.items.length === 0 ? (
-        <EmptyOrder text="Պատվերներ դեռ չկան" />
-      ) : (
+      {orders.items.length > 0 || hasSearched ? (
         <ScrollView
           refreshControl={
             <RefreshControl refreshing={orders.isLoading as boolean} onRefresh={handleRefresh} />
-          }>
+          }
+          keyboardShouldPersistTaps="handled">
           <View className="m-4">
             <View />
             <CrudList
@@ -59,6 +64,11 @@ export const OrdersControl = () => {
               handleNextPage={handleNextUserPage}
               totalItems={orders.total_items}
               fieldButtonType="view"
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              hasSearched={hasSearched}
+              setHasSearched={setHasSearched}
+              searchFieldPlaceholder="Փնտրել հաճախորդի անունով"
               renderItemComponent={(index: number, item: TOrder) => (
                 <>
                   <View className="flex-row items-center gap-2">
@@ -73,6 +83,8 @@ export const OrdersControl = () => {
             />
           </View>
         </ScrollView>
+      ) : (
+        <EmptyOrder text="Պատվերների պատմությունը առկա չէ" />
       )}
     </Main>
   );

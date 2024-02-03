@@ -36,11 +36,35 @@ export const Home = () => {
 
   // Retrieve user information and various order-related states from the Redux store
   const { user } = useAppSelector((state) => state.user);
-  const { deleteItem, create, changeStatus, toOrder } = useAppSelector((state) => state.order);
+  const {
+    deleteItem,
+    changeStatus,
+    toOrder,
+    create: createOrder,
+  } = useAppSelector((state) => state.order);
+  // Retrieve product data from the Redux store
+  const {
+    products,
+    discountedProducts,
+    create: createProduct,
+    update: updateProduct,
+    delete: deleteProduct,
+  } = useAppSelector((state) => state.product);
+
+  const loadingStates: (boolean | null)[] = [
+    createOrder.isLoading,
+    deleteItem.isLoading,
+    changeStatus.isLoading,
+    toOrder.isLoading,
+    createProduct.isLoading,
+    updateProduct.isLoading,
+    deleteProduct.isLoading,
+  ];
 
   // Determine overall loading status for multiple actions
-  const isLoading =
-    create.isLoading || deleteItem.isLoading || changeStatus.isLoading || toOrder.isLoading;
+  const isLoading: boolean | null = loadingStates.some(
+    (loadingState: boolean | null) => loadingState
+  );
 
   const fetchData = (): void => {
     dispatch(fetchProductsThunk({ limit: LIMIT_NUMBER }));
@@ -57,10 +81,7 @@ export const Home = () => {
 
   React.useEffect((): void => {
     fetchDataInProgress();
-  }, [create.isLoading]);
-
-  // Retrieve product data from the Redux store
-  const { products, discountedProducts } = useAppSelector((state) => state.product);
+  }, [createOrder.isLoading]);
 
   const handleRefresh = (): void => {
     fetchData();

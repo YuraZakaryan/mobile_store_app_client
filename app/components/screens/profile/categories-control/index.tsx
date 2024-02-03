@@ -3,7 +3,8 @@ import React from 'react';
 import { Image, RefreshControl, ScrollView, Text, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
-import { fetchCategoriesThunk } from '../../../../redux/http/categoryThunk';
+import { useDebounce } from '../../../../hooks/useDebounce';
+import { fetchControlCategoriesThunk } from '../../../../redux/http/categoryThunk';
 import { TCategory } from '../../../../redux/types';
 import { API_URL, LIMIT_NUMBER } from '../../../../utils/constants';
 import { CreateItemButton, CrudList, Main } from '../../../wrappers';
@@ -11,20 +12,28 @@ import { CreateItemButton, CrudList, Main } from '../../../wrappers';
 export const CategoriesControl = () => {
   const dispatch = useAppDispatch();
   const { create, update, delete: deleteCategory } = useAppSelector((state) => state.category);
+  const { categoriesControl: categories } = useAppSelector((state) => state.category);
+  const { navigate } = useNavigation<NavigationProp<ParamListBase>>();
   const [currentCategoryPage, setCategoryCurrentPage] = React.useState<number>(1);
-
+  const [searchQuery, setSearchQuery] = React.useState<string>('');
+  const [hasSearched, setHasSearched] = React.useState<boolean>(false);
   const isLoading = create.isLoading || update.isLoading || deleteCategory.isLoading;
 
+  const debouncedSearch: string = useDebounce(searchQuery, 500);
+
   const fetchData = (): void => {
-    dispatch(fetchCategoriesThunk({ page: currentCategoryPage, limit: LIMIT_NUMBER }));
+    dispatch(
+      fetchControlCategoriesThunk({
+        page: currentCategoryPage,
+        limit: LIMIT_NUMBER,
+        query: debouncedSearch,
+      })
+    );
   };
 
   React.useEffect((): void => {
     fetchData();
-  }, [currentCategoryPage, isLoading]);
-
-  const { categories } = useAppSelector((state) => state.category);
-  const { navigate } = useNavigation<NavigationProp<ParamListBase>>();
+  }, [currentCategoryPage, debouncedSearch, isLoading]);
 
   const handleClick = (): void => {
     navigate('categoryCreateEdit');
@@ -52,9 +61,10 @@ export const CategoriesControl = () => {
       <ScrollView
         refreshControl={
           <RefreshControl refreshing={categories.isLoading as boolean} onRefresh={handleRefresh} />
-        }>
+        }
+        keyboardShouldPersistTaps="handled">
         <View className="m-4">
-          {categories.total_items > 0 ? (
+          {categories.total_items > 0 || hasSearched ? (
             <CrudList
               labelList="Կատեգորիաներ"
               data={categories.items}
@@ -64,6 +74,10 @@ export const CategoriesControl = () => {
               handlePreviousPage={handlePrevUserPage}
               handleNextPage={handleNextUserPage}
               totalItems={categories.total_items}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              hasSearched={hasSearched}
+              setHasSearched={setHasSearched}
               renderItemComponent={(index: number, item: TCategory) => (
                 <>
                   <View className="flex-row items-center gap-2">

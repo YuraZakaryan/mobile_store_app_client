@@ -23,6 +23,11 @@ export interface ICrudListProps<T> {
   previousButtonDisable: boolean;
   nextButtonDisable: boolean;
   totalItems: number;
+  searchQuery: string;
+  hasSearched: boolean;
+  setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
+  setHasSearched: React.Dispatch<React.SetStateAction<boolean>>;
+  searchFieldPlaceholder?: string;
 }
 export interface ICreateEditForm<T extends FormikValues> {
   initialCreateEditFormValue: T;

@@ -14,9 +14,10 @@ import {
   toggleBanThunk,
   updateUserThunk,
 } from '../../../../redux/http/userThunk';
-import { SHOW_SUCCESS } from '../../../../toasts';
+import { TPayloadActionUser, TUser } from '../../../../redux/types';
+import { SHOW_ERROR, SHOW_SUCCESS } from '../../../../toasts';
 import { selectRoles } from '../../../../utils';
-import { ICON_MAIN_COLOR } from '../../../../utils/constants';
+import { ICON_MAIN_COLOR, NETWORK_ERROR_MESSAGE } from '../../../../utils/constants';
 import { registrationFormSchema, updateUserFormSchema } from '../../../../validation';
 import {
   CreateEditForm,
@@ -65,20 +66,28 @@ export const UserCreateEdit = () => {
     if (item) {
       await dispatch(updateUserThunk({ id: item?._id as string, formData: values, navigate }))
         .unwrap()
-        .then((res) =>
+        .then((res: TUser): void =>
           res && user?._id === res._id
             ? SHOW_SUCCESS('Փոփոխությունները տեսնելու համար նորից մուտք գործեք ծրագիր')
             : SHOW_SUCCESS('Հաճախորդը հաջողությամբ փոփոխվեց')
         )
-        .catch((err) => {
-          console.log(err);
+        .catch((err): void => {
+          if (err === 'NetworkError') {
+            SHOW_ERROR(NETWORK_ERROR_MESSAGE);
+          } else {
+            SHOW_ERROR('Բաժանորդի տվյալների փոփոխման հետ  կապված խնդիր է առաջացել');
+          }
         });
     } else {
       await dispatch(createUserThunk({ formData: values, navigate }))
         .unwrap()
-        .then((res) => res && SHOW_SUCCESS('Հաճախորդը հաջողությամբ ստեղծվեց'))
-        .catch((err) => {
-          console.log(err);
+        .then((res: TPayloadActionUser) => res && SHOW_SUCCESS('Հաճախորդը հաջողությամբ ստեղծվեց'))
+        .catch((err): void => {
+          if (err === 'NetworkError') {
+            SHOW_ERROR(NETWORK_ERROR_MESSAGE);
+          } else {
+            SHOW_ERROR('Բաժանորդի ստեղծման հետ կապված խնդիր է առաջացել');
+          }
         });
     }
   };
@@ -97,17 +106,25 @@ export const UserCreateEdit = () => {
             }`
           )
       )
-      .catch((err) => {
-        console.log(err);
+      .catch((err): void => {
+        if (err === 'NetworkError') {
+          SHOW_ERROR(NETWORK_ERROR_MESSAGE);
+        } else {
+          SHOW_ERROR('Բաժանորդի ակտիվացման կամ ապաակտիվացման հետ կապված խնդիր է առաջացել');
+        }
       });
   };
 
   const handleCancel = async (): Promise<void> => {
     await dispatch(cancelUserThunk({ _id: item?._id as string, navigate }))
       .unwrap()
-      .then((res) => res && SHOW_SUCCESS('Հաճախորդը հաջողությամբ չեղարկվեց'))
-      .catch((err) => {
-        console.log(err);
+      .then((res: string) => res && SHOW_SUCCESS('Հաճախորդը հաջողությամբ չեղարկվեց'))
+      .catch((err): void => {
+        if (err === 'NetworkError') {
+          SHOW_ERROR(NETWORK_ERROR_MESSAGE);
+        } else {
+          SHOW_ERROR('Բաժանորդի չեղարկման հետ կապված խնդիր է առաջացել');
+        }
       });
   };
 

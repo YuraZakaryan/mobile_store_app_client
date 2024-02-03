@@ -19,6 +19,7 @@ export type TChosen = {
 
 export type TInitialCategoryState = {
   categories: TItemsWithTotalLength<TCategory[]>;
+  categoriesControl: TItemsWithTotalLength<TCategory[]>;
   create: TStateStatus;
   update: TStateStatus;
   delete: TStateStatus;

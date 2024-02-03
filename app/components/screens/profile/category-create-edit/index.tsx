@@ -11,8 +11,9 @@ import {
   deleteCategoryThunk,
   updateCategoryThunk,
 } from '../../../../redux/http/categoryThunk';
-import { SHOW_SUCCESS } from '../../../../toasts';
-import { API_URL, ICON_MAIN_COLOR } from '../../../../utils/constants';
+import { TCategory } from '../../../../redux/types';
+import { SHOW_ERROR, SHOW_SUCCESS } from '../../../../toasts';
+import { API_URL, ICON_MAIN_COLOR, NETWORK_ERROR_MESSAGE } from '../../../../utils/constants';
 import { pickImageSetFormik } from '../../../../utils/image';
 import { createAndEditCategoryFormSchema } from '../../../../validation';
 import {
@@ -48,7 +49,7 @@ export const CategoryCreateEdit = () => {
     author: user?._id as string,
   };
 
-  const clearPicture = (setFieldValue: FormikValues['setFieldValue']) => {
+  const clearPicture = (setFieldValue: FormikValues['setFieldValue']): void => {
     setFieldValue('picture', null);
   };
 
@@ -66,24 +67,42 @@ export const CategoryCreateEdit = () => {
         .unwrap()
         .then((res) => res && SHOW_SUCCESS('Կատեգորիան հաջողությամբ փոփոխվեց'))
         .catch((err) => {
-          console.log(err);
+          if (err === 'NetworkError') {
+            SHOW_ERROR(NETWORK_ERROR_MESSAGE);
+          } else if (err === 403) {
+            SHOW_ERROR('Դուք չունեք բավարար իրավունքներ');
+          } else {
+            SHOW_ERROR('Կատեգորիայի փոփոխման հետ կապված խնդիր է առաջացել');
+          }
         });
     } else {
       await dispatch(createCategoryThunk({ formData, navigate }))
         .unwrap()
-        .then((res) => res && SHOW_SUCCESS('Կատեգորիան հաջողությամբ ստեղծվեց'))
-        .catch((err) => {
-          console.log(err);
+        .then((res: TCategory) => res && SHOW_SUCCESS('Կատեգորիան հաջողությամբ ստեղծվեց'))
+        .catch((err): void => {
+          if (err === 403) {
+            SHOW_ERROR('Դուք չունեք բավարար իրավունքներ');
+          } else {
+            SHOW_ERROR('Կատեգորիայի ստեղծման հետ կապված խնդիր է առաջացել');
+          }
         });
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = async (): Promise<void> => {
     await dispatch(deleteCategoryThunk({ _id: item?._id as string, navigate }))
       .unwrap()
-      .then((res) => res && SHOW_SUCCESS('Կատեգորիան հաջողությամբ ջնջվեց'))
-      .catch((err) => {
-        console.log(err);
+      .then((res: string) => res && SHOW_SUCCESS('Կատեգորիան հաջողությամբ ջնջվեց'))
+      .catch((err): void => {
+        if (err === 'NetworkError') {
+          SHOW_ERROR(NETWORK_ERROR_MESSAGE);
+        } else if (err === 409) {
+          SHOW_ERROR('Հայտնաբերվել են ապրանքներ տվյալ կատեգորիայով');
+        } else if (err === 403) {
+          SHOW_ERROR('Դուք չունեք բավարար իրավունքներ');
+        } else {
+          SHOW_ERROR('Կատեգորիայի ջնջման հետ կապված խնդիր է առաջացել');
+        }
       });
   };
 

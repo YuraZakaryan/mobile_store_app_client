@@ -4,6 +4,8 @@ import { Keyboard, Text, TextInput, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../../../hooks/redux';
 import { sendOtpToMailThunk } from '../../../../../redux/http/userThunk';
+import { SHOW_ERROR } from '../../../../../toasts';
+import { NETWORK_ERROR_MESSAGE } from '../../../../../utils/constants';
 import { resetPasswordMailFormSchema } from '../../../../../validation';
 import { FieldWithError } from '../../../../wrappers';
 import { TInitialSendMailFormValue } from '../../types';
@@ -22,7 +24,13 @@ export const MailSection = () => {
 
   // Form submission handler for sending OTP to the provided mail
   const onSubmit = (values: FormikValues): void => {
-    dispatch(sendOtpToMailThunk(values.mail));
+    dispatch(sendOtpToMailThunk(values.mail)).catch((err): void => {
+      if (err === 'NetworkError') {
+        SHOW_ERROR(NETWORK_ERROR_MESSAGE);
+      } else {
+        SHOW_ERROR('Նշված էլեկտրոնային փոստով բաժանորդ չի գտնվել');
+      }
+    });
   };
 
   return (

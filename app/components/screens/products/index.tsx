@@ -14,16 +14,51 @@ import { PaginationButtons, ProductItem } from '../../wrappers';
 export const Products = () => {
   // Redux state selectors
   const { chosen } = useAppSelector((state) => state.category);
-  const { categories } = useAppSelector((state) => state.category);
-  const { deleteItem, create, changeStatus, toOrder } = useAppSelector((state) => state.order);
-  const { productsByCategory } = useAppSelector((state) => state.product);
+  const {
+    categories,
+    create: createCategory,
+    update: updateCategory,
+    delete: deleteCategory,
+  } = useAppSelector((state) => state.category);
+  const {
+    deleteItem,
+    create: createOrder,
+    changeStatus,
+    toOrder,
+  } = useAppSelector((state) => state.order);
+  const {
+    productsByCategory,
+    create: createProduct,
+    update: updateProduct,
+    delete: deleteProduct,
+  } = useAppSelector((state) => state.product);
 
   // State to track the current page for fetching products by category
   const [currentProductPage, setProductCurrentPage] = React.useState<number>(1);
 
   // Loading status based on multiple order-related actions
-  const isLoading =
-    create.isLoading || deleteItem.isLoading || changeStatus.isLoading || toOrder.isLoading;
+  const loadingStates: (boolean | null)[] = [
+    createOrder.isLoading,
+    deleteItem.isLoading,
+    changeStatus.isLoading,
+    toOrder.isLoading,
+    createProduct.isLoading,
+    updateProduct.isLoading,
+    deleteProduct.isLoading,
+  ];
+
+  const isLoading: boolean | null = loadingStates.some(
+    (loadingState: boolean | null) => loadingState
+  );
+
+  const loadingStatesCategory: (boolean | null)[] = [
+    createCategory.isLoading,
+    updateCategory.isLoading,
+    deleteCategory.isLoading,
+  ];
+  const isLoadingCategory: boolean | null = loadingStatesCategory.some(
+    (loadingState: boolean | null) => loadingState
+  );
 
   const dispatch = useAppDispatch();
   const navigation = useNavigation<NavigationProp<any, any>>();
@@ -45,7 +80,7 @@ export const Products = () => {
   // Fetch categories data on component mount
   React.useEffect((): void => {
     fetchCategoriesData();
-  }, []);
+  }, [isLoadingCategory]);
 
   // Update header title and fetch products by category data when 'chosen' category changes
   React.useLayoutEffect((): void => {

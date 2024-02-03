@@ -14,6 +14,10 @@ export const UserList: React.FC<IUserList> = React.memo((props) => {
     previousButtonDisable,
     nextButtonDisable,
     totalItems,
+    setSearchQuery,
+    setHasSearched,
+    searchQuery,
+    hasSearched,
   } = props;
 
   return (
@@ -26,6 +30,10 @@ export const UserList: React.FC<IUserList> = React.memo((props) => {
       previousButtonDisable={previousButtonDisable}
       nextButtonDisable={nextButtonDisable}
       totalItems={totalItems}
+      searchQuery={searchQuery}
+      setSearchQuery={setSearchQuery}
+      hasSearched={hasSearched}
+      setHasSearched={setHasSearched}
       renderItemComponent={(index: number, item: TUser) => (
         <>
           <View className="flex-row items-center gap-2">

@@ -1,6 +1,7 @@
 export type TFetchOptions = {
   page?: number;
   limit?: number;
+  query?: string;
 };
 export interface IFetchByCategoryOptions extends TFetchOptions {
   category: string;
@@ -15,7 +16,6 @@ export type TItemsWithTotalLength<T> = {
   isLoading: boolean | null;
   isError: boolean;
   isNetworkError: boolean;
-  showErrorTest?: string;
   total_items: number;
   items: T;
 };

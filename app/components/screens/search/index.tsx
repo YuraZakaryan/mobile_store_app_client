@@ -27,17 +27,40 @@ export const Search = () => {
   const dispatch = useAppDispatch();
 
   // Redux state selectors for product search and order-related states
-  const { search, searchQuery } = useAppSelector((state) => state.product);
+  const {
+    search,
+    searchQuery,
+    create: createProduct,
+    update: updateProduct,
+    delete: deleteProduct,
+  } = useAppSelector((state) => state.product);
   const [initialSearch, setInitialSearch] = React.useState<boolean>(false);
 
   // Redux state selectors for order-related states
-  const { deleteItem, create, changeStatus, toOrder } = useAppSelector((state) => state.order);
+  const {
+    deleteItem,
+    create: createOrder,
+    changeStatus,
+    toOrder,
+  } = useAppSelector((state) => state.order);
 
-  // Determine overall loading status for multiple order-related actions
-  const isLoading =
-    create.isLoading || deleteItem.isLoading || changeStatus.isLoading || toOrder.isLoading;
+  const loadingStates: (boolean | null)[] = [
+    createOrder.isLoading,
+    deleteItem.isLoading,
+    changeStatus.isLoading,
+    toOrder.isLoading,
+    createProduct.isLoading,
+    updateProduct.isLoading,
+    deleteProduct.isLoading,
+  ];
+
+  // Determine overall loading status for multiple actions
+  const isLoading: boolean | null = loadingStates.some(
+    (loadingState: boolean | null) => loadingState
+  );
+
   // Custom hook for debouncing the search query
-  const debouncedSearch = useDebounce(searchQuery, 500);
+  const debouncedSearch: string = useDebounce(searchQuery, 500);
 
   const fetchDataByQuery = () => {
     dispatch(searchProductsThunk({ query: debouncedSearch }));
