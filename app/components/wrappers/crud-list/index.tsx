@@ -88,7 +88,7 @@ export const CrudList = <T,>(props: ICrudListProps<T>): React.ReactElement => {
                 alt="missing_items"
                 className="w-20 h-20 scale-[2]"
               />
-              <Text className="text-base font-bold mt-2">Չի գտնվել</Text>
+              <Text className="text-base font-bold mt-2 italic text-gray-600">Չի գտնվել</Text>
             </View>
           ) : (
             <FlatList

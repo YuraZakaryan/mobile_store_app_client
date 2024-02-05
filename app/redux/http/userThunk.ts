@@ -14,6 +14,7 @@ import {
   TPayloadActionUser,
   TUpdateItem,
   TUser,
+  TUserCreateOrUpdateErrorResponseMessage,
 } from '../types';
 
 export const loginThunk = createAsyncThunk(
@@ -51,7 +52,8 @@ export const registrationThunk = createAsyncThunk(
       if (!error.response) {
         return rejectWithValue('NetworkError');
       } else {
-        return rejectWithValue(error.response.status);
+        const responseData = error.response.data as TUserCreateOrUpdateErrorResponseMessage;
+        return rejectWithValue(responseData.message);
       }
     }
   }
@@ -190,27 +192,30 @@ export const createUserThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
+
       if (!error.response) {
         return rejectWithValue('NetworkError');
       } else {
-        return rejectWithValue(error.response.status);
+        const responseData = error.response.data as TUserCreateOrUpdateErrorResponseMessage;
+        return rejectWithValue(responseData.message);
       }
     }
   }
 );
+
 export const updateUserThunk = createAsyncThunk(
   'update/user',
   async ({ id, formData, navigate }: TUpdateItem<FormikValues>, { rejectWithValue }) => {
     try {
       const { data } = await $authHost.put<TUser>(`user/${id}`, formData);
-      navigate && navigate('users-control');
       return data;
     } catch (err) {
       const error = err as AxiosError;
       if (!error.response) {
         return rejectWithValue('NetworkError');
       } else {
-        return rejectWithValue(error.response.status);
+        const responseData = error.response.data as TUserCreateOrUpdateErrorResponseMessage;
+        return rejectWithValue(responseData.message);
       }
     }
   }

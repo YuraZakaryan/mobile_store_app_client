@@ -17,6 +17,7 @@ export const CreateEditForm = <T extends FormikValues>(
     onSubmit,
     validationSchema,
   } = props;
+
   return (
     <KeyboardAvoidingView behavior="padding" style={{ height: '100%' }}>
       <ScrollView

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, Text, TouchableOpacity } from 'react-native';
 
 import { IButtonStatusViewOrder } from '../../types';
 
@@ -8,12 +8,16 @@ export const ButtonStatusViewOrder: React.FC<IButtonStatusViewOrder> = React.mem
 
   return (
     <TouchableOpacity
-      className={`bg-gray-400 rounded p-3  mb-2 w-full ${
+      className={`bg-gray-400 rounded p-3 min-h-[49px] mb-2 w-full ${
         active || label === 'Չեղարկել' ? 'bg-orange-400' : ''
       }`}
       disabled={isLoading || active}
       onPress={() => handleChangeStatus(status)}>
-      <Text className="text-center text-white text-base">{label}</Text>
+      {isLoading ? (
+        <ActivityIndicator size="small" />
+      ) : (
+        <Text className="text-center text-white text-base">{label}</Text>
+      )}
     </TouchableOpacity>
   );
 });

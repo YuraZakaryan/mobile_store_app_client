@@ -24,7 +24,6 @@ import {
   setPackaging,
   updateItemCount,
 } from '../../../redux/reducers/order/orderSlice';
-import { TProduct } from '../../../redux/types';
 import { EPackage, TOrder, TOrderItem } from '../../../redux/types/order';
 import { SHOW_ERROR, SHOW_SUCCESS } from '../../../toasts';
 import { API_URL } from '../../../utils/constants';

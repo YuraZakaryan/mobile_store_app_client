@@ -45,7 +45,9 @@ export const OrdersControl = () => {
     fetchData();
   };
 
-  return (
+  return orders.isLoading && !hasSearched ? (
+    <Loading />
+  ) : (
     <Main>
       {orders.items.length > 0 || hasSearched ? (
         <ScrollView

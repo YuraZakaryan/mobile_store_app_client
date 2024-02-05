@@ -9,6 +9,7 @@ import { fetchControlProductsThunk } from '../../../../redux/http/productThunk';
 import { TProduct } from '../../../../redux/types';
 import { SHOW_ERROR } from '../../../../toasts';
 import { API_URL, LIMIT_NUMBER } from '../../../../utils/constants';
+import { Loading } from '../../../ui';
 import { CreateItemButton, CrudList, Main } from '../../../wrappers';
 
 export const ProductsControl = () => {
@@ -68,7 +69,9 @@ export const ProductsControl = () => {
     fetchData();
   };
 
-  return (
+  return products.isLoading && !hasSearched ? (
+    <Loading />
+  ) : (
     <Main>
       <ScrollView
         refreshControl={

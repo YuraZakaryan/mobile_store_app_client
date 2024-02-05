@@ -51,7 +51,9 @@ export const OrdersCompleted = () => {
     fetchData();
   };
 
-  return (
+  return ordersHistory.isLoading && !hasSearched ? (
+    <Loading />
+  ) : (
     <Main>
       {ordersHistory.items.length > 0 || hasSearched ? (
         <ScrollView

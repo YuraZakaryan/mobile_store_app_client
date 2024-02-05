@@ -29,8 +29,12 @@ export const Registration = () => {
       .catch((err): void => {
         if (err === 'NetworkError') {
           SHOW_ERROR(NETWORK_ERROR_MESSAGE);
+        } else if (err.toLowerCase().includes('mail already exists')) {
+          SHOW_ERROR('Էլ․ փոստը զբաղված է');
+        } else if (err.toLowerCase().includes('username already exists')) {
+          SHOW_ERROR('Մուտքանունը զբաղված է');
         } else {
-          SHOW_ERROR('Մուտքանունը զբաղված է, խնդրում ենք փորձել մեկ ուրիշ');
+          SHOW_ERROR('Բաժանորդի ստեղծման հետ կապված խնդիր է առաջացել');
         }
       });
   };

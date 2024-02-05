@@ -7,6 +7,7 @@ import { useDebounce } from '../../../../hooks/useDebounce';
 import { fetchControlCategoriesThunk } from '../../../../redux/http/categoryThunk';
 import { TCategory } from '../../../../redux/types';
 import { API_URL, LIMIT_NUMBER } from '../../../../utils/constants';
+import { Loading } from '../../../ui';
 import { CreateItemButton, CrudList, Main } from '../../../wrappers';
 
 export const CategoriesControl = () => {
@@ -56,7 +57,9 @@ export const CategoriesControl = () => {
     fetchData();
   };
 
-  return (
+  return categories.isLoading && !hasSearched ? (
+    <Loading />
+  ) : (
     <Main>
       <ScrollView
         refreshControl={

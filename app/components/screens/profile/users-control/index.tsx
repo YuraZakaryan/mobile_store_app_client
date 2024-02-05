@@ -11,6 +11,7 @@ import {
   fetchUsersThunk,
 } from '../../../../redux/http/userThunk';
 import { LIMIT_NUMBER } from '../../../../utils/constants';
+import { Loading } from '../../../ui';
 import { CreateItemButton, Main } from '../../../wrappers';
 
 export const UsersControl = () => {
@@ -118,7 +119,12 @@ export const UsersControl = () => {
     fetchUnconfirmedUsersData();
     fetchBannedUsersData();
   };
-  return (
+
+  return (users.isLoading && !hasSearchedUser) ||
+    (unconfirmedUsers.isLoading && !hasSearchedUnConfirmedUser) ||
+    (bannedUsers.isLoading && !hasSearchedBannedUser) ? (
+    <Loading />
+  ) : (
     <Main>
       <ScrollView
         refreshControl={

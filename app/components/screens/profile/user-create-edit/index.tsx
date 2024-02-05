@@ -66,16 +66,23 @@ export const UserCreateEdit = () => {
     if (item) {
       await dispatch(updateUserThunk({ id: item?._id as string, formData: values, navigate }))
         .unwrap()
-        .then((res: TUser): void =>
-          res && user?._id === res._id
-            ? SHOW_SUCCESS('Փոփոխությունները տեսնելու համար նորից մուտք գործեք ծրագիր')
-            : SHOW_SUCCESS('Հաճախորդը հաջողությամբ փոփոխվեց')
-        )
+        .then((res: TUser | void): void => {
+          if (res && user?._id === res._id) {
+            SHOW_SUCCESS('Փոփոխությունները տեսնելու համար նորից մուտք գործեք ծրագիր');
+          } else {
+            SHOW_SUCCESS('Հաճախորդը հաջողությամբ փոփոխվեց');
+            navigate('users-control');
+          }
+        })
         .catch((err): void => {
           if (err === 'NetworkError') {
             SHOW_ERROR(NETWORK_ERROR_MESSAGE);
+          } else if (err.toLowerCase().includes('mail already exists')) {
+            SHOW_ERROR('Էլ․ փոստը զբաղված է');
+          } else if (err.toLowerCase().includes('username already exists')) {
+            SHOW_ERROR('Մուտքանունը զբաղված է');
           } else {
-            SHOW_ERROR('Բաժանորդի տվյալների փոփոխման հետ  կապված խնդիր է առաջացել');
+            SHOW_ERROR('Բաժանորդի տվյալների փոփոխման հետ կապված խնդիր է առաջացել');
           }
         });
     } else {
@@ -85,6 +92,10 @@ export const UserCreateEdit = () => {
         .catch((err): void => {
           if (err === 'NetworkError') {
             SHOW_ERROR(NETWORK_ERROR_MESSAGE);
+          } else if (err.toLowerCase().includes('mail already exists')) {
+            SHOW_ERROR('Էլ․ փոստը զբաղված է');
+          } else if (err.toLowerCase().includes('username already exists')) {
+            SHOW_ERROR('Մուտքանունը զբաղված է');
           } else {
             SHOW_ERROR('Բաժանորդի ստեղծման հետ կապված խնդիր է առաջացել');
           }

@@ -69,3 +69,7 @@ export type TOtpData = {
   mail: string;
   otp: string;
 };
+export type TUserCreateOrUpdateErrorResponseMessage = {
+  message: string;
+  statusCode: number;
+};
