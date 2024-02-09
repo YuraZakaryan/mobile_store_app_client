@@ -8,6 +8,7 @@ import { SecureStoreService } from '../../services';
 import {
   TCreateItemAndNavigate,
   TDeleteItem,
+  TErrorDataResponse,
   TFetchOptions,
   TItemsWithTotalLength,
   TOtpData,
@@ -30,7 +31,8 @@ export const loginThunk = createAsyncThunk(
       if (!error.response) {
         return rejectWithValue('NetworkError');
       } else {
-        return rejectWithValue(error.response.status);
+        const data: TErrorDataResponse = error.response.data as TErrorDataResponse;
+        return rejectWithValue(data.message);
       }
     }
   }
@@ -44,15 +46,13 @@ export const registrationThunk = createAsyncThunk(
         role: 'USER',
         confirmed: false,
       });
-      await SecureStoreService.saveAccessToken(data.tokens.access_token);
-      await SecureStoreService.saveRefreshToken(data.tokens.refresh_token);
       return data;
     } catch (err) {
       const error = err as AxiosError;
       if (!error.response) {
         return rejectWithValue('NetworkError');
       } else {
-        const responseData = error.response.data as TUserCreateOrUpdateErrorResponseMessage;
+        const responseData: TErrorDataResponse = error.response.data as TErrorDataResponse;
         return rejectWithValue(responseData.message);
       }
     }

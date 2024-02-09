@@ -1,10 +1,16 @@
 import { AntDesign, SimpleLineIcons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { NavigationContainer } from '@react-navigation/native';
+import {
+  NavigationContainer,
+  NavigationProp,
+  ParamListBase,
+  useNavigation,
+} from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 
 import {
@@ -31,6 +37,7 @@ import {
   ResetPassword,
 } from './components/screens';
 import { Auth } from './components/screens/auth';
+import { Loading } from './components/ui';
 import { useAppDispatch, useAppSelector } from './hooks/redux';
 import { getOrderByUserInProgressThunk } from './redux/http/orderThunk';
 import { fetchMe } from './redux/http/userThunk';
@@ -227,6 +234,7 @@ export const SearchPageStackGroup = () => {
     </MyPageStack.Navigator>
   );
 };
+
 const AuthPageStackGroup = () => {
   return (
     <MyPageStack.Navigator>
@@ -247,6 +255,7 @@ const AuthPageStackGroup = () => {
     </MyPageStack.Navigator>
   );
 };
+
 const UsersControlPageStackGroup = () => {
   return (
     <MyPageStack.Navigator>
@@ -375,7 +384,7 @@ const TopTabsGroup = () => {
 const Tab = createBottomTabNavigator();
 
 const TabGroup = () => {
-  const { isAuth, user, fetchMe } = useAppSelector((state) => state.user);
+  const { user, fetchMe } = useAppSelector((state) => state.user);
   const { basket } = useAppSelector((state) => state.order);
 
   return (
@@ -438,70 +447,41 @@ const TabGroup = () => {
           title: 'Զամբյուղ',
         }}
       />
-      {isAuth ? (
-        <Tab.Screen
-          name={tabsName.profileGroup}
-          component={user && isAdmin(user.role) ? TopTabsGroup : ProfileStackGroup}
-          options={{
-            headerShown: true,
-            title: 'Իմ էջը',
-            tabBarLabel: ({ color }) => {
-              if (fetchMe.isLoading) {
-                return null;
-              }
+      <Tab.Screen
+        name={tabsName.profileGroup}
+        component={user && isAdmin(user.role) ? TopTabsGroup : ProfileStackGroup}
+        options={{
+          headerShown: true,
+          title: 'Իմ էջը',
+          tabBarLabel: ({ color }) => {
+            if (fetchMe.isLoading) {
+              return null;
+            }
 
-              return (
-                <Text className="text-[10px] font-light" style={{ color }}>
-                  Իմ էջը
-                </Text>
-              );
-            },
-            tabBarIcon: ({ color }) => {
-              if (fetchMe.isLoading) {
-                return <ActivityIndicator size="small" color={ICON_MAIN_COLOR} />;
-              }
-              const iconName: TIconName = 'user';
+            return (
+              <Text className="text-[10px] font-light" style={{ color }}>
+                Իմ էջը
+              </Text>
+            );
+          },
+          tabBarIcon: ({ color }) => {
+            if (fetchMe.isLoading) {
+              return <ActivityIndicator size="small" color={ICON_MAIN_COLOR} />;
+            }
+            const iconName: TIconName = 'user';
 
-              return <AntDesign name={iconName} size={26} color={color} />;
-            },
-          }}
-        />
-      ) : (
-        <Tab.Screen
-          name={tabsName.authorizationGroup}
-          component={AuthPageStackGroup}
-          options={{
-            headerShown: false,
-            title: 'Մուտք գործել',
-            tabBarLabel: ({ color }) => {
-              if (fetchMe.isLoading) {
-                return null;
-              }
-
-              return (
-                <Text className="text-[10px] font-light" style={{ color }}>
-                  Մուտք գործել
-                </Text>
-              );
-            },
-            tabBarIcon: ({ color }) => {
-              if (fetchMe.isLoading) {
-                return <ActivityIndicator size="small" color={ICON_MAIN_COLOR} />;
-              }
-              const iconName: TIconName = 'user';
-
-              return <AntDesign name={iconName} size={26} color={color} />;
-            },
-          }}
-        />
-      )}
+            return <AntDesign name={iconName} size={26} color={color} />;
+          },
+        }}
+      />
     </Tab.Navigator>
   );
 };
 
 const Navigation = () => {
   const dispatch = useAppDispatch();
-  const { user } = useAppSelector((state) => state.user);
+
+  const { user, isAuth, fetchMe: Me } = useAppSelector((state) => state.user);
 
   React.useEffect((): void => {
     dispatch(fetchMe());
@@ -511,11 +491,21 @@ const Navigation = () => {
     dispatch(getOrderByUserInProgressThunk(user?._id as string));
   }, [user]);
 
+  const Stack = createNativeStackNavigator();
+
   return (
-    <NavigationContainer>
-      <TabGroup />
-      <Toast />
-    </NavigationContainer>
+    !Me.isLoading && (
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          {isAuth ? (
+            <Stack.Screen name="MainTabs" component={TabGroup} />
+          ) : (
+            <Stack.Screen name={tabsName.authorizationGroup} component={AuthPageStackGroup} />
+          )}
+        </Stack.Navigator>
+        <Toast />
+      </NavigationContainer>
+    )
   );
 };
 

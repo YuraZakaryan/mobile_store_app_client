@@ -90,14 +90,16 @@ export const UserCreateEdit = () => {
         .unwrap()
         .then((res: TPayloadActionUser) => res && SHOW_SUCCESS('Հաճախորդը հաջողությամբ ստեղծվեց'))
         .catch((err): void => {
-          if (err === 'NetworkError') {
-            SHOW_ERROR(NETWORK_ERROR_MESSAGE);
-          } else if (err.toLowerCase().includes('mail already exists')) {
-            SHOW_ERROR('Էլ․ փոստը զբաղված է');
-          } else if (err.toLowerCase().includes('username already exists')) {
-            SHOW_ERROR('Մուտքանունը զբաղված է');
-          } else {
-            SHOW_ERROR('Բաժանորդի ստեղծման հետ կապված խնդիր է առաջացել');
+          switch (err) {
+            case 'mail_already_exists':
+              SHOW_ERROR('Էլ․ փոստը զբաղված է');
+              break;
+            case 'username_already_exists':
+              SHOW_ERROR('Մուտքանունը զբաղված է');
+              break;
+            default:
+              SHOW_ERROR(NETWORK_ERROR_MESSAGE);
+              break;
           }
         });
     }

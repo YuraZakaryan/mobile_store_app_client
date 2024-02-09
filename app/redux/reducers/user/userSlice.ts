@@ -125,15 +125,10 @@ export const userSlice = createSlice({
       .addCase(loginThunk.rejected, (state: TInitialUserState): void => {
         state.login.isLoading = false;
       })
-      .addCase(
-        registrationThunk.fulfilled,
-        (state: TInitialUserState, action: PayloadAction<TPayloadActionUser>): void => {
-          const { user } = action.payload;
-          state.user = user;
-          state.isAuth = true;
-          state.registration = initialState.registration;
-        }
-      )
+      .addCase(registrationThunk.fulfilled, (state: TInitialUserState): void => {
+        state.registration = initialState.registration;
+        state.authMode = EAuthMode.LOGIN;
+      })
       .addCase(registrationThunk.pending, (state: TInitialUserState): void => {
         state.registration.isLoading = true;
       })

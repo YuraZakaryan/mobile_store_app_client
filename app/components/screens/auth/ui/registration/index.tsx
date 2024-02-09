@@ -6,7 +6,7 @@ import MaskInput from 'react-native-mask-input';
 import { useAppDispatch, useAppSelector } from '../../../../../hooks/redux';
 import { registrationThunk } from '../../../../../redux/http/userThunk';
 import { EAuthMode } from '../../../../../redux/types';
-import { SHOW_ERROR } from '../../../../../toasts';
+import { SHOW_ERROR, SHOW_SUCCESS } from '../../../../../toasts';
 import { NETWORK_ERROR_MESSAGE } from '../../../../../utils/constants';
 import { registrationFormSchema } from '../../../../../validation';
 import { FieldWithError, LabelInput } from '../../../../wrappers';
@@ -26,15 +26,18 @@ export const Registration = () => {
     // Dispatch the registrationThunk action with the provided form values
     await dispatch(registrationThunk(values))
       .unwrap()
+      .then((res) => res && SHOW_SUCCESS('Դուք հաջողությամբ գրանցվեցիք, սպասեք հաստատման'))
       .catch((err): void => {
-        if (err === 'NetworkError') {
-          SHOW_ERROR(NETWORK_ERROR_MESSAGE);
-        } else if (err.toLowerCase().includes('mail already exists')) {
-          SHOW_ERROR('Էլ․ փոստը զբաղված է');
-        } else if (err.toLowerCase().includes('username already exists')) {
-          SHOW_ERROR('Մուտքանունը զբաղված է');
-        } else {
-          SHOW_ERROR('Բաժանորդի ստեղծման հետ կապված խնդիր է առաջացել');
+        switch (err) {
+          case 'mail_already_exists':
+            SHOW_ERROR('Էլ․ փոստը զբաղված է');
+            break;
+          case 'username_already_exists':
+            SHOW_ERROR('Մուտքանունը զբաղված է');
+            break;
+          default:
+            SHOW_ERROR(NETWORK_ERROR_MESSAGE);
+            break;
         }
       });
   };

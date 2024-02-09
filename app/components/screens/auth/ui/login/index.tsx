@@ -27,10 +27,19 @@ export const Login = () => {
     await dispatch(loginThunk(values))
       .unwrap()
       .catch((err): void => {
-        if (err === 'NetworkError') {
-          SHOW_ERROR(NETWORK_ERROR_MESSAGE);
-        } else {
-          SHOW_ERROR('Մուտքանունը կամ գաղտնաբառը սխալ է');
+        switch (err) {
+          case 'invalid_login_credentials':
+            SHOW_ERROR('Մուտքանունը կամ գաղտնաբառը սխալ է');
+            break;
+          case 'account_not_confirmed':
+            SHOW_ERROR('Ձեր հաշիվը դեռ հաստատված չէ');
+            break;
+          case 'account_banned':
+            SHOW_ERROR('Ձեր հաշիվը արգելափակված է');
+            break;
+          default:
+            SHOW_ERROR(NETWORK_ERROR_MESSAGE);
+            break;
         }
       });
   };

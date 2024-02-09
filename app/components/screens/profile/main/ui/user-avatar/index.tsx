@@ -5,11 +5,11 @@ import { Image, View } from 'react-native';
 import { useAppSelector } from '../../../../../../hooks/redux';
 
 export const UserAvatar = () => {
-  const { user } = useAppSelector((state) => state.user);
+  const { user, isAuth } = useAppSelector((state) => state.user);
   return (
     <View className="overflow-hidden flex-1 flex-col relative">
       <View className="absolute z-50 right-1 top-1">
-        {user && (
+        {isAuth && user && (
           <AntDesign
             name={!user.banned && user.confirmed ? 'checkcircle' : 'minuscircle'}
             size={24}

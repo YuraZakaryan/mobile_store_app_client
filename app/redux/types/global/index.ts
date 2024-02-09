@@ -26,3 +26,7 @@ export type TUpdateItem<T> = {
 };
 export type TDeleteItem = { _id: string; navigate: (route: string) => void };
 export type TCreateItemAndNavigate<T> = { formData: T; navigate: (route: string) => void };
+export type TErrorDataResponse = {
+  message: string;
+  statusCode: number;
+};
