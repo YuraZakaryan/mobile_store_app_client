@@ -20,8 +20,9 @@ import { searchProductsThunk } from '../../../redux/http/productThunk';
 import { clearSearchQuery, setSearchQuery } from '../../../redux/reducers/product/productSlice';
 import { TProduct } from '../../../redux/types';
 import { ETypeError } from '../../../types';
+import { LIMIT_NUMBER } from '../../../utils/constants';
 import { Loading, NetworkError } from '../../ui';
-import { ProductItem } from '../../wrappers';
+import { PaginationButtons, ProductItem } from '../../wrappers';
 
 export const Search = () => {
   const dispatch = useAppDispatch();
@@ -31,10 +32,14 @@ export const Search = () => {
     search,
     searchQuery,
     create: createProduct,
+    createByDocument,
     update: updateProduct,
     delete: deleteProduct,
   } = useAppSelector((state) => state.product);
   const [initialSearch, setInitialSearch] = React.useState<boolean>(false);
+
+  // State to track the current page for fetching products by category
+  const [currentSearchProductPage, setSearchProductCurrentPage] = React.useState<number>(1);
 
   // Redux state selectors for order-related states
   const {
@@ -50,6 +55,7 @@ export const Search = () => {
     changeStatus.isLoading,
     toOrder.isLoading,
     createProduct.isLoading,
+    createByDocument.isLoading,
     updateProduct.isLoading,
     deleteProduct.isLoading,
   ];
@@ -62,18 +68,30 @@ export const Search = () => {
   // Custom hook for debouncing the search query
   const debouncedSearch: string = useDebounce(searchQuery, 500);
 
-  const fetchDataByQuery = () => {
-    dispatch(searchProductsThunk({ query: debouncedSearch }));
+  const fetchDataByQuery = (): void => {
+    dispatch(
+      searchProductsThunk({
+        query: debouncedSearch,
+        limit: LIMIT_NUMBER,
+        page: currentSearchProductPage,
+      })
+    );
   };
+
   // Effect to trigger searchProductsThunk when search query changes or initial search is true
   React.useEffect(() => {
     fetchDataByQuery();
-  }, [initialSearch, debouncedSearch, isLoading]);
+  }, [initialSearch, debouncedSearch, isLoading, currentSearchProductPage]);
 
   const handleSearchChange = (text: string): void => {
     // Dispatch action to set the search query and indicate an initial search
+    if (!initialSearch) {
+      setInitialSearch(true);
+    }
+    if (currentSearchProductPage !== 1) {
+      setSearchProductCurrentPage(1);
+    }
     dispatch(setSearchQuery(text));
-    setInitialSearch(true);
   };
 
   // Function to clear the search query
@@ -85,8 +103,25 @@ export const Search = () => {
     fetchDataByQuery();
   };
 
+  const handlePrevProductPage = (): void => {
+    if (currentSearchProductPage > 1) {
+      setSearchProductCurrentPage((prevPage: number) => prevPage - 1);
+    }
+  };
+
+  // Function to handle moving to the next page of products
+  const handleNextProductPage = (): void => {
+    if (currentSearchProductPage * LIMIT_NUMBER < search.total_items) {
+      setSearchProductCurrentPage((prevPage: number) => prevPage + 1);
+    }
+  };
+
   const { isNetworkError, isError: isTechnicalError } = search || {};
   const isError: boolean = isNetworkError || isTechnicalError;
+
+  const previousButtonDisable: boolean = currentSearchProductPage <= 1;
+  const nextButtonDisable: boolean = currentSearchProductPage * LIMIT_NUMBER >= search.total_items;
+  const totalCurrentPage: number = search.items.length;
 
   return search.isLoading && !initialSearch ? (
     <Loading />
@@ -150,9 +185,7 @@ export const Search = () => {
                         item={item}
                         index={index}
                         key={item._id}
-                        isLastInRow={
-                          search.items.length % 2 === 0 || index === search.items.length - 1
-                        }
+                        isLastInRow={totalCurrentPage % 2 === 1 && index === totalCurrentPage - 1}
                       />
                     )}
                     numColumns={2}
@@ -164,6 +197,13 @@ export const Search = () => {
             )}
           </View>
         </TouchableWithoutFeedback>
+        <PaginationButtons
+          total_items={search.total_items}
+          previousButtonDisable={previousButtonDisable}
+          nextButtonDisable={nextButtonDisable}
+          handlePrevPage={handlePrevProductPage}
+          handleNextPage={handleNextProductPage}
+        />
       </ScrollView>
     </SafeAreaView>
   );

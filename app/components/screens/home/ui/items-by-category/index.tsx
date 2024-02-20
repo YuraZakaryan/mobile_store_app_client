@@ -13,9 +13,13 @@ export const ItemsByCategory: React.FC<IItemsByCategory> = React.memo((props) =>
   const handleNavigate = (): void => {
     navigate('byFilter', { categoryTitle });
   };
+
+  const productsItems: TProduct[] = products.items;
+  const totalCurrentPage: number = products.items.length;
+
   return (
     <>
-      {Array.isArray(products) && products.length !== 0 ? (
+      {Array.isArray(productsItems) && products.total_items !== 0 ? (
         <View className="my-3">
           <View>
             <View className="items-center flex-row">
@@ -29,13 +33,13 @@ export const ItemsByCategory: React.FC<IItemsByCategory> = React.memo((props) =>
           <View className="mt-3">
             <FlatList
               scrollEnabled={false}
-              data={products}
+              data={productsItems}
               ItemSeparatorComponent={() => <View style={{ height: 20 }} />}
               renderItem={({ index, item }) => (
                 <ProductItem
                   item={item}
                   index={index}
-                  isLastInRow={products.length % 2 === 0 || index === products.length - 1}
+                  isLastInRow={totalCurrentPage % 2 === 1 && index === totalCurrentPage - 1}
                   key={item._id}
                 />
               )}

@@ -5,7 +5,7 @@ import { ObjectSchema } from 'yup';
 import { TProduct } from '../redux/types';
 import { TOrder } from '../redux/types/order';
 
-export interface IProductItem {
+export interface IProductItem extends TClassName {
   index: number;
   item: TProduct;
   isLastInRow: boolean;
@@ -28,6 +28,7 @@ export interface ICrudListProps<T> {
   setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
   setHasSearched: React.Dispatch<React.SetStateAction<boolean>>;
   searchFieldPlaceholder?: string;
+  showDocumentDialogButton?: boolean;
 }
 export interface ICreateEditForm<T extends FormikValues> {
   initialCreateEditFormValue: T;
@@ -104,3 +105,4 @@ export interface INetworkError {
   handleRefresh: () => void;
   type?: ETypeError;
 }
+export type TCustomFileType = { size: number; name: string; type: string; uri: string };

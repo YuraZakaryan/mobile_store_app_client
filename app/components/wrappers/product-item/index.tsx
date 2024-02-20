@@ -12,7 +12,7 @@ import { SaleIcon } from '../sale-icon';
 
 export const ProductItem: React.FC<IProductItem> = React.memo((props) => {
   const dispatch = useAppDispatch();
-  const { item, index, isLastInRow, imageClassName, height } = props;
+  const { item, index, isLastInRow, imageClassName, className, height } = props;
   const { navigate } = useNavigation<NavigationProp<TProductItemParamList>>();
 
   const handleNavigate = (): void => {
@@ -20,19 +20,26 @@ export const ProductItem: React.FC<IProductItem> = React.memo((props) => {
     navigate('product', { title: item.title, productId: item._id });
   };
   const checkDiscount: boolean = item.discount > 0;
+
   return (
     <View
       key={item._id}
-      className={`bg-white rounded${!isLastInRow ? ' w-full flex-1' : ' flex-[0.5]'}`}
+      className={`bg-white pt-3.5 rounded${!isLastInRow ? ' w-full flex-1' : ' flex-[0.5]'} ${className ? className : ''}`}
       style={{
         marginRight: index % 2 !== 0 ? 0 : 5,
         marginLeft: index % 2 !== 0 ? 0 : 5,
       }}>
       <TouchableOpacity onPress={handleNavigate} className="w-full">
-        <View className="flex-1 items-center relative">
+        <View className="items-center">
           <Image
-            source={{ uri: `${API_URL}/${item.picture}` ?? '' }}
-            alt={item._id}
+            source={
+              item.picture
+                ? {
+                    uri: (item.picture && `${API_URL}/${item.picture}`) ?? false,
+                  }
+                : require('./../../../assets/images/no_image.png')
+            }
+            alt={item.title}
             className={`w-32 h-32 ${imageClassName}`}
           />
           {checkDiscount ? <SaleIcon discount={item.discount} /> : null}

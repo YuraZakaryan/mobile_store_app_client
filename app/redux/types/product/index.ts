@@ -23,15 +23,24 @@ export interface ICurrentProduct extends TStateStatus {
   product: TProduct | null;
 }
 
+export interface IProductDocument extends TStateStatus {
+  file: File | null;
+  dialogActive: boolean;
+}
+
 export type TInitialProductState = {
   currentProduct: ICurrentProduct;
+
   products: TItemsWithTotalLength<TProduct[]>;
+  productDocument: IProductDocument;
   productsControl: TItemsWithTotalLength<TProduct[]>;
+  notActivatedProductsControl: TItemsWithTotalLength<TProduct[]>;
   discountedProducts: TItemsWithTotalLength<TProduct[]>;
   discountedProductsForHomeScreen: TItemsWithTotalLength<TProduct[]>;
   productsForHomeScreen: TItemsWithTotalLength<TProduct[]>;
   productsByCategory: TItemsWithTotalLength<TProduct[]>;
   create: TStateStatus;
+  createByDocument: TStateStatus;
   update: TStateStatus;
   delete: TStateStatus;
   history: IProductHistory[];

@@ -56,7 +56,6 @@ export const OrdersControl = () => {
           }
           keyboardShouldPersistTaps="handled">
           <View className="m-4">
-            <View />
             <CrudList
               data={orders.items}
               navigateTo="order-view"

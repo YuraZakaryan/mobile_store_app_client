@@ -118,7 +118,13 @@ export const ProductPage = () => {
             <>
               <View className="overflow-hidden w-full items-center relative">
                 <Image
-                  source={{ uri: `${API_URL}/${product.picture}` ?? '' }}
+                  source={
+                    product.picture
+                      ? {
+                          uri: (product.picture && `${API_URL}/${product.picture}`) ?? false,
+                        }
+                      : require('./../../../assets/images/no_image.png')
+                  }
                   className="w-60 h-60 rounded-lg"
                   alt="picture"
                 />

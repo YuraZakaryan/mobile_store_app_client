@@ -1,12 +1,13 @@
 import { AntDesign, Foundation, MaterialCommunityIcons } from '@expo/vector-icons';
 import { NavigationProp, ParamListBase, useNavigation } from '@react-navigation/native';
 import React from 'react';
-import { RefreshControl, ScrollView, TouchableOpacity, View } from 'react-native';
+import { FlatList, RefreshControl, ScrollView, TouchableOpacity, View } from 'react-native';
 
 import { ItemsByCategory } from './ui';
 import { useAppDispatch, useAppSelector } from '../../../hooks/redux';
 import { getOrderByUserInProgressThunk } from '../../../redux/http/orderThunk';
 import { fetchDiscountedProductsThunk, fetchProductsThunk } from '../../../redux/http/productThunk';
+import { TItemsWithTotalLength, TProduct } from '../../../redux/types';
 import { ETypeError } from '../../../types';
 import { ICON_MAIN_COLOR, LIMIT_NUMBER } from '../../../utils/constants';
 import { categoryHome } from '../../../utils/product';
@@ -19,7 +20,7 @@ export const Home = () => {
   const { setOptions, navigate } = useNavigation<NavigationProp<ParamListBase>>();
 
   // Function to handle navigation to 'about-app' screen
-  const handleNavigate = (): void => {
+  const handleNavigateToAbout = (): void => {
     navigate('about-app');
   };
 
@@ -27,7 +28,7 @@ export const Home = () => {
   React.useLayoutEffect((): void => {
     setOptions({
       headerRight: () => (
-        <TouchableOpacity onPress={handleNavigate}>
+        <TouchableOpacity onPress={handleNavigateToAbout}>
           <AntDesign name="exclamationcircle" size={24} color="gray" />
         </TouchableOpacity>
       ),
@@ -47,6 +48,7 @@ export const Home = () => {
     products,
     discountedProducts,
     create: createProduct,
+    createByDocument,
     update: updateProduct,
     delete: deleteProduct,
   } = useAppSelector((state) => state.product);
@@ -57,6 +59,7 @@ export const Home = () => {
     changeStatus.isLoading,
     toOrder.isLoading,
     createProduct.isLoading,
+    createByDocument.isLoading,
     updateProduct.isLoading,
     deleteProduct.isLoading,
   ];
@@ -90,6 +93,12 @@ export const Home = () => {
   const isNetworkError: boolean = products.isNetworkError || discountedProducts.isNetworkError;
   const isTechnicalError: boolean = products.isError || discountedProducts.isError;
 
+  const renderCategory = (
+    products: TItemsWithTotalLength<TProduct[]>,
+    categoryTitle: string,
+    icon: React.ReactNode
+  ) => <ItemsByCategory products={products} categoryTitle={categoryTitle} icon={icon} />;
+
   return products.isLoading || discountedProducts.isLoading ? (
     <Loading />
   ) : (
@@ -105,20 +114,29 @@ export const Home = () => {
           />
         ) : (
           <View className="mx-4 mb-3">
-            <ItemsByCategory
-              products={products.items}
-              categoryTitle={categoryHome.newProducts}
-              icon={<Foundation name="burst-new" size={34} color={ICON_MAIN_COLOR} />}
-            />
-            <ItemsByCategory
-              products={discountedProducts.items}
-              categoryTitle={categoryHome.discountProducts}
-              icon={
-                <MaterialCommunityIcons
-                  name="brightness-percent"
-                  size={28}
-                  color={ICON_MAIN_COLOR}
-                />
+            <FlatList
+              scrollEnabled={false}
+              data={[
+                {
+                  products,
+                  categoryTitle: categoryHome.newProducts,
+                  icon: <Foundation name="burst-new" size={34} color={ICON_MAIN_COLOR} />,
+                },
+                {
+                  products: discountedProducts,
+                  categoryTitle: categoryHome.discountProducts,
+                  icon: (
+                    <MaterialCommunityIcons
+                      name="brightness-percent"
+                      size={28}
+                      color={ICON_MAIN_COLOR}
+                    />
+                  ),
+                },
+              ]}
+              keyExtractor={(item) => item.categoryTitle}
+              renderItem={({ item }) =>
+                renderCategory(item.products, item.categoryTitle, item.icon)
               }
             />
           </View>

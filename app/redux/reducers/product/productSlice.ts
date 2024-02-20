@@ -1,8 +1,10 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 import {
+  createProductByDocumentThunk,
   createProductThunk,
   deleteProductThunk,
+  fetchControlNotActivatedProductsThunk,
   fetchControlProductsThunk,
   fetchDiscountedProductsForHomeCategoryThunk,
   fetchDiscountedProductsThunk,
@@ -23,6 +25,13 @@ const initialState: TInitialProductState = {
     isError: false,
     isNetworkError: true,
   },
+  productDocument: {
+    dialogActive: false,
+    file: null,
+    isLoading: false,
+    isError: false,
+    isNetworkError: false,
+  },
   products: {
     isLoading: false,
     isError: false,
@@ -31,6 +40,13 @@ const initialState: TInitialProductState = {
     items: [],
   },
   productsControl: {
+    isLoading: false,
+    isError: false,
+    isNetworkError: true,
+    total_items: 0,
+    items: [],
+  },
+  notActivatedProductsControl: {
     isLoading: false,
     isError: false,
     isNetworkError: true,
@@ -68,6 +84,9 @@ const initialState: TInitialProductState = {
   create: {
     isLoading: false,
   },
+  createByDocument: {
+    isLoading: false,
+  },
   update: {
     isLoading: false,
   },
@@ -89,17 +108,26 @@ export const productSlice = createSlice({
   name: 'product',
   initialState,
   reducers: {
-    setSearchQuery(state: TInitialProductState, action: PayloadAction<string>) {
+    setSearchQuery(state: TInitialProductState, action: PayloadAction<string>): void {
       state.searchQuery = action.payload;
     },
-    clearSearchQuery(state: TInitialProductState) {
+    clearSearchQuery(state: TInitialProductState): void {
       state.searchQuery = initialState.searchQuery;
     },
-    updateCurrentProduct(state: TInitialProductState, action: PayloadAction<TProduct | null>) {
+    updateCurrentProduct(
+      state: TInitialProductState,
+      action: PayloadAction<TProduct | null>
+    ): void {
       state.currentProduct.product = action.payload;
     },
+    setProductDocument(state: TInitialProductState, action): void {
+      state.productDocument.file = action.payload;
+    },
+    toggleProductDocumentActive(state: TInitialProductState): void {
+      state.productDocument.dialogActive = !state.productDocument.dialogActive;
+    },
   },
-  extraReducers: (builder) => {
+  extraReducers: (builder): void => {
     builder
       .addCase(
         fetchProductsThunk.fulfilled,
@@ -155,6 +183,39 @@ export const productSlice = createSlice({
         state.productsControl.items = [];
         state.productsControl.isLoading = false;
       })
+      .addCase(
+        fetchControlNotActivatedProductsThunk.fulfilled,
+        (
+          state: TInitialProductState,
+          action: PayloadAction<TItemsWithTotalLength<TProduct[]>>
+        ): void => {
+          const { total_items, items } = action.payload;
+
+          state.notActivatedProductsControl = {
+            total_items,
+            items,
+            isError: false,
+            isNetworkError: false,
+            isLoading: false,
+          };
+        }
+      )
+      .addCase(
+        fetchControlNotActivatedProductsThunk.pending,
+        (state: TInitialProductState): void => {
+          state.notActivatedProductsControl.isLoading = true;
+          state.notActivatedProductsControl.isError = false;
+          state.notActivatedProductsControl.isNetworkError = false;
+        }
+      )
+      .addCase(
+        fetchControlNotActivatedProductsThunk.rejected,
+        (state: TInitialProductState): void => {
+          state.notActivatedProductsControl.total_items = 0;
+          state.notActivatedProductsControl.items = [];
+          state.notActivatedProductsControl.isLoading = false;
+        }
+      )
       .addCase(fetchProductThunk.fulfilled, (state: TInitialProductState, action): void => {
         state.currentProduct = {
           product: action.payload as TProduct,
@@ -253,6 +314,7 @@ export const productSlice = createSlice({
           action: PayloadAction<TItemsWithTotalLength<TProduct[]>>
         ): void => {
           const { total_items, items } = action.payload;
+          setProductDocument;
 
           state.discountedProductsForHomeScreen = {
             total_items,
@@ -360,6 +422,17 @@ export const productSlice = createSlice({
       .addCase(createProductThunk.rejected, (state: TInitialProductState): void => {
         state.create.isLoading = false;
       })
+      .addCase(createProductByDocumentThunk.fulfilled, (state: TInitialProductState): void => {
+        state.createByDocument.isLoading = false;
+        state.productDocument = initialState.productDocument;
+      })
+      .addCase(createProductByDocumentThunk.pending, (state: TInitialProductState): void => {
+        state.createByDocument.isLoading = true;
+      })
+      .addCase(createProductByDocumentThunk.rejected, (state: TInitialProductState): void => {
+        state.createByDocument.isLoading = false;
+        state.productDocument = initialState.productDocument;
+      })
       .addCase(updateProductThunk.fulfilled, (state: TInitialProductState): void => {
         state.update.isLoading = false;
       })
@@ -381,4 +454,10 @@ export const productSlice = createSlice({
   },
 });
 export const productReducer = productSlice.reducer;
-export const { setSearchQuery, clearSearchQuery, updateCurrentProduct } = productSlice.actions;
+export const {
+  setSearchQuery,
+  clearSearchQuery,
+  toggleProductDocumentActive,
+  setProductDocument,
+  updateCurrentProduct,
+} = productSlice.actions;

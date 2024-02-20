@@ -62,6 +62,7 @@ export const ProductCreateEdit = () => {
     category: item?.category || categoryData[0].value,
     author: user?._id as string,
   };
+
   const clearPicture = (setFieldValue: FormikValues['setFieldValue']): void => {
     setFieldValue('picture', null);
   };

@@ -1,11 +1,11 @@
 import { ParamListBase } from '@react-navigation/native';
 import React from 'react';
 
-import { TProduct } from '../../../../redux/types';
+import { TItemsWithTotalLength, TProduct } from '../../../../redux/types';
 
 export interface IItemsByCategory {
   categoryTitle: string;
-  products: TProduct[];
+  products: TItemsWithTotalLength<TProduct[]>;
   icon: React.ReactNode;
 }
 

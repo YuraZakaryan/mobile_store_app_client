@@ -81,6 +81,7 @@ export const ProductsPageByCategory = () => {
   // Determine button disable status based on current page and total items
   const previousButtonDisable: boolean = currentProductPage <= 1;
   const nextButtonDisable: boolean = currentProductPage * LIMIT_NUMBER >= products.total_items;
+  const totalCurrentPage: number = products.items.length;
 
   // Function to handle manual data refresh
   const handleRefresh = () => {
@@ -104,7 +105,7 @@ export const ProductsPageByCategory = () => {
               <ProductItem
                 item={item}
                 index={index}
-                isLastInRow={products.total_items % 2 === 0 || index === products.total_items - 1}
+                isLastInRow={totalCurrentPage % 2 === 1 && index === totalCurrentPage - 1}
                 key={item._id}
               />
             )}

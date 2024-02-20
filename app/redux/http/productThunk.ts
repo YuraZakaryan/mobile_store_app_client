@@ -8,6 +8,7 @@ import {
   ISearchProductOptions,
   TCreateItemAndNavigate,
   TDeleteItem,
+  TErrorDataResponse,
   TFetchOptions,
   TItemsWithTotalLength,
   TProduct,
@@ -42,6 +43,26 @@ export const fetchControlProductsThunk = createAsyncThunk(
     try {
       const { data } = await $authHost.get<TItemsWithTotalLength<TProduct[]>>(
         `product/all?limit=${limit}&skip=${skip}&title=${query}`
+      );
+      return data;
+    } catch (err) {
+      const error = err as AxiosError;
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
+    }
+  }
+);
+export const fetchControlNotActivatedProductsThunk = createAsyncThunk(
+  'fetchForControl/NotActivatedProducts',
+  async ({ page = 1, limit = 5, query = '' }: TFetchOptions, { rejectWithValue }) => {
+    const skip: number = (page - 1) * limit;
+
+    try {
+      const { data } = await $authHost.get<TItemsWithTotalLength<TProduct[]>>(
+        `product/all?limit=${limit}&skip=${skip}&title=${query}&not-activated`
       );
       return data;
     } catch (err) {
@@ -183,11 +204,31 @@ export const createProductThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      console.log(error);
       if (!error.response) {
         return rejectWithValue('NetworkError');
       } else {
         return rejectWithValue(error.response.status);
+      }
+    }
+  }
+);
+export const createProductByDocumentThunk = createAsyncThunk(
+  'createByDocument/product',
+  async (formData: FormData, { rejectWithValue }) => {
+    try {
+      const { data } = await $authHost.post('product/create/by-document', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return data;
+    } catch (err) {
+      const error = err as AxiosError;
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        const data: TErrorDataResponse = error.response.data as TErrorDataResponse;
+        return rejectWithValue(data.message);
       }
     }
   }

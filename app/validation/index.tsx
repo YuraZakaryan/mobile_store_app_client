@@ -140,7 +140,6 @@ export const createAndEditProductFormSchema = Yup.object().shape({
     .max(100, 'Զեղչը պետք է լինի ոչ մեծ 100֊ից'),
   code: Yup.string().required('Քանակը պարտադիր է'),
   category: Yup.string().required('Կատեգորիան պարտադիր է'),
-  picture: Yup.mixed().required('Նկարը պարտադիր է'),
 });
 
 export const loginFormSchema = Yup.object().shape({

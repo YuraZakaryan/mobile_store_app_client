@@ -120,7 +120,8 @@ export const UsersControl = () => {
     fetchBannedUsersData();
   };
 
-  return (users.isLoading && !hasSearchedUser) ||
+  return (users.isLoading &&
+    (!hasSearchedUser || !hasSearchedBannedUser || hasSearchedUnConfirmedUser)) ||
     (unconfirmedUsers.isLoading && !hasSearchedUnConfirmedUser) ||
     (bannedUsers.isLoading && !hasSearchedBannedUser) ? (
     <Loading />

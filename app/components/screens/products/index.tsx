@@ -29,6 +29,7 @@ export const Products = () => {
   const {
     productsByCategory,
     create: createProduct,
+    createByDocument,
     update: updateProduct,
     delete: deleteProduct,
   } = useAppSelector((state) => state.product);
@@ -43,6 +44,7 @@ export const Products = () => {
     changeStatus.isLoading,
     toOrder.isLoading,
     createProduct.isLoading,
+    createByDocument.isLoading,
     updateProduct.isLoading,
     deleteProduct.isLoading,
   ];
@@ -137,7 +139,13 @@ export const Products = () => {
           <View className="items-center bg-white">
             <FlatList
               data={categories.items}
-              renderItem={({ item }) => <ProductCategoryItem item={item} key={item._id} />}
+              renderItem={({ item }) => (
+                <ProductCategoryItem
+                  item={item}
+                  key={item._id}
+                  setProductCurrentPage={setProductCurrentPage}
+                />
+              )}
             />
           </View>
           <View className="m-2 mt-1 ml-0.5 w-full flex-1">
@@ -156,10 +164,11 @@ export const Products = () => {
                 <ProductItem
                   index={index}
                   item={item}
+                  className="pt-0"
                   imageClassName="w-28 h-28 mt-[20px]"
                   height={24}
                   isLastInRow={
-                    productsByCategory.items.length % 2 === 0 ||
+                    productsByCategory.items.length % 2 === 1 &&
                     index === productsByCategory.items.length - 1
                   }
                 />

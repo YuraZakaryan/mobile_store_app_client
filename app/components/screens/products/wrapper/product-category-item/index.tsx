@@ -6,11 +6,13 @@ import { setCategory } from '../../../../../redux/reducers/category/categorySlic
 import { API_URL } from '../../../../../utils/constants';
 import { IProductCategoryItem } from '../../types';
 
-export const ProductCategoryItem: React.FC<IProductCategoryItem> = React.memo(({ item }) => {
+export const ProductCategoryItem: React.FC<IProductCategoryItem> = React.memo((props) => {
+  const { item, setProductCurrentPage } = props;
   const dispatch = useAppDispatch();
   const { chosen } = useAppSelector((state) => state.category);
 
   const handleChose = (): void => {
+    setProductCurrentPage(1);
     dispatch(setCategory({ _id: item._id, title: item.title }));
   };
   return (
