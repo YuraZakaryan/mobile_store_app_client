@@ -178,10 +178,19 @@ export const Basket = () => {
                             )}
                           </TouchableOpacity>
                           <View>
-                            {item.product && item.product.picture && (
+                            {item.product && (
                               <Image
-                                source={{ uri: API_URL + '/' + item.product.picture }}
-                                className="w-24 h-24 rounded-lg"
+                                source={
+                                  item.product.picture
+                                    ? {
+                                        uri:
+                                          (item.product.picture &&
+                                            `${API_URL}/${item.product.picture}`) ??
+                                          false,
+                                      }
+                                    : require('./../../../assets/images/no_image.jpg')
+                                }
+                                className="w-24 h-24 rounded-lg my-2"
                                 alt={item.product.title}
                               />
                             )}

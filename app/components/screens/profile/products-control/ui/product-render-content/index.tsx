@@ -15,13 +15,17 @@ export const ProductRenderContent: React.FC<IProductRenderContent> = React.memo(
           {title}
         </Text>
       </View>
-      {picture && (
-        <Image
-          source={{ uri: `${API_URL + '/' + picture}` }}
-          alt={title}
-          className="w-10 h-10 rounded"
-        />
-      )}
+      <Image
+        source={
+          picture
+            ? {
+                uri: (picture && `${API_URL}/${picture}`) ?? false,
+              }
+            : require('./../../../../../../assets/images/no_image.jpg')
+        }
+        alt={title}
+        className="w-10 h-10 rounded"
+      />
     </>
   );
 });

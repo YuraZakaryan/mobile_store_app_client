@@ -123,7 +123,7 @@ export const ProductPage = () => {
                       ? {
                           uri: (product.picture && `${API_URL}/${product.picture}`) ?? false,
                         }
-                      : require('./../../../assets/images/no_image.png')
+                      : require('./../../../assets/images/no_image.jpg')
                   }
                   className="w-60 h-60 rounded-lg"
                   alt="picture"

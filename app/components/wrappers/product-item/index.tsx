@@ -37,7 +37,7 @@ export const ProductItem: React.FC<IProductItem> = React.memo((props) => {
                 ? {
                     uri: (item.picture && `${API_URL}/${item.picture}`) ?? false,
                   }
-                : require('./../../../assets/images/no_image.png')
+                : require('./../../../assets/images/no_image.jpg')
             }
             alt={item.title}
             className={`w-32 h-32 ${imageClassName}`}

@@ -19,15 +19,23 @@ export const OrdersControl = () => {
 
   const debouncedSearch: string = useDebounce(searchQuery, 500);
 
+  const fetchSearchData = (): void => {
+    dispatch(fetchAllOrdersThunk({ page: 0, limit: LIMIT_NUMBER, query: debouncedSearch }));
+  };
+
   const fetchData = (): void => {
     dispatch(
-      fetchAllOrdersThunk({ page: currentOrderPage, limit: LIMIT_NUMBER, query: debouncedSearch })
+      fetchAllOrdersThunk({ page: currentOrderPage, limit: LIMIT_NUMBER, query: searchQuery })
     );
   };
 
-  React.useEffect(() => {
+  React.useEffect((): void => {
+    fetchSearchData();
+  }, [debouncedSearch]);
+
+  React.useEffect((): void => {
     fetchData();
-  }, [currentOrderPage, debouncedSearch, isLoading]);
+  }, [currentOrderPage, isLoading]);
 
   const handlePrevUserPage = (): void => {
     if (currentOrderPage > 1) {

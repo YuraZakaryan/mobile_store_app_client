@@ -68,10 +68,20 @@ export const Search = () => {
   // Custom hook for debouncing the search query
   const debouncedSearch: string = useDebounce(searchQuery, 500);
 
-  const fetchDataByQuery = (): void => {
+  const fetchSearchData = (): void => {
     dispatch(
       searchProductsThunk({
         query: debouncedSearch,
+        limit: LIMIT_NUMBER,
+        page: 0,
+      })
+    );
+  };
+
+  const fetchData = (): void => {
+    dispatch(
+      searchProductsThunk({
+        query: searchQuery,
         limit: LIMIT_NUMBER,
         page: currentSearchProductPage,
       })
@@ -79,9 +89,14 @@ export const Search = () => {
   };
 
   // Effect to trigger searchProductsThunk when search query changes or initial search is true
-  React.useEffect(() => {
-    fetchDataByQuery();
-  }, [initialSearch, debouncedSearch, isLoading, currentSearchProductPage]);
+
+  React.useEffect((): void => {
+    fetchSearchData();
+  }, [debouncedSearch]);
+
+  React.useEffect((): void => {
+    fetchData();
+  }, [initialSearch, isLoading, currentSearchProductPage]);
 
   const handleSearchChange = (text: string): void => {
     // Dispatch action to set the search query and indicate an initial search
@@ -100,7 +115,7 @@ export const Search = () => {
   };
 
   const handleRefresh = (): void => {
-    fetchDataByQuery();
+    fetchData();
   };
 
   const handlePrevProductPage = (): void => {

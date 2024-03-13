@@ -4,7 +4,7 @@ import { View } from 'react-native';
 
 import { TOrderViewRouteParams } from './types';
 import { ButtonStatusViewOrder } from './wrappers';
-import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
+import { useAppDispatch } from '../../../../hooks/redux';
 import { changeOrderStatusThunk, deliverOrderThunk } from '../../../../redux/http/orderThunk';
 import { EOrderStatus, TOrder, TOrderItem } from '../../../../redux/types/order';
 import { SHOW_SUCCESS } from '../../../../toasts';
@@ -20,7 +20,6 @@ export const OrderView = () => {
     [EOrderStatus.REJECTED]: false,
   });
   const { item }: TOrderViewRouteParams = (route.params as TOrderViewRouteParams) || {};
-  const { changeStatus } = useAppSelector((state) => state.order);
   const { navigate } = useNavigation<NavigationProp<ParamListBase>>();
 
   const handleChangeStatus = React.useCallback(

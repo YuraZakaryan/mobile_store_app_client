@@ -3,7 +3,7 @@ import { RefreshControl, ScrollView, Text, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
 import { useDebounce } from '../../../../hooks/useDebounce';
-import { fetchDeliveredOrdersThunk } from '../../../../redux/http/orderThunk';
+import { fetchAllOrdersThunk, fetchDeliveredOrdersThunk } from '../../../../redux/http/orderThunk';
 import { EOrderStatus, TOrder } from '../../../../redux/types/order';
 import { formatDate } from '../../../../utils';
 import { LIMIT_NUMBER } from '../../../../utils/constants';
@@ -20,19 +20,27 @@ export const OrdersCompleted = () => {
 
   const debouncedSearch: string = useDebounce(searchQuery, 500);
 
+  const fetchSearchData = (): void => {
+    dispatch(fetchDeliveredOrdersThunk({ page: 0, limit: LIMIT_NUMBER, query: debouncedSearch }));
+  };
+
   const fetchData = (): void => {
     dispatch(
       fetchDeliveredOrdersThunk({
         page: currentStatusOrderPage,
         limit: LIMIT_NUMBER,
-        query: debouncedSearch,
+        query: searchQuery,
       })
     );
   };
 
   React.useEffect((): void => {
+    fetchSearchData();
+  }, [debouncedSearch]);
+
+  React.useEffect((): void => {
     fetchData();
-  }, [currentStatusOrderPage, debouncedSearch, isLoading]);
+  }, [currentStatusOrderPage, isLoading]);
 
   const handlePrevUserPage = (): void => {
     if (currentStatusOrderPage > 1) {

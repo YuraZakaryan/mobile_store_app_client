@@ -12,10 +12,18 @@ export interface IOrderItemCard {
 export const OrderItemCard: React.FC<IOrderItemCard> = React.memo((props) => {
   const { item } = props;
 
+  const picture: string = item.product.picture;
+
   return (
     <View className="flex-row flex-1 min-h-[100px] bg-white shadow rounded-lg">
       <Image
-        source={{ uri: `${API_URL}/${item.product.picture}` ?? '' }}
+        source={
+          picture
+            ? {
+                uri: (picture && `${API_URL}/${picture}`) ?? false,
+              }
+            : require('./../../../assets/images/no_image.jpg')
+        }
         alt={item._id}
         className="w-24 h-24 rounded-lg mx-2"
       />

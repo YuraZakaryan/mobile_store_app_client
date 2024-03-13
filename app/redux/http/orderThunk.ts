@@ -82,7 +82,7 @@ export const toOrderThunk = createAsyncThunk(
 export const fetchDeliveredOrdersThunk = createAsyncThunk(
   'fetchDelivered/order',
   async ({ page = 1, limit = 5, query = '' }: TFetchOptions, { rejectWithValue }) => {
-    const skip: number = (page - 1) * limit;
+    const skip: number = Math.max(page - 1, 0) * limit;
 
     try {
       const { data } = await $authHost.get<TItemsWithTotalLength<TOrder[]>>(
@@ -102,7 +102,7 @@ export const fetchDeliveredOrdersThunk = createAsyncThunk(
 export const fetchAllOrdersThunk = createAsyncThunk(
   'fetchAllOrders/order',
   async ({ page = 1, limit = 5, query = '' }: TFetchOptions, { rejectWithValue }) => {
-    const skip: number = (page - 1) * limit;
+    const skip: number = Math.max(page - 1, 0) * limit;
 
     try {
       const { data } = await $authHost.get<TItemsWithTotalLength<TOrder[]>>(

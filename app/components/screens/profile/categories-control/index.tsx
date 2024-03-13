@@ -5,6 +5,7 @@ import { Image, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
 import { useDebounce } from '../../../../hooks/useDebounce';
 import { fetchControlCategoriesThunk } from '../../../../redux/http/categoryThunk';
+import { fetchControlProductsThunk } from '../../../../redux/http/productThunk';
 import { TCategory } from '../../../../redux/types';
 import { API_URL, LIMIT_NUMBER } from '../../../../utils/constants';
 import { Loading } from '../../../ui';
@@ -22,19 +23,33 @@ export const CategoriesControl = () => {
 
   const debouncedSearch: string = useDebounce(searchQuery, 500);
 
-  const fetchData = (): void => {
+  const fetchSearchData = (): void => {
     dispatch(
       fetchControlCategoriesThunk({
-        page: currentCategoryPage,
+        page: 0,
         limit: LIMIT_NUMBER,
         query: debouncedSearch,
       })
     );
   };
 
+  const fetchData = (): void => {
+    dispatch(
+      fetchControlCategoriesThunk({
+        page: currentCategoryPage,
+        limit: LIMIT_NUMBER,
+        query: searchQuery,
+      })
+    );
+  };
+
+  React.useEffect((): void => {
+    fetchSearchData();
+  }, [debouncedSearch]);
+
   React.useEffect((): void => {
     fetchData();
-  }, [currentCategoryPage, debouncedSearch, isLoading]);
+  }, [currentCategoryPage, isLoading]);
 
   const handleClick = (): void => {
     navigate('categoryCreateEdit');

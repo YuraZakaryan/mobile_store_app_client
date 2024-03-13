@@ -36,9 +36,19 @@ export const UsersControl = () => {
 
   const isLoading: boolean | null =
     createUser.isLoading || updateUser.isLoading || cancelUser.isLoading || banUser.isLoading;
+
+  const fetchSearchUserData = (): void => {
+    dispatch(fetchUsersThunk({ page: 0, limit: LIMIT_NUMBER, query: debouncedSearchUser }));
+  };
   const fetchUsersData = (): void => {
     dispatch(
-      fetchUsersThunk({ page: currentUserPage, limit: LIMIT_NUMBER, query: debouncedSearchUser })
+      fetchUsersThunk({ page: currentUserPage, limit: LIMIT_NUMBER, query: searchUserQuery })
+    );
+  };
+
+  const fetchUnconfirmedSearchUserData = (): void => {
+    dispatch(
+      fetchUnconfirmedUsers({ page: 0, limit: LIMIT_NUMBER, query: debouncedSearchUnConfirmedUser })
     );
   };
   const fetchUnconfirmedUsersData = (): void => {
@@ -46,30 +56,46 @@ export const UsersControl = () => {
       fetchUnconfirmedUsers({
         page: currentUnConfirmedUserPage,
         limit: LIMIT_NUMBER,
-        query: debouncedSearchUnConfirmedUser,
+        query: searchUnConfirmedUserQuery,
       })
     );
+  };
+
+  const fetchBannedSearchUserData = (): void => {
+    dispatch(fetchBannedUsers({ page: 0, limit: LIMIT_NUMBER, query: debouncedSearchBannedUser }));
   };
   const fetchBannedUsersData = (): void => {
     dispatch(
       fetchBannedUsers({
         page: currentBannedUserPage,
         limit: LIMIT_NUMBER,
-        query: debouncedSearchBannedUser,
+        query: searchBannedUserQuery,
       })
     );
   };
   React.useEffect((): void => {
+    fetchSearchUserData();
+  }, [debouncedSearchUser]);
+
+  React.useEffect((): void => {
     fetchUsersData();
-  }, [currentUserPage, debouncedSearchUser, isLoading]);
+  }, [currentUserPage, isLoading]);
+
+  React.useEffect((): void => {
+    fetchUnconfirmedSearchUserData();
+  }, [debouncedSearchUnConfirmedUser]);
 
   React.useEffect((): void => {
     fetchUnconfirmedUsersData();
-  }, [currentUnConfirmedUserPage, debouncedSearchUnConfirmedUser, isLoading]);
+  }, [currentUnConfirmedUserPage, isLoading]);
+
+  React.useEffect((): void => {
+    fetchBannedSearchUserData();
+  }, [debouncedSearchBannedUser]);
 
   React.useEffect((): void => {
     fetchBannedUsersData();
-  }, [currentBannedUserPage, debouncedSearchBannedUser, isLoading]);
+  }, [currentBannedUserPage, isLoading]);
 
   const handleClick = (): void => {
     navigate('userCreateEdit');
@@ -120,8 +146,7 @@ export const UsersControl = () => {
     fetchBannedUsersData();
   };
 
-  return (users.isLoading &&
-    (!hasSearchedUser || !hasSearchedBannedUser || hasSearchedUnConfirmedUser)) ||
+  return (users.isLoading && !hasSearchedUser) ||
     (unconfirmedUsers.isLoading && !hasSearchedUnConfirmedUser) ||
     (bannedUsers.isLoading && !hasSearchedBannedUser) ? (
     <Loading />

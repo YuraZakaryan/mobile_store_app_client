@@ -43,15 +43,35 @@ export const ProductsControl = () => {
   const debouncedSearch: string = useDebounce(searchQuery, 500);
   const debouncedSearchNotActivated: string = useDebounce(searchNotActivatedQuery, 500);
 
+  const fetchSearchData = (): void => {
+    dispatch(
+      fetchControlProductsThunk({
+        page: 0,
+        limit: LIMIT_NUMBER,
+        query: debouncedSearch,
+      })
+    );
+  };
+
   const fetchData = (): void => {
     dispatch(
       fetchControlProductsThunk({
         page: currentProductPage,
         limit: LIMIT_NUMBER,
-        query: debouncedSearch,
+        query: searchQuery,
       })
     );
     dispatch(fetchCategoriesThunk({}));
+  };
+
+  const fetchSearchNotActivated = (): void => {
+    dispatch(
+      fetchControlNotActivatedProductsThunk({
+        page: 0,
+        limit: LIMIT_NUMBER,
+        query: debouncedSearchNotActivated,
+      })
+    );
   };
 
   const fetchNotActivatedData = (): void => {
@@ -59,18 +79,26 @@ export const ProductsControl = () => {
       fetchControlNotActivatedProductsThunk({
         page: currentNotActivatedProductPage,
         limit: LIMIT_NUMBER,
-        query: debouncedSearchNotActivated,
+        query: searchNotActivatedQuery,
       })
     );
   };
 
   React.useEffect((): void => {
     fetchData();
-  }, [currentProductPage, debouncedSearch, isLoading]);
+  }, [currentProductPage, isLoading]);
+
+  React.useEffect((): void => {
+    fetchSearchData();
+  }, [debouncedSearch]);
 
   React.useEffect((): void => {
     fetchNotActivatedData();
-  }, [currentNotActivatedProductPage, debouncedSearchNotActivated, isLoading]);
+  }, [currentNotActivatedProductPage, isLoading]);
+
+  React.useEffect((): void => {
+    fetchSearchNotActivated();
+  }, [debouncedSearchNotActivated]);
 
   const handlePrevProductPage = (): void => {
     if (currentProductPage > 1) {

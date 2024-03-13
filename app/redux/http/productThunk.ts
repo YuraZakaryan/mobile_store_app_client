@@ -38,7 +38,7 @@ export const fetchProductsThunk = createAsyncThunk(
 export const fetchControlProductsThunk = createAsyncThunk(
   'fetchForControl/products',
   async ({ page = 1, limit = 5, query = '' }: TFetchOptions, { rejectWithValue }) => {
-    const skip = (page - 1) * limit;
+    const skip: number = Math.max(page - 1, 0) * limit;
 
     try {
       const { data } = await $authHost.get<TItemsWithTotalLength<TProduct[]>>(
@@ -58,7 +58,7 @@ export const fetchControlProductsThunk = createAsyncThunk(
 export const fetchControlNotActivatedProductsThunk = createAsyncThunk(
   'fetchForControl/NotActivatedProducts',
   async ({ page = 1, limit = 5, query = '' }: TFetchOptions, { rejectWithValue }) => {
-    const skip: number = (page - 1) * limit;
+    const skip: number = Math.max(page - 1, 0) * limit;
 
     try {
       const { data } = await $authHost.get<TItemsWithTotalLength<TProduct[]>>(
@@ -174,12 +174,13 @@ export const fetchProductsByCategoryThunk = createAsyncThunk(
 export const searchProductsThunk = createAsyncThunk(
   'search/products',
   async ({ page = 1, limit = 10, query }: ISearchProductOptions, { rejectWithValue }) => {
-    const skip = (page - 1) * limit;
+    const skip: number = Math.max(page - 1, 0) * limit;
 
     try {
       const { data } = await $authHost.get<TItemsWithTotalLength<TProduct[]>>(
         `product/search?limit=${limit}&skip=${skip}&title=${query}`
       );
+
       return data;
     } catch (err) {
       const error = err as AxiosError;

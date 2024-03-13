@@ -61,7 +61,7 @@ export const registrationThunk = createAsyncThunk(
 export const fetchUsersThunk = createAsyncThunk(
   'fetch/users',
   async ({ page = 1, limit = 5, query = '' }: TFetchOptions, { rejectWithValue }) => {
-    const skip = (page - 1) * limit;
+    const skip: number = Math.max(page - 1, 0) * limit;
 
     try {
       const { data } = await $authHost.get<TItemsWithTotalLength<TUser[]>>(
@@ -82,7 +82,7 @@ export const fetchUsersThunk = createAsyncThunk(
 export const fetchUnconfirmedUsers = createAsyncThunk(
   'fetchRegistrationRequests/users',
   async ({ page = 1, limit = 5, query = '' }: TFetchOptions, { rejectWithValue }) => {
-    const skip = (page - 1) * limit;
+    const skip: number = Math.max(page - 1, 0) * limit;
 
     try {
       const { data } = await $authHost.get<TItemsWithTotalLength<TUser[]>>(
@@ -102,7 +102,7 @@ export const fetchUnconfirmedUsers = createAsyncThunk(
 export const fetchBannedUsers = createAsyncThunk(
   'fetchBanned/users',
   async ({ page = 1, limit = 5, query = '' }: TFetchOptions, { rejectWithValue }) => {
-    const skip = (page - 1) * limit;
+    const skip: number = Math.max(page - 1, 0) * limit;
 
     try {
       const { data } = await $authHost.get<TItemsWithTotalLength<TUser[]>>(
