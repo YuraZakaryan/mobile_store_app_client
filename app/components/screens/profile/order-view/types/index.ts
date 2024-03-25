@@ -5,8 +5,7 @@ export interface TOrderViewRouteParams {
 }
 export interface IButtonStatusViewOrder {
   label: string;
-  active?: boolean;
-  status: EOrderStatus;
+  type: EOrderStatus;
   isLoading?: boolean;
   handleChangeStatus: (status: EOrderStatus) => void;
 }

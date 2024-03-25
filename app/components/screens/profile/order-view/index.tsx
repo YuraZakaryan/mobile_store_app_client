@@ -1,4 +1,4 @@
-import { useRoute, useNavigation, NavigationProp, ParamListBase } from '@react-navigation/native';
+import { NavigationProp, ParamListBase, useNavigation, useRoute } from '@react-navigation/native';
 import React from 'react';
 import { View } from 'react-native';
 
@@ -78,34 +78,32 @@ export const OrderView = () => {
     <Main>
       <OrdersList item={item as TOrder}>
         <View className="bg-white items-center w-full rounded-lg">
-          <ButtonStatusViewOrder
-            label="Պատվիրաված"
-            active={item?.status === EOrderStatus.ORDERED}
-            status={EOrderStatus.ORDERED}
-            handleChangeStatus={handleChangeStatus}
-            isLoading={loadingStates[EOrderStatus.ORDERED] ?? false}
-          />
-          <ButtonStatusViewOrder
-            label="Ընդունված"
-            active={item?.status === EOrderStatus.ACCEPTED}
-            status={EOrderStatus.ACCEPTED}
-            handleChangeStatus={handleChangeStatus}
-            isLoading={loadingStates[EOrderStatus.ACCEPTED] ?? false}
-          />
-          <ButtonStatusViewOrder
-            label="Առաքված"
-            active={item?.status === EOrderStatus.DELIVERED}
-            status={EOrderStatus.DELIVERED}
-            handleChangeStatus={handleDeliverOrder}
-            isLoading={loadingStates[EOrderStatus.DELIVERED] ?? false}
-          />
-          <ButtonStatusViewOrder
-            label="Մերժել"
-            active={item?.status === EOrderStatus.REJECTED}
-            status={EOrderStatus.REJECTED}
-            handleChangeStatus={handleChangeStatus}
-            isLoading={loadingStates[EOrderStatus.REJECTED] ?? false}
-          />
+          {item?.status === EOrderStatus.ORDERED && (
+            <>
+              <ButtonStatusViewOrder
+                label="Ընդունել"
+                type={EOrderStatus.ACCEPTED}
+                handleChangeStatus={handleChangeStatus}
+                isLoading={loadingStates[EOrderStatus.ACCEPTED] ?? false}
+              />
+              <View className="w-full mt-5">
+                <ButtonStatusViewOrder
+                  label="Մերժել"
+                  type={EOrderStatus.REJECTED}
+                  handleChangeStatus={handleChangeStatus}
+                  isLoading={loadingStates[EOrderStatus.REJECTED] ?? false}
+                />
+              </View>
+            </>
+          )}
+          {item?.status === EOrderStatus.ACCEPTED && (
+            <ButtonStatusViewOrder
+              label="Նշել որպես առաքված"
+              type={EOrderStatus.DELIVERED}
+              handleChangeStatus={handleDeliverOrder}
+              isLoading={loadingStates[EOrderStatus.DELIVERED] ?? false}
+            />
+          )}
         </View>
       </OrdersList>
     </Main>

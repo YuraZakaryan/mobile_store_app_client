@@ -1,10 +1,10 @@
-import axios, { AxiosError } from 'axios';
+import axios, { AxiosError, AxiosInstance } from 'axios';
 
 import { SecureStoreService } from '../../services';
 import { API_URL } from '../../utils/constants';
 import { TPayloadActionUser } from '../types';
 
-export const $authHost = axios.create({
+export const $authHost: AxiosInstance = axios.create({
   baseURL: `${API_URL || 'http://localhost:5000'}/api/`,
   timeout: 10000,
 });

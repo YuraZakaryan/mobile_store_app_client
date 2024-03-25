@@ -33,25 +33,9 @@ export const OrderCompletedView = () => {
     <Main>
       <OrdersList item={item as TOrder}>
         <View className="bg-white items-center w-full rounded-lg">
-          {item?.status === EOrderStatus.REJECTED ? (
-            <View className="p-3">
-              <Text className="text-red-500 text-center font-bold text-xl">Մերժված</Text>
-            </View>
-          ) : !hasTimePassed(formatDate(item?.deliveredTime as string), 86400) ? (
-            <>
-              <ButtonStatusViewOrder
-                label="Չեղարկել"
-                status={EOrderStatus.ACCEPTED}
-                isLoading={cancelOrder.isLoading ?? false}
-                handleChangeStatus={handleCancelOrder}
-              />
-              <View className="p-3">
-                <Text className="text-red-800 text-center">
-                  Չեղարկումը հնարավոր է կատարել <Text className="font-bold">1</Text> օրվա ընթացքում
-                </Text>
-              </View>
-            </>
-          ) : null}
+          <View className="p-3">
+            <Text className="text-red-500 text-center font-bold text-xl">Մերժված է</Text>
+          </View>
         </View>
       </OrdersList>
     </Main>

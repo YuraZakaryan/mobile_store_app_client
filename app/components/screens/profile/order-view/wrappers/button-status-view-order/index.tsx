@@ -1,18 +1,28 @@
 import React from 'react';
 import { ActivityIndicator, Text, TouchableOpacity } from 'react-native';
 
+import { EOrderStatus } from '../../../../../../redux/types/order';
 import { IButtonStatusViewOrder } from '../../types';
 
 export const ButtonStatusViewOrder: React.FC<IButtonStatusViewOrder> = React.memo((props) => {
-  const { label, active, status, handleChangeStatus, isLoading } = props;
+  const { label, type, handleChangeStatus, isLoading } = props;
+  const [buttonColor, setButtonColor] = React.useState<string>('bg-orange-400');
+
+  React.useEffect((): void => {
+    switch (type) {
+      case EOrderStatus.REJECTED:
+        setButtonColor('bg-red-600');
+        break;
+      default:
+        break;
+    }
+  }, [type]);
 
   return (
     <TouchableOpacity
-      className={`bg-gray-400 rounded p-3 min-h-[49px] mb-2 w-full ${
-        active || label === 'Չեղարկել' ? 'bg-orange-400' : ''
-      }`}
-      disabled={isLoading || active}
-      onPress={() => handleChangeStatus(status)}>
+      className={`rounded p-3 min-h-[49px] mb-2 w-full ${buttonColor}`}
+      disabled={isLoading}
+      onPress={() => handleChangeStatus(type)}>
       {isLoading ? (
         <ActivityIndicator size="small" />
       ) : (

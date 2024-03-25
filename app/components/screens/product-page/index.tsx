@@ -91,7 +91,7 @@ export const ProductPage = () => {
         } else if (err === 410) {
           SHOW_ERROR('Ձեր հաշիվը արգելափակված է');
         } else if (err === 502) {
-          SHOW_ERROR('Ոչ բավարար ապրանքի քանակ');
+          SHOW_ERROR('ՈՉ ԲԱՎԱՐԱՐ ԱՊՐԱՆՔԻ ՔԱՆԱԿ, ԹԱՐՄԱՑՐԵՔ ԷՋԸ');
         } else if (err === 401) {
           SHOW_ERROR('Կխնդրեինք առաջին հերթին մուտք գործել');
         } else {

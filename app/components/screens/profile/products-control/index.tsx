@@ -143,7 +143,9 @@ export const ProductsControl = () => {
     dispatch(toggleProductDocumentActive());
   };
 
-  return products.isLoading && (!hasSearched || !hasSearchedNotActivated) ? (
+  return products.isLoading &&
+    notActivatedProducts.isLoading &&
+    (!hasSearched || !hasSearchedNotActivated) ? (
     <Loading />
   ) : (
     <Main>

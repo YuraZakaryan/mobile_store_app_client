@@ -12,7 +12,6 @@ import {
   View,
 } from 'react-native';
 
-import { TInitialItemCounts } from './types';
 import { useAppDispatch, useAppSelector } from '../../../hooks/redux';
 import {
   deleteOrderItemThunk,
@@ -33,13 +32,10 @@ import { Main, NumericInputCustom } from '../../wrappers';
 
 export const Basket = () => {
   const dispatch = useAppDispatch();
-  const [initialItemCounts, setInitialItemCounts] = React.useState<TInitialItemCounts>({});
   const [itemLoadingStates, setItemLoadingStates] = React.useState<{ [itemId: string]: boolean }>(
     {}
   );
-  const { basket, fetchBasketOrder, toOrder, create, deleteItem } = useAppSelector(
-    (state) => state.order
-  );
+  const { basket, fetchBasketOrder, toOrder, create } = useAppSelector((state) => state.order);
   const { user } = useAppSelector((state) => state.user);
   const isAnyItemCountZero = basket.items.some((item) => item.itemCount === 0);
   const isLoading: boolean = create.isLoading as boolean;
@@ -52,35 +48,6 @@ export const Basket = () => {
   React.useEffect((): void => {
     fetchData();
   }, [isLoading]);
-
-  // Update initialItemCounts when basket or order deletion changes
-  React.useEffect(() => {
-    setInitialItemCounts((prevCounts) => {
-      const updatedCounts = { ...prevCounts };
-
-      basket.items.forEach((item: TOrderItem): void => {
-        if (updatedCounts[item._id]) {
-          updatedCounts[item._id] = prevCounts[item._id];
-        } else {
-          updatedCounts[item._id] = item.itemCount;
-        }
-      });
-
-      basket.items.forEach((item: TOrderItem): void => {
-        if (!updatedCounts[item._id]) {
-          updatedCounts[item._id] = item.itemCount;
-        }
-      });
-
-      Object.keys(updatedCounts).forEach((itemId: string): void => {
-        if (!basket.items.find((item: TOrderItem): boolean => item._id === itemId)) {
-          delete updatedCounts[itemId];
-        }
-      });
-
-      return updatedCounts;
-    });
-  }, [fetchBasketOrder.isLoading, deleteItem.isLoading]);
 
   // Calculate the total price of items in the basket
   const sumItemsPrice: number = basket.items.reduce((acc: number, item: TOrderItem): number => {
@@ -129,7 +96,7 @@ export const Basket = () => {
       .then((res: TOrder) => res && SHOW_SUCCESS('Պատվերը հաջողությամբ հաստատվեց'))
       .catch((err): void => {
         if (err === 502) {
-          SHOW_ERROR('Ոչ բավարար ապրանքի քանակ');
+          SHOW_ERROR('ՈՉ ԲԱՎԱՐԱՐ ԱՊՐԱՆՔԻ ՔԱՆԱԿ, ԹԱՐՄԱՑՐԵՔ ԷՋԸ');
         } else {
           SHOW_ERROR('Պատվերի հաստատման հետ կապված խնդիր է առաջացել');
         }
@@ -161,8 +128,6 @@ export const Basket = () => {
                 scrollEnabled={false}
                 ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
                 renderItem={({ item }) => {
-                  const initialItemCount: number = initialItemCounts[item._id] || 0;
-
                   return (
                     <>
                       {item.product && (
@@ -240,7 +205,7 @@ export const Basket = () => {
                                   <NumericInputCustom
                                     value={item.itemCount}
                                     minValue={0}
-                                    maxValue={item.product.count + initialItemCount}
+                                    maxValue={item.product.count}
                                     onChange={(newValue: number): void => {
                                       dispatch(updateItemCount({ itemId: item._id, newValue }));
                                     }}
