@@ -144,6 +144,7 @@ export const Registration = () => {
                   value={values.password}
                   onSubmitEditing={Keyboard.dismiss}
                   placeholder="Գաղտնաբառ"
+                  textContentType="oneTimeCode"
                   className="rounded px-3 py-3 border border-gray-600"
                   secureTextEntry
                 />
@@ -156,6 +157,7 @@ export const Registration = () => {
                   onBlur={handleBlur('confirmPassword')}
                   onSubmitEditing={Keyboard.dismiss}
                   placeholder="Կրկնել գաղտնաբառը"
+                  textContentType="oneTimeCode"
                   className="rounded px-3 py-3 border border-gray-600"
                   secureTextEntry
                 />

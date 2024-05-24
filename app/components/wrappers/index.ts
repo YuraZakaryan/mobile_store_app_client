@@ -14,3 +14,4 @@ export * from './orders-list';
 export * from './pagination-buttons';
 export * from './numeric-input-custom';
 export * from './dialog-import-document';
+export * from './sync-products';

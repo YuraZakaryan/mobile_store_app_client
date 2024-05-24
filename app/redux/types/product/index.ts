@@ -41,6 +41,7 @@ export type TInitialProductState = {
   productsByCategory: TItemsWithTotalLength<TProduct[]>;
   create: TStateStatus;
   createByDocument: TStateStatus;
+  syncProducts: TStateStatus;
   update: TStateStatus;
   delete: TStateStatus;
   history: IProductHistory[];

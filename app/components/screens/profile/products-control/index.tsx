@@ -200,7 +200,7 @@ export const ProductsControl = () => {
           {products.total_items === 0 && notActivatedProducts.total_items === 0 ? (
             <CreateItemButton handleClick={toggleDialog} createButtonLabel="Ներբեռնել XLSX" />
           ) : null}
-          <CreateItemButton handleClick={handleClick} createButtonLabel="Ստեղծել ապրանք" />
+          {/*<CreateItemButton handleClick={handleClick} createButtonLabel="Ստեղծել ապրանք" />*/}
         </View>
       </ScrollView>
     </Main>

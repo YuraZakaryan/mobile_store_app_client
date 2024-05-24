@@ -22,6 +22,7 @@ export type TUser = {
   phone: string;
   role: TRole;
   confirmed: boolean;
+  stockToken: string;
   banned: boolean;
 };
 

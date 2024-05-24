@@ -219,6 +219,7 @@ export const ProductCreateEdit = () => {
                     keyboardType="number-pad"
                     value={values.price?.toString()}
                     className="rounded p-3 border border-gray-600"
+                    editable={false}
                   />
                 </FieldWithError>
               </LabelInput>
@@ -232,6 +233,7 @@ export const ProductCreateEdit = () => {
                     keyboardType="number-pad"
                     value={values.discount.toString()}
                     className="rounded p-3 border border-gray-600"
+                    editable={false}
                   />
                 </FieldWithError>
               </LabelInput>
@@ -245,6 +247,7 @@ export const ProductCreateEdit = () => {
                     keyboardType="number-pad"
                     value={values.count?.toString()}
                     className="rounded p-3 border border-gray-600"
+                    editable={false}
                   />
                 </FieldWithError>
               </LabelInput>
@@ -258,6 +261,7 @@ export const ProductCreateEdit = () => {
                     keyboardType="number-pad"
                     value={values.code.toString()}
                     className="rounded p-3 border border-gray-600"
+                    editable={false}
                   />
                 </FieldWithError>
               </LabelInput>

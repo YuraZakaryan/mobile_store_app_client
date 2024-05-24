@@ -18,6 +18,7 @@ import { ICrudListProps } from '../../../types';
 import { TUserListNavigationProps } from '../../screens/profile/users-control/types';
 import { DialogImportDocument } from '../dialog-import-document';
 import { PaginationButtons } from '../pagination-buttons';
+import { SyncProducts } from '../sync-products';
 
 export const CrudList = <T,>(props: ICrudListProps<T>): React.ReactElement => {
   const {
@@ -62,17 +63,22 @@ export const CrudList = <T,>(props: ICrudListProps<T>): React.ReactElement => {
   const toggleDialog = (): void => {
     dispatch(toggleProductDocumentActive());
   };
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View className="mb-4">
-        <DialogImportDocument />
+        {/*<DialogImportDocument />*/}
+        {/*<View className="flex-row items-center justify-between mb-2">*/}
+        {/*  {labelList && <Text className="text-lg font-semibold">{labelList}</Text>}*/}
+        {/*  {showDocumentDialogButton ? (*/}
+        {/*    <TouchableOpacity className="px-6 py-2 bg-orange-400 rounded" onPress={toggleDialog}>*/}
+        {/*      <Text className="font-semibold text-white">Ներբեռնել XLSX</Text>*/}
+        {/*    </TouchableOpacity>*/}
+        {/*  ) : null}*/}
+        {/*</View>*/}
         <View className="flex-row items-center justify-between mb-2">
           {labelList && <Text className="text-lg font-semibold">{labelList}</Text>}
-          {showDocumentDialogButton ? (
-            <TouchableOpacity className="px-6 py-2 bg-orange-400 rounded" onPress={toggleDialog}>
-              <Text className="font-semibold text-white">Ներբեռնել XLSX</Text>
-            </TouchableOpacity>
-          ) : null}
+          <SyncProducts showDocumentDialogButton={showDocumentDialogButton as boolean} />
         </View>
         <View className="bg-white rounded-lg shadow">
           <View className="flex-1 justify-center bg-transparent border-b border-gray-200 w-full rounded-t-lg py-3 relative">

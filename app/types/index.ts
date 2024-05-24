@@ -69,7 +69,7 @@ export interface IDeleteButton extends PropsWithChildren, TClassName {
   isLoading: boolean;
   handleDelete: () => void;
 }
-export interface ICrudMainButton extends PropsWithChildren {
+export interface ICrudMainButton extends PropsWithChildren, TClassName {
   disabled: boolean;
   isLoading: boolean;
   handleSubmit: FormikHandlers['handleSubmit'];
@@ -106,3 +106,6 @@ export interface INetworkError {
   type?: ETypeError;
 }
 export type TCustomFileType = { size: number; name: string; type: string; uri: string };
+export interface ISyncProducts {
+  showDocumentDialogButton: boolean;
+}

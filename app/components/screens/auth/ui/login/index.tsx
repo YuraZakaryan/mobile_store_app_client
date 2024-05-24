@@ -76,6 +76,7 @@ export const Login = () => {
                     onChangeText={handleChange('password')}
                     onBlur={handleBlur('password')}
                     onSubmitEditing={Keyboard.dismiss}
+                    textContentType="oneTimeCode"
                     value={values.password}
                     placeholder="Գաղտնաբառ"
                     className="rounded px-3 py-4 border border-gray-600 z-5"

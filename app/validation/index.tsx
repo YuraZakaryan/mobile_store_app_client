@@ -133,12 +133,12 @@ export const createAndEditProductFormSchema = Yup.object().shape({
     .required('Անվանումը պարտադիր է')
     .min(2, 'Անունը պետք է ունենա առնվազն 2 տառ')
     .max(64, 'Անունը չպետք է լինի ավելի քան 16 տառ'),
-  price: Yup.number().required('Գինը պարտադիր է').moreThan(0, 'Պետք է լինի մեծ 0֊ից'),
-  count: Yup.number().required('Քանակը պարտադիր է'),
-  discount: Yup.number()
-    .min(0, 'Զեղչը պետք է լինի ոչ փոքր 0֊ից')
-    .max(100, 'Զեղչը պետք է լինի ոչ մեծ 100֊ից'),
-  code: Yup.string().required('Քանակը պարտադիր է'),
+  // price: Yup.number().required('Գինը պարտադիր է').moreThan(0, 'Պետք է լինի մեծ 0֊ից'),
+  // count: Yup.number().required('Քանակը պարտադիր է'),
+  // discount: Yup.number()
+  //   .min(0, 'Զեղչը պետք է լինի ոչ փոքր 0֊ից')
+  //   .max(100, 'Զեղչը պետք է լինի ոչ մեծ 100֊ից'),
+  // code: Yup.string().required('Քանակը պարտադիր է'),
   category: Yup.string().required('Կատեգորիան պարտադիր է'),
 });
 

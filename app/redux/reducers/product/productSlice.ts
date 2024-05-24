@@ -13,6 +13,7 @@ import {
   fetchProductsThunk,
   fetchProductThunk,
   searchProductsThunk,
+  syncProductsByStockThunk,
   updateProductThunk,
 } from '../../http/productThunk';
 import { historyProducts } from '../../mock';
@@ -85,6 +86,9 @@ const initialState: TInitialProductState = {
     isLoading: false,
   },
   createByDocument: {
+    isLoading: false,
+  },
+  syncProducts: {
     isLoading: false,
   },
   update: {
@@ -432,6 +436,15 @@ export const productSlice = createSlice({
       .addCase(createProductByDocumentThunk.rejected, (state: TInitialProductState): void => {
         state.createByDocument.isLoading = false;
         state.productDocument = initialState.productDocument;
+      })
+      .addCase(syncProductsByStockThunk.fulfilled, (state: TInitialProductState): void => {
+        state.syncProducts.isLoading = false;
+      })
+      .addCase(syncProductsByStockThunk.pending, (state: TInitialProductState): void => {
+        state.syncProducts.isLoading = true;
+      })
+      .addCase(syncProductsByStockThunk.rejected, (state: TInitialProductState): void => {
+        state.syncProducts.isLoading = false;
       })
       .addCase(updateProductThunk.fulfilled, (state: TInitialProductState): void => {
         state.update.isLoading = false;

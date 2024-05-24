@@ -55,6 +55,7 @@ export const UserCreateEdit = () => {
     password: '',
     phone: item?.phone || '',
     role: item?.role || 'USER',
+    stockToken: item?.stockToken || '',
     confirmed: !item?.confirmed ? true : item?.confirmed || false,
   };
 
@@ -228,6 +229,18 @@ export const UserCreateEdit = () => {
                     onSubmitEditing={Keyboard.dismiss}
                     placeholder="Հասցե"
                     value={values.address}
+                    className="rounded px-3 py-3 border border-gray-600"
+                  />
+                </FieldWithError>
+              </LabelInput>
+              <LabelInput label="Պահոցի թոքեն" required>
+                <FieldWithError fieldName="stockToken" errors={errors} touched={touched}>
+                  <TextInput
+                    onChangeText={handleChange('stockToken')}
+                    onBlur={handleBlur('stockToken')}
+                    onSubmitEditing={Keyboard.dismiss}
+                    placeholder="Թոքեն"
+                    value={values.stockToken}
                     className="rounded px-3 py-3 border border-gray-600"
                   />
                 </FieldWithError>

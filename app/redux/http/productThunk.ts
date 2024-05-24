@@ -234,6 +234,25 @@ export const createProductByDocumentThunk = createAsyncThunk(
     }
   }
 );
+
+export const syncProductsByStockThunk = createAsyncThunk(
+  'sync/product',
+  async (_, { rejectWithValue }) => {
+    try {
+      const { data } = await $authHost.get('product/sync');
+      return data;
+    } catch (err) {
+      const error = err as AxiosError;
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        const data: TErrorDataResponse = error.response.data as TErrorDataResponse;
+        return rejectWithValue(data.message);
+      }
+    }
+  }
+);
+
 export const updateProductThunk = createAsyncThunk(
   'update/product',
   async ({ id, formData }: TUpdateItem<FormikValues>, { rejectWithValue }) => {

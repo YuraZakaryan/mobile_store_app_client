@@ -1,6 +1,7 @@
 import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { Image } from 'expo-image';
 import React from 'react';
-import { Image, Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 
 import { useAppDispatch } from '../../../hooks/redux';
 import { updateCurrentProduct } from '../../../redux/reducers/product/productSlice';
@@ -20,6 +21,11 @@ export const ProductItem: React.FC<IProductItem> = React.memo((props) => {
     navigate('product', { title: item.title, productId: item._id });
   };
   const checkDiscount: boolean = item.discount > 0;
+  const imageUrl =
+    item.picture && item.picture.includes('https')
+      ? item.picture
+      : { uri: item.picture && `${API_URL}/${item.picture}` } ||
+        require('./../../../assets/images/no_image.jpg');
 
   return (
     <View
@@ -31,17 +37,7 @@ export const ProductItem: React.FC<IProductItem> = React.memo((props) => {
       }}>
       <TouchableOpacity onPress={handleNavigate} className="w-full">
         <View className="items-center">
-          <Image
-            source={
-              item.picture
-                ? {
-                    uri: (item.picture && `${API_URL}/${item.picture}`) ?? false,
-                  }
-                : require('./../../../assets/images/no_image.jpg')
-            }
-            alt={item.title}
-            className={`w-32 h-32 ${imageClassName}`}
-          />
+          <Image source={imageUrl} alt={item.title} className={`w-32 h-32 ${imageClassName}`} />
           {checkDiscount ? <SaleIcon discount={item.discount} /> : null}
         </View>
         <View className={`p-3 gap-1 justify-between h-24 h-${height}`}>

@@ -13,6 +13,7 @@ export type TInitialUserCreateEditFormValue = {
   address: string;
   password?: string;
   phone: string;
+  stockToken: string;
   role: TRole;
   confirmed: boolean;
 };
