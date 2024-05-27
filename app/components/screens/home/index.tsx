@@ -49,6 +49,7 @@ export const Home = () => {
     discountedProducts,
     create: createProduct,
     createByDocument,
+    syncProducts,
     update: updateProduct,
     delete: deleteProduct,
   } = useAppSelector((state) => state.product);
@@ -60,6 +61,7 @@ export const Home = () => {
     toOrder.isLoading,
     createProduct.isLoading,
     createByDocument.isLoading,
+    syncProducts.isLoading,
     updateProduct.isLoading,
     deleteProduct.isLoading,
   ];

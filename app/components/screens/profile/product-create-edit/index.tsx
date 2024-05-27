@@ -59,7 +59,7 @@ export const ProductCreateEdit = () => {
     discount: item?.discount || 0,
     code: item?.code || '',
     picture: item?.picture || null,
-    category: item?.category || categoryData[0].value,
+    category: item?.category as string,
     author: user?._id as string,
   };
 
@@ -192,6 +192,7 @@ export const ProductCreateEdit = () => {
                   value={values.category}
                   items={categoryData}
                   setOpen={setOpen}
+                  placeholder="Ընտրել"
                   style={{
                     borderRadius: 4,
                     borderColor: 'gray',

@@ -1,16 +1,10 @@
 import { AntDesign, SimpleLineIcons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import {
-  NavigationContainer,
-  NavigationProp,
-  ParamListBase,
-  useNavigation,
-} from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
-import { ActivityIndicator, Image, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ActivityIndicator, Text, View } from 'react-native';
 import Toast from 'react-native-toast-message';
 
 import {
@@ -37,7 +31,6 @@ import {
   ResetPassword,
 } from './components/screens';
 import { Auth } from './components/screens/auth';
-import { Loading } from './components/ui';
 import { useAppDispatch, useAppSelector } from './hooks/redux';
 import { getOrderByUserInProgressThunk } from './redux/http/orderThunk';
 import { fetchMe } from './redux/http/userThunk';
@@ -149,6 +142,15 @@ const ProfileStackGroup = () => {
         component={UserPasswordEdit}
         options={{
           title: 'Փոփոխել գաղտաբառը',
+          presentation: 'modal',
+          headerTitleStyle: { fontSize: 14 },
+        }}
+      />
+      <MyPageStack.Screen
+        name="aboutApp"
+        component={AboutApp}
+        options={{
+          title: 'Ծրագրի մասին',
           presentation: 'modal',
           headerTitleStyle: { fontSize: 14 },
         }}

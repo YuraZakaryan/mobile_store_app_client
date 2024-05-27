@@ -22,6 +22,7 @@ export const ProductsControl = () => {
   const {
     productsControl: products,
     notActivatedProductsControl: notActivatedProducts,
+    syncProducts,
     create,
     createByDocument,
     update,
@@ -38,7 +39,11 @@ export const ProductsControl = () => {
     React.useState<number>(1);
 
   const isLoading =
-    create.isLoading || createByDocument.isLoading || update.isLoading || deleteProduct.isLoading;
+    create.isLoading ||
+    createByDocument.isLoading ||
+    update.isLoading ||
+    deleteProduct.isLoading ||
+    syncProducts.isLoading;
 
   const debouncedSearch: string = useDebounce(searchQuery, 500);
   const debouncedSearchNotActivated: string = useDebounce(searchNotActivatedQuery, 500);

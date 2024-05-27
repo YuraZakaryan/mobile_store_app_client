@@ -30,6 +30,7 @@ export const Products = () => {
     productsByCategory,
     create: createProduct,
     createByDocument,
+    syncProducts,
     update: updateProduct,
     delete: deleteProduct,
   } = useAppSelector((state) => state.product);
@@ -45,6 +46,7 @@ export const Products = () => {
     toOrder.isLoading,
     createProduct.isLoading,
     createByDocument.isLoading,
+    syncProducts.isLoading,
     updateProduct.isLoading,
     deleteProduct.isLoading,
   ];

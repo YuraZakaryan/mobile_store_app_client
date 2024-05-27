@@ -21,11 +21,11 @@ export const ProductItem: React.FC<IProductItem> = React.memo((props) => {
     navigate('product', { title: item.title, productId: item._id });
   };
   const checkDiscount: boolean = item.discount > 0;
-  const imageUrl =
-    item.picture && item.picture.includes('https')
+  const imageUrl = item.picture
+    ? item.picture.includes('https')
       ? item.picture
-      : { uri: item.picture && `${API_URL}/${item.picture}` } ||
-        require('./../../../assets/images/no_image.jpg');
+      : { uri: item.picture && `${API_URL}/${item.picture}` }
+    : require('./../../../assets/images/no_image.jpg');
 
   return (
     <View
