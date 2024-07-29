@@ -13,6 +13,7 @@ import {
 import { toggleProductDocumentActive } from '../../../../redux/reducers/product/productSlice';
 import { TProduct } from '../../../../redux/types';
 import { SHOW_ERROR } from '../../../../toasts';
+import { handleSync } from '../../../../utils';
 import { LIMIT_NUMBER } from '../../../../utils/constants';
 import { Loading } from '../../../ui';
 import { CreateItemButton, CrudList, Main } from '../../../wrappers';
@@ -148,6 +149,9 @@ export const ProductsControl = () => {
     dispatch(toggleProductDocumentActive());
   };
 
+  const syncButton = () => handleSync(dispatch);
+  const isSyncLoading: boolean = syncProducts.isLoading ?? false;
+
   return products.isLoading &&
     notActivatedProducts.isLoading &&
     (!hasSearched || !hasSearchedNotActivated) ? (
@@ -203,7 +207,11 @@ export const ProductsControl = () => {
             />
           ) : null}
           {products.total_items === 0 && notActivatedProducts.total_items === 0 ? (
-            <CreateItemButton handleClick={toggleDialog} createButtonLabel="Ներբեռնել XLSX" />
+            <CreateItemButton
+              handleClick={syncButton}
+              createButtonLabel="Սիխրոնիզացնել"
+              isLoading={isSyncLoading as boolean}
+            />
           ) : null}
           {/*<CreateItemButton handleClick={handleClick} createButtonLabel="Ստեղծել ապրանք" />*/}
         </View>

@@ -239,7 +239,9 @@ export const syncProductsByStockThunk = createAsyncThunk(
   'sync/product',
   async (_, { rejectWithValue }) => {
     try {
-      const { data } = await $authHost.get('product/sync');
+      const { data } = await $authHost.get('product/sync', {
+        timeout: 0,
+      });
       return data;
     } catch (err) {
       const error = err as AxiosError;

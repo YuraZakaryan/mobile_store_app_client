@@ -42,6 +42,7 @@ export interface ICreateEditForm<T extends FormikValues> {
 export interface ICreateItemButton {
   handleClick: () => void;
   createButtonLabel: string;
+  isLoading?: boolean;
 }
 export interface ILabelInput extends PropsWithChildren, TClassName {
   label: string;
@@ -106,6 +107,6 @@ export interface INetworkError {
   type?: ETypeError;
 }
 export type TCustomFileType = { size: number; name: string; type: string; uri: string };
-export interface ISyncProducts {
+export interface ISyncProducts extends TClassName {
   showDocumentDialogButton: boolean;
 }
