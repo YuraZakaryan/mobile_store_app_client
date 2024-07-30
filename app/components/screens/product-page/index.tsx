@@ -11,7 +11,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import NumericInput from 'react-native-numeric-input';
 
 import { ETypeInfo, TProductRouteParams } from './types';
 import { InfoItem } from './wrapper';
@@ -23,7 +22,7 @@ import { TProduct } from '../../../redux/types';
 import { TOrderItem } from '../../../redux/types/order';
 import { SHOW_ERROR } from '../../../toasts';
 import { API_URL, ICON_MAIN_COLOR } from '../../../utils/constants';
-import { SaleIcon } from '../../wrappers';
+import { NumericInputCustom, SaleIcon } from '../../wrappers';
 
 export const ProductPage = () => {
   const dispatch = useAppDispatch();
@@ -104,6 +103,8 @@ export const ProductPage = () => {
     fetchData();
   };
 
+  const value = newItemForm.itemCount;
+
   return (
     <SafeAreaView>
       <ScrollView
@@ -134,19 +135,15 @@ export const ProductPage = () => {
                 <View className="bg-white flex-row items-center justify-between border border-gray-200 mb-1 rounded-lg">
                   <Text className="text-gray-500 p-4">Քանակը</Text>
                   <View className="px-4">
-                    <NumericInput
-                      onChange={(value: number) => handleChange('itemCount', value)}
-                      totalWidth={120}
-                      type="plus-minus"
-                      valueType="real"
-                      rounded
-                      totalHeight={35}
+                    <NumericInputCustom
+                      value={value}
                       minValue={0}
                       maxValue={product.count}
+                      onChange={(value: number) => handleChange('itemCount', value)}
                     />
                   </View>
                 </View>
-                <InfoItem label="Անվանում" content={product.title} />
+                <InfoItem type={ETypeInfo.LONG} label="Անվանում" content={product.title} />
                 <InfoItem label="Ընդհանուր քանակը" content={product.count} />
                 <InfoItem label="Կոդ" content={product.code} />
                 <InfoItem

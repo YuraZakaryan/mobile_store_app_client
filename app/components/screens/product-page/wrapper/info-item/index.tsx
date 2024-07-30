@@ -7,7 +7,7 @@ import { ETypeInfo, IInfoItem } from '../../types';
 export const InfoItem: React.FC<IInfoItem> = React.memo((props) => {
   const { label, content, type, discount } = props;
   return (
-    <View className="bg-white flex-row items-center justify-between border border-gray-200 p-4 mb-1 rounded-lg">
+    <View className="bg-white flex-row items-center justify-between border border-gray-200 p-4 mb-1 rounded-lg overflow-hidden">
       <Text className="text-gray-500">{label}</Text>
       {type === ETypeInfo.PRICE ? (
         <Text className="text-orange-500 font-semibold">
@@ -21,6 +21,8 @@ export const InfoItem: React.FC<IInfoItem> = React.memo((props) => {
           <Text className="text-gray-600 line-through">{formattedPrice(content as number)}</Text>
           <Text className="text-orange-500 font-semibold">․դր</Text>
         </View>
+      ) : type === ETypeInfo.LONG ? (
+        <Text className="text-orange-500 font-semibold w-3/4 text-right">{content}</Text>
       ) : (
         <Text className="text-orange-500 font-semibold">{content}</Text>
       )}

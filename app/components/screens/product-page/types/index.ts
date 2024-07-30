@@ -1,4 +1,5 @@
 export enum ETypeInfo {
+  LONG = 'long',
   PRICE = 'price',
   PRICE_WITH_DISCOUNTED = 'discountedPrice',
 }

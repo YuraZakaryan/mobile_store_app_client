@@ -161,7 +161,7 @@ export const Basket = () => {
                             )}
                           </View>
                           <View className="m-3 justify-between">
-                            <View>
+                            <View className="max-w-[85%]">
                               {item.product && (
                                 <Text className="text-blue-600">{item.product.title}</Text>
                               )}
