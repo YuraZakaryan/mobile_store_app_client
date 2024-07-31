@@ -54,7 +54,7 @@ export const ProductCreateEdit = () => {
   const initialProductCreateEditFormValue: TInitialProductCreateEditFormValue = {
     title: item?.title || '',
     information: item?.information || '',
-    price: item?.price || null,
+    priceWholesale: item?.priceWholesale || null,
     count: item?.count || null,
     discount: item?.discount || 0,
     code: item?.code || '',
@@ -218,7 +218,7 @@ export const ProductCreateEdit = () => {
                     onSubmitEditing={Keyboard.dismiss}
                     placeholder="Գին"
                     keyboardType="number-pad"
-                    value={values.price?.toString()}
+                    value={values.priceWholesale?.toString()}
                     className="rounded p-3 border border-gray-600"
                     editable={false}
                   />

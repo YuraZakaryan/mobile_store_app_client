@@ -47,13 +47,15 @@ export const ProductItem: React.FC<IProductItem> = React.memo((props) => {
           <View>
             {checkDiscount ? (
               <>
-                <Text className="text-gray-600 line-through">{formattedPrice(item.price)} ․դր</Text>
+                <Text className="text-gray-600 line-through">
+                  {formattedPrice(item.priceWholesale)} ․դր
+                </Text>
                 <Text className="text-red-500">
-                  {formattedPrice(calculateDiscountedPrice(item.price, item.discount))} ․դր
+                  {formattedPrice(calculateDiscountedPrice(item.priceWholesale, item.discount))} ․դր
                 </Text>
               </>
             ) : (
-              <Text className="text-red-500">{formattedPrice(item.price)} ․դր</Text>
+              <Text className="text-red-500">{formattedPrice(item.priceWholesale)} ․դր</Text>
             )}
           </View>
         </View>

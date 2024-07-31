@@ -51,10 +51,10 @@ export const Basket = () => {
 
   // Calculate the total price of items in the basket
   const sumItemsPrice: number = basket.items.reduce((acc: number, item: TOrderItem): number => {
-    if (item.product && item.product.price) {
+    if (item.product && item.product.priceWholesale) {
       const itemPrice: number = item.product.discount
-        ? calculateDiscountedPrice(item.product.price, item.product.discount)
-        : item.product.price;
+        ? calculateDiscountedPrice(item.product.priceWholesale, item.product.discount)
+        : item.product.priceWholesale;
       return acc + itemPrice * item.itemCount;
     }
     return acc;
@@ -183,14 +183,14 @@ export const Basket = () => {
                                       className={`text-orange-500  ${
                                         item.product.discount ? 'line-through text-gray-600' : ''
                                       }`}>
-                                      {item.product.price}
+                                      {item.product.priceWholesale}
                                       &nbsp;․դր
                                     </Text>
                                     {item.product.discount ? (
                                       <Text className="text-sm text-orange-500 ml-1">
                                         {formattedPrice(
                                           calculateDiscountedPrice(
-                                            item.product.price,
+                                            item.product.priceWholesale,
                                             item.product.discount
                                           )
                                         )}

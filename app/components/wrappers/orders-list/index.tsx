@@ -11,10 +11,10 @@ export const OrdersList: React.FC<IOrderList> = React.memo((props) => {
   const { children, item } = props;
 
   const totalAmount = item?.items.reduce((acc, item) => {
-    if (item.product && item.product.price) {
+    if (item.product && item.product.priceWholesale) {
       const itemPrice = item.product.discount
-        ? calculateDiscountedPrice(item.product.price, item.product.discount)
-        : item.product.price;
+        ? calculateDiscountedPrice(item.product.priceWholesale, item.product.discount)
+        : item.product.priceWholesale;
       return acc + item.itemCount * itemPrice;
     }
     return acc;

@@ -12,6 +12,10 @@ export interface IOrderItemCard {
 export const OrderItemCard: React.FC<IOrderItemCard> = React.memo((props) => {
   const { item } = props;
 
+  if (!item.product) {
+    return null;
+  }
+
   const picture: string = item.product.picture;
 
   return (
@@ -39,12 +43,12 @@ export const OrderItemCard: React.FC<IOrderItemCard> = React.memo((props) => {
               <Text className="text-sm text-red-500">x</Text>
               <Text
                 className={`text-sm text-red-500 ${item.product.discount ? 'line-through text-gray-600' : ''}`}>
-                {formattedPrice(item.product.price)}
+                {formattedPrice(item.product.priceWholesale)}
               </Text>
               {item.product.discount ? (
                 <Text className="text-sm text-red-500">
                   {formattedPrice(
-                    calculateDiscountedPrice(item.product.price, item.product.discount)
+                    calculateDiscountedPrice(item.product.priceWholesale, item.product.discount)
                   )}
                 </Text>
               ) : null}
@@ -53,8 +57,8 @@ export const OrderItemCard: React.FC<IOrderItemCard> = React.memo((props) => {
               {formattedPrice(
                 item.itemCount *
                   (item.product.discount
-                    ? calculateDiscountedPrice(item.product.price, item.product.discount)
-                    : item.product.price)
+                    ? calculateDiscountedPrice(item.product.priceWholesale, item.product.discount)
+                    : item.product.priceWholesale)
               )}
               ․ԴՐ
             </Text>

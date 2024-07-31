@@ -18,7 +18,7 @@ import { useAppDispatch, useAppSelector } from '../../../hooks/redux';
 import { createOrAddOrderThunk } from '../../../redux/http/orderThunk';
 import { fetchProductThunk } from '../../../redux/http/productThunk';
 import { changeForm, setProductId } from '../../../redux/reducers/order/orderSlice';
-import { TProduct } from '../../../redux/types';
+import { TProduct, TRole } from '../../../redux/types';
 import { TOrderItem } from '../../../redux/types/order';
 import { SHOW_ERROR } from '../../../toasts';
 import { API_URL, ICON_MAIN_COLOR } from '../../../utils/constants';
@@ -104,6 +104,7 @@ export const ProductPage = () => {
   };
 
   const value = newItemForm.itemCount;
+  const role = user?.role as TRole;
 
   return (
     <SafeAreaView>
@@ -146,12 +147,51 @@ export const ProductPage = () => {
                 <InfoItem type={ETypeInfo.LONG} label="Անվանում" content={product.title} />
                 <InfoItem label="Ընդհանուր քանակը" content={product.count} />
                 <InfoItem label="Կոդ" content={product.code} />
-                <InfoItem
-                  label="Գին"
-                  content={product.price}
-                  type={checkDiscount ? ETypeInfo.PRICE_WITH_DISCOUNTED : ETypeInfo.PRICE}
-                  discount={product.discount}
-                />
+                {role === 'USER' ? (
+                  <InfoItem
+                    label="Գին"
+                    content={product.priceWholesale}
+                    type={checkDiscount ? ETypeInfo.PRICE_WITH_DISCOUNTED : ETypeInfo.PRICE}
+                    discount={product.discount}
+                  />
+                ) : role === 'SUPERUSER' ? (
+                  <>
+                    <InfoItem
+                      label="Գին մանրածախ"
+                      content={product.priceRetail}
+                      type={checkDiscount ? ETypeInfo.PRICE_WITH_DISCOUNTED : ETypeInfo.PRICE}
+                      discount={product.discount}
+                    />
+                    <InfoItem
+                      label="Գին մեծածախ"
+                      content={product.priceWholesale}
+                      type={checkDiscount ? ETypeInfo.PRICE_WITH_DISCOUNTED : ETypeInfo.PRICE}
+                      discount={product.discount}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <InfoItem
+                      label="Գին մանրածախ"
+                      content={product.priceRetail}
+                      type={checkDiscount ? ETypeInfo.PRICE_WITH_DISCOUNTED : ETypeInfo.PRICE}
+                      discount={product.discount}
+                    />
+                    <InfoItem
+                      label="Գին մեծածախ"
+                      content={product.priceWholesale}
+                      type={checkDiscount ? ETypeInfo.PRICE_WITH_DISCOUNTED : ETypeInfo.PRICE}
+                      discount={product.discount}
+                    />
+                    <InfoItem
+                      label="Գին Wildberries"
+                      content={product.priceWildberries}
+                      type={checkDiscount ? ETypeInfo.PRICE_WITH_DISCOUNTED : ETypeInfo.PRICE}
+                      discount={product.discount}
+                    />
+                  </>
+                )}
+
                 {checkDiscount ? <InfoItem label="Զեղչ" content={product.discount + ' %'} /> : null}
               </View>
               <View className="min-h-[40px] w-full flex-1 justify-center mt-5 items-center">

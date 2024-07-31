@@ -6,7 +6,9 @@ export type TProduct = {
   title: string;
   information: string;
   picture: string;
-  price: number;
+  priceRetail: number;
+  priceWholesale: number;
+  priceWildberries: number;
   count: number;
   code: string;
   discount: number;
@@ -30,7 +32,6 @@ export interface IProductDocument extends TStateStatus {
 
 export type TInitialProductState = {
   currentProduct: ICurrentProduct;
-
   products: TItemsWithTotalLength<TProduct[]>;
   productDocument: IProductDocument;
   productsControl: TItemsWithTotalLength<TProduct[]>;

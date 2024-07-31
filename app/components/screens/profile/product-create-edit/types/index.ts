@@ -7,7 +7,7 @@ export interface TProductCreateEditRouteParams {
 export type TInitialProductCreateEditFormValue = {
   title: string;
   information: string;
-  price: number | string | null;
+  priceWholesale: number | string | null;
   discount: number | string;
   code: string;
   count: number | string | null;

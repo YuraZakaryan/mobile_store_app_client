@@ -3,7 +3,7 @@ import { RefreshControl, ScrollView, Text, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
 import { useDebounce } from '../../../../hooks/useDebounce';
-import { fetchAllOrdersThunk, fetchDeliveredOrdersThunk } from '../../../../redux/http/orderThunk';
+import { fetchDeliveredOrdersThunk } from '../../../../redux/http/orderThunk';
 import { EOrderStatus, TOrder } from '../../../../redux/types/order';
 import { formatDate } from '../../../../utils';
 import { LIMIT_NUMBER } from '../../../../utils/constants';

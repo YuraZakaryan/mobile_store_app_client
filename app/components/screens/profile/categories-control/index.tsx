@@ -5,7 +5,6 @@ import { Image, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
 import { useDebounce } from '../../../../hooks/useDebounce';
 import { fetchControlCategoriesThunk } from '../../../../redux/http/categoryThunk';
-import { fetchControlProductsThunk } from '../../../../redux/http/productThunk';
 import { TCategory } from '../../../../redux/types';
 import { API_URL, LIMIT_NUMBER } from '../../../../utils/constants';
 import { Loading } from '../../../ui';

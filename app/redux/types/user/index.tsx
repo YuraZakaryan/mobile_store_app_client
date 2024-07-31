@@ -10,7 +10,7 @@ export enum EResetPasswordMode {
   NEW_PASS_SECTION = 'new-pass-section',
 }
 
-export type TRole = 'ADMIN' | 'MODERATOR' | 'USER';
+export type TRole = 'ADMIN' | 'MODERATOR' | 'USER' | 'SUPERUSER';
 
 export type TUser = {
   _id: string;

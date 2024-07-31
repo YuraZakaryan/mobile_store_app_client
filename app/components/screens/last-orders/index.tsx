@@ -87,14 +87,23 @@ export const LastOrders = () => {
                 <Text className="text-lg font-bold mb-2 text-blue-500">{formatDate(dateTime)}</Text>
                 {orders.map((order: TOrder, index: number) => {
                   const totalAmount: number = order.items.reduce(
-                    (acc: number, item: TOrderItem) =>
-                      acc +
-                      item.itemCount *
-                        (item.product.discount
-                          ? calculateDiscountedPrice(item.product.price, item.product.discount)
-                          : item.product.price),
+                    (acc: number, item: TOrderItem) => {
+                      if (!item.product) {
+                        return acc;
+                      }
+
+                      const price = item.product.discount
+                        ? calculateDiscountedPrice(
+                            item.product.priceWholesale,
+                            item.product.discount
+                          )
+                        : item.product.priceWholesale;
+
+                      return acc + item.itemCount * price;
+                    },
                     0
                   );
+
                   return (
                     <React.Fragment key={index}>
                       <FlatList
