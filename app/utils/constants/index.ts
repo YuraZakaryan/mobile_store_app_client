@@ -1,6 +1,6 @@
-import { EXPO_PUBLIC_API_URL, EXPO_PUBLIC_LOCAL_URL } from '@env';
+import { EXPO_PUBLIC_SERVER_URL, EXPO_PUBLIC_LOCAL_URL } from '@env';
 
-const API_URL = EXPO_PUBLIC_LOCAL_URL || 'http://localhost:5000';
+const API_URL = EXPO_PUBLIC_SERVER_URL || 'http://localhost:5000';
 const ICON_MAIN_COLOR: string = '#e78828';
 const LIMIT_NUMBER: number = 6;
 const NETWORK_ERROR_MESSAGE: string = 'Առկա է կապի հետ կապված խնդիր';
