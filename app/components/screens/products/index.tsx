@@ -2,7 +2,6 @@ import { NavigationProp, useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { FlatList, RefreshControl, SafeAreaView, View } from 'react-native';
 
-import { ProductCategoryItem } from './wrapper';
 import { useAppDispatch, useAppSelector } from '../../../hooks/redux';
 import { fetchCategoriesThunk } from '../../../redux/http/categoryThunk';
 import { fetchProductsByCategoryThunk } from '../../../redux/http/productThunk';
@@ -10,6 +9,7 @@ import { ETypeError } from '../../../types';
 import { LIMIT_NUMBER } from '../../../utils/constants';
 import { Loading, NetworkError } from '../../ui';
 import { PaginationButtons, ProductItem } from '../../wrappers';
+import { ProductCategoryItem } from './wrapper';
 
 export const Products = () => {
   // Redux state selectors
@@ -46,7 +46,6 @@ export const Products = () => {
     toOrder.isLoading,
     createProduct.isLoading,
     createByDocument.isLoading,
-    syncProducts.isLoading,
     updateProduct.isLoading,
     deleteProduct.isLoading,
   ];

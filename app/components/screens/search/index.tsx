@@ -57,7 +57,6 @@ export const Search = () => {
     toOrder.isLoading,
     createProduct.isLoading,
     createByDocument.isLoading,
-    syncProducts.isLoading,
     updateProduct.isLoading,
     deleteProduct.isLoading,
   ];

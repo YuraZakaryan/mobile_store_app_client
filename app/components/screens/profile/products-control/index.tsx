@@ -2,7 +2,6 @@ import { NavigationProp, ParamListBase, useNavigation } from '@react-navigation/
 import React from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 
-import { ProductRenderContent } from './ui';
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
 import { useDebounce } from '../../../../hooks/useDebounce';
 import { fetchCategoriesThunk } from '../../../../redux/http/categoryThunk';
@@ -17,6 +16,7 @@ import { handleSync } from '../../../../utils';
 import { LIMIT_NUMBER } from '../../../../utils/constants';
 import { Loading } from '../../../ui';
 import { CreateItemButton, CrudList, Main } from '../../../wrappers';
+import { ProductRenderContent } from './ui';
 
 export const ProductsControl = () => {
   const dispatch = useAppDispatch();
@@ -40,12 +40,7 @@ export const ProductsControl = () => {
     React.useState<number>(1);
 
   const isLoading =
-    create.isLoading ||
-    createByDocument.isLoading ||
-    update.isLoading ||
-    deleteProduct.isLoading ||
-    syncProducts.isLoading;
-
+    create.isLoading || createByDocument.isLoading || update.isLoading || deleteProduct.isLoading;
   const debouncedSearch: string = useDebounce(searchQuery, 500);
   const debouncedSearchNotActivated: string = useDebounce(searchNotActivatedQuery, 500);
 
@@ -150,7 +145,7 @@ export const ProductsControl = () => {
   };
 
   const syncButton = () => handleSync(dispatch);
-  const isSyncLoading: boolean = syncProducts.isLoading ?? false;
+  const syncLoading = syncProducts.isLoading ?? false;
 
   return products.isLoading &&
     notActivatedProducts.isLoading &&
@@ -210,7 +205,7 @@ export const ProductsControl = () => {
             <CreateItemButton
               handleClick={syncButton}
               createButtonLabel="Սիխրոնիզացնել"
-              isLoading={isSyncLoading as boolean}
+              isLoading={syncLoading}
             />
           ) : null}
           {/*<CreateItemButton handleClick={handleClick} createButtonLabel="Ստեղծել ապրանք" />*/}

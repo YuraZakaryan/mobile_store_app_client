@@ -1,12 +1,13 @@
+import { EXPO_PUBLIC_SERVER_URL } from '@env';
 import { Formik } from 'formik';
 import React from 'react';
-import { Keyboard, TextInput, View } from 'react-native';
+import { Keyboard, TextInput, View, Text } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../../../hooks/redux';
 import { loginThunk } from '../../../../../redux/http/userThunk';
 import { EAuthMode } from '../../../../../redux/types';
 import { SHOW_ERROR } from '../../../../../toasts';
-import { NETWORK_ERROR_MESSAGE } from '../../../../../utils/constants';
+import { API_URL, NETWORK_ERROR_MESSAGE } from '../../../../../utils/constants';
 import { loginFormSchema } from '../../../../../validation';
 import { FieldWithError, LabelInput } from '../../../../wrappers';
 import { initialLoginFormValue } from '../../data';

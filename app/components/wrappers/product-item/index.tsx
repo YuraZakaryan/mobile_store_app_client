@@ -42,7 +42,9 @@ export const ProductItem: React.FC<IProductItem> = React.memo((props) => {
         </View>
         <View className={`p-3 gap-1 justify-between h-24 h-${height}`}>
           <View>
-            <Text className="max-w-[160px]">{item.title}</Text>
+            <Text numberOfLines={2} className="max-w-[160px]">
+              {item.title}
+            </Text>
           </View>
           <View>
             {checkDiscount ? (

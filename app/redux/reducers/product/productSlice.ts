@@ -13,10 +13,8 @@ import {
   fetchProductsThunk,
   fetchProductThunk,
   searchProductsThunk,
-  syncProductsByStockThunk,
   updateProductThunk,
 } from '../../http/productThunk';
-import { historyProducts } from '../../mock';
 import { TInitialProductState, TItemsWithTotalLength, TProduct } from '../../types';
 
 const initialState: TInitialProductState = {
@@ -97,7 +95,7 @@ const initialState: TInitialProductState = {
   delete: {
     isLoading: false,
   },
-  history: historyProducts,
+  history: [],
   search: {
     isLoading: null,
     isError: false,
@@ -114,6 +112,9 @@ export const productSlice = createSlice({
   reducers: {
     setSearchQuery(state: TInitialProductState, action: PayloadAction<string>): void {
       state.searchQuery = action.payload;
+    },
+    syncProductIsLoading(state: TInitialProductState, action: PayloadAction<boolean>): void {
+      state.syncProducts.isLoading = action.payload;
     },
     clearSearchQuery(state: TInitialProductState): void {
       state.searchQuery = initialState.searchQuery;
@@ -437,15 +438,6 @@ export const productSlice = createSlice({
         state.createByDocument.isLoading = false;
         state.productDocument = initialState.productDocument;
       })
-      .addCase(syncProductsByStockThunk.fulfilled, (state: TInitialProductState): void => {
-        state.syncProducts.isLoading = false;
-      })
-      .addCase(syncProductsByStockThunk.pending, (state: TInitialProductState): void => {
-        state.syncProducts.isLoading = true;
-      })
-      .addCase(syncProductsByStockThunk.rejected, (state: TInitialProductState): void => {
-        state.syncProducts.isLoading = false;
-      })
       .addCase(updateProductThunk.fulfilled, (state: TInitialProductState): void => {
         state.update.isLoading = false;
       })
@@ -473,4 +465,5 @@ export const {
   toggleProductDocumentActive,
   setProductDocument,
   updateCurrentProduct,
+  syncProductIsLoading,
 } = productSlice.actions;

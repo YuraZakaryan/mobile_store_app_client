@@ -3,7 +3,6 @@ import { NavigationProp, ParamListBase, useNavigation } from '@react-navigation/
 import React from 'react';
 import { FlatList, RefreshControl, ScrollView, TouchableOpacity, View } from 'react-native';
 
-import { ItemsByCategory } from './ui';
 import { useAppDispatch, useAppSelector } from '../../../hooks/redux';
 import { getOrderByUserInProgressThunk } from '../../../redux/http/orderThunk';
 import { fetchDiscountedProductsThunk, fetchProductsThunk } from '../../../redux/http/productThunk';
@@ -13,6 +12,7 @@ import { ICON_MAIN_COLOR, LIMIT_NUMBER } from '../../../utils/constants';
 import { categoryHome } from '../../../utils/product';
 import { Loading, NetworkError } from '../../ui';
 import { Main } from '../../wrappers';
+import { ItemsByCategory } from './ui';
 
 export const Home = () => {
   const dispatch = useAppDispatch();
@@ -49,7 +49,6 @@ export const Home = () => {
     discountedProducts,
     create: createProduct,
     createByDocument,
-    syncProducts,
     update: updateProduct,
     delete: deleteProduct,
   } = useAppSelector((state) => state.product);
@@ -61,7 +60,6 @@ export const Home = () => {
     toOrder.isLoading,
     createProduct.isLoading,
     createByDocument.isLoading,
-    syncProducts.isLoading,
     updateProduct.isLoading,
     deleteProduct.isLoading,
   ];

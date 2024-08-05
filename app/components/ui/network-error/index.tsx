@@ -12,7 +12,7 @@ export const NetworkError: React.FC<INetworkError> = React.memo((props) => {
       <View className="flex-row justify-center gap-1">
         <MaterialIcons name="error" size={26} color="black" />
         <Text className="font-bold text-[18px]">
-          {type === ETypeError.TECHNICAL ? 'Տեղխնիկական խնդիր' : 'Կապի խնդիր'}
+          {type === ETypeError.TECHNICAL ? 'Տեխնիկական խնդիր' : 'Կապի խնդիր'}
         </Text>
       </View>
       <Text className="font-semibold text-gray-600 italic mt-1 text-center">
