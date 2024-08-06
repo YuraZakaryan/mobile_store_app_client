@@ -1,8 +1,7 @@
 import { NavigationProp, useNavigation, useRoute } from '@react-navigation/native';
 import React from 'react';
-import { FlatList, RefreshControl, SafeAreaView, ScrollView, View } from 'react-native';
+import { FlatList, RefreshControl, SafeAreaView, View } from 'react-native';
 
-import { TCategoryRouteParams } from './types';
 import { useAppDispatch, useAppSelector } from '../../../hooks/redux';
 import {
   fetchDiscountedProductsForHomeCategoryThunk,
@@ -11,8 +10,9 @@ import {
 import { TProduct } from '../../../redux/types';
 import { LIMIT_NUMBER } from '../../../utils/constants';
 import { categoryHome } from '../../../utils/product';
-import { Loading } from '../../ui';
-import { PaginationButtons, ProductItem } from '../../wrappers';
+import { Loading, ScrollLoader } from '../../ui';
+import { ProductItem } from '../../wrappers';
+import { TCategoryRouteParams } from './types';
 
 export const ProductsPageByCategory = () => {
   const dispatch = useAppDispatch();
@@ -30,19 +30,30 @@ export const ProductsPageByCategory = () => {
   // State to track the current page for fetching products
   const [currentProductPage, setProductCurrentPage] = React.useState<number>(1);
 
+  // State to track if more data is being loaded
+  const [isLoadingMore, setIsLoadingMore] = React.useState<boolean>(false);
+
   // Function to fetch data based on the selected category title
-  const fetchData = (): void => {
+  const fetchData = (isRefreshing: boolean = false): void => {
+    if (isRefreshing) {
+      setProductCurrentPage(1);
+    }
+
     if (categoryTitle === categoryHome.newProducts) {
       dispatch(
         fetchProductsForHomeCategoryThunk({ page: currentProductPage, limit: LIMIT_NUMBER })
-      );
+      ).then(() => {
+        setIsLoadingMore(false);
+      });
     } else if (categoryTitle === categoryHome.discountProducts) {
       dispatch(
         fetchDiscountedProductsForHomeCategoryThunk({
           page: currentProductPage,
           limit: LIMIT_NUMBER,
         })
-      );
+      ).then(() => {
+        setIsLoadingMore(false);
+      });
     }
   };
 
@@ -64,64 +75,42 @@ export const ProductsPageByCategory = () => {
       ? productsForHomeScreen
       : discountedProductsForHomeScreen;
 
-  // Function to handle moving to the previous page of products
-  const handlePrevProductPage = (): void => {
-    if (currentProductPage > 1) {
-      setProductCurrentPage((prevPage: number) => prevPage - 1);
-    }
-  };
-
-  // Function to handle moving to the next page of products
-  const handleNextProductPage = (): void => {
-    if (currentProductPage * LIMIT_NUMBER < products.total_items) {
+  // Function to handle loading more products when reaching the end of the list
+  const handleLoadMore = () => {
+    if (currentProductPage * LIMIT_NUMBER < products.total_items && !isLoadingMore) {
+      setIsLoadingMore(true);
       setProductCurrentPage((prevPage: number) => prevPage + 1);
     }
   };
-
-  // Determine button disable status based on current page and total items
-  const previousButtonDisable: boolean = currentProductPage <= 1;
-  const nextButtonDisable: boolean = currentProductPage * LIMIT_NUMBER >= products.total_items;
-  const totalCurrentPage: number = products.items.length;
-
   // Function to handle manual data refresh
   const handleRefresh = () => {
-    fetchData();
+    fetchData(true);
   };
 
-  return products.isLoading ? (
+  return products.isLoading && currentProductPage === 1 ? (
     <Loading />
   ) : (
     <SafeAreaView>
-      <ScrollView
+      <FlatList
+        data={products.items}
+        ItemSeparatorComponent={() => <View style={{ height: 20 }} />}
+        renderItem={({ index, item }) => (
+          <ProductItem
+            item={item}
+            index={index}
+            isLastInRow={products.items.length % 2 === 1 && index === products.items.length - 1}
+            key={item._id}
+          />
+        )}
+        numColumns={2}
+        keyExtractor={(item: TProduct) => item._id}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.5}
         refreshControl={
           <RefreshControl refreshing={products.isLoading as boolean} onRefresh={handleRefresh} />
-        }>
-        <View className="m-4">
-          <FlatList
-            scrollEnabled={false}
-            data={products.items}
-            ItemSeparatorComponent={() => <View style={{ height: 20 }} />}
-            renderItem={({ index, item }) => (
-              <ProductItem
-                item={item}
-                index={index}
-                isLastInRow={totalCurrentPage % 2 === 1 && index === totalCurrentPage - 1}
-                key={item._id}
-              />
-            )}
-            numColumns={2}
-            horizontal={false}
-            keyExtractor={(item: TProduct) => item._id}
-          />
-          <PaginationButtons
-            total_items={products.total_items}
-            previousButtonDisable={previousButtonDisable}
-            nextButtonDisable={nextButtonDisable}
-            handlePrevPage={handlePrevProductPage}
-            handleNextPage={handleNextProductPage}
-          />
-        </View>
-      </ScrollView>
+        }
+        ListFooterComponent={isLoadingMore ? <ScrollLoader /> : null}
+      />
     </SafeAreaView>
   );
 };

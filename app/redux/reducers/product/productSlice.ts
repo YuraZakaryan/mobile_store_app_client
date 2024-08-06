@@ -131,6 +131,10 @@ export const productSlice = createSlice({
     toggleProductDocumentActive(state: TInitialProductState): void {
       state.productDocument.dialogActive = !state.productDocument.dialogActive;
     },
+    clearCategoryThunk(state: TInitialProductState): void {
+      state.productsForHomeScreen = initialState.productsForHomeScreen;
+      state.discountedProductsForHomeScreen = initialState.discountedProductsForHomeScreen;
+    },
   },
   extraReducers: (builder): void => {
     builder
@@ -285,15 +289,27 @@ export const productSlice = createSlice({
         ): void => {
           const { total_items, items } = action.payload;
 
-          state.productsForHomeScreen = {
-            total_items,
-            items,
-            isError: false,
-            isLoading: false,
-            isNetworkError: false,
-          };
+          // Create a Set to store unique product IDs
+          const existingProductIds = new Set(
+            state.productsForHomeScreen.items.map((item) => item._id)
+          );
+
+          // Filter out duplicates from new items
+          const uniqueItems = items.filter((item) => !existingProductIds.has(item._id));
+
+          // Update state with unique items
+          state.productsForHomeScreen.total_items = total_items;
+          state.productsForHomeScreen.items = [
+            ...state.productsForHomeScreen.items,
+            ...uniqueItems,
+          ];
+
+          state.productsForHomeScreen.isError = false;
+          state.productsForHomeScreen.isLoading = false;
+          state.productsForHomeScreen.isNetworkError = false;
         }
       )
+
       .addCase(fetchProductsForHomeCategoryThunk.pending, (state: TInitialProductState): void => {
         state.productsForHomeScreen.isLoading = true;
         state.productsForHomeScreen.isError = false;
@@ -466,4 +482,5 @@ export const {
   setProductDocument,
   updateCurrentProduct,
   syncProductIsLoading,
+  clearCategoryThunk,
 } = productSlice.actions;

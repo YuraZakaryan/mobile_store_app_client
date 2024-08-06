@@ -5,7 +5,6 @@ import React from 'react';
 import { Image, Keyboard, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 
-import { TInitialProductCreateEditFormValue, TProductCreateEditRouteParams } from './types';
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
 import {
   createProductThunk,
@@ -26,6 +25,7 @@ import {
   Main,
 } from '../../../wrappers';
 import { CrudMainButton } from '../../../wrappers/crud-main-button';
+import { TInitialProductCreateEditFormValue, TProductCreateEditRouteParams } from './types';
 
 export const ProductCreateEdit = () => {
   const dispatch = useAppDispatch();
@@ -78,7 +78,7 @@ export const ProductCreateEdit = () => {
     const formData = new FormData();
     formData.append('title', values.title);
     formData.append('information', values.information);
-    formData.append('price', values.price);
+    formData.append('priceRetail', values.priceRetail);
     formData.append('count', values.count);
     formData.append('discount', values.discount);
     formData.append('code', values.code);
@@ -186,7 +186,7 @@ export const ProductCreateEdit = () => {
                   />
                 </FieldWithError>
               </LabelInput>
-              <LabelInput label="Կատեգորիա" required>
+              <LabelInput className="z-30" label="Կատեգորիա" required>
                 <DropDownPicker
                   open={open}
                   value={values.category}
@@ -211,10 +211,10 @@ export const ProductCreateEdit = () => {
                 label="Գինը"
                 required
                 icon={<Text className="text-gray-500 text-[12px] font-bold">դրամ</Text>}>
-                <FieldWithError fieldName="price" errors={errors} touched={touched}>
+                <FieldWithError fieldName="priceWholesale" errors={errors} touched={touched}>
                   <TextInput
-                    onChangeText={handleChange('price')}
-                    onBlur={handleBlur('price')}
+                    onChangeText={handleChange('priceWholesale')}
+                    onBlur={handleBlur('priceWholesale')}
                     onSubmitEditing={Keyboard.dismiss}
                     placeholder="Գին"
                     keyboardType="number-pad"
@@ -283,7 +283,7 @@ export const ProductCreateEdit = () => {
                                 ? (values.picture as { uri: string })?.uri
                                 : values.picture.includes('file')
                                   ? values.picture
-                                  : `${API_URL}/${values.picture}` ?? '',
+                                  : `${API_URL}/${values.picture}` || '',
                           }}
                           className="w-36 h-36 rounded"
                         />

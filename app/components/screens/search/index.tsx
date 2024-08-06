@@ -33,7 +33,6 @@ export const Search = () => {
     searchQuery,
     create: createProduct,
     createByDocument,
-    syncProducts,
     update: updateProduct,
     delete: deleteProduct,
   } = useAppSelector((state) => state.product);

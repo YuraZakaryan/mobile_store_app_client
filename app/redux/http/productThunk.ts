@@ -2,7 +2,6 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { AxiosError } from 'axios';
 import { FormikValues } from 'formik';
 
-import { $authHost } from './index';
 import {
   IFetchByCategoryOptions,
   ISearchProductOptions,
@@ -14,6 +13,7 @@ import {
   TProduct,
   TUpdateItem,
 } from '../types';
+import { $authHost } from './index';
 
 export const fetchProductsThunk = createAsyncThunk(
   'fetch/products',
@@ -267,6 +267,7 @@ export const updateProductThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
+
       if (!error.response) {
         return rejectWithValue('NetworkError');
       } else {

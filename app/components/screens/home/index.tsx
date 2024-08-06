@@ -51,6 +51,7 @@ export const Home = () => {
     createByDocument,
     update: updateProduct,
     delete: deleteProduct,
+    productsForHomeScreen,
   } = useAppSelector((state) => state.product);
 
   const loadingStates: (boolean | null)[] = [
