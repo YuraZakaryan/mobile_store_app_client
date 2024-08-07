@@ -2,7 +2,6 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { AxiosError } from 'axios';
 import { FormikValues } from 'formik';
 
-import { $authHost } from './index';
 import { TInitialLoginFormValue } from '../../components/screens/auth/types';
 import { SecureStoreService } from '../../services';
 import {
@@ -17,6 +16,7 @@ import {
   TUser,
   TUserCreateOrUpdateErrorResponseMessage,
 } from '../types';
+import { $authHost } from './index';
 
 export const loginThunk = createAsyncThunk(
   'login/user',
@@ -205,7 +205,7 @@ export const createUserThunk = createAsyncThunk(
 
 export const updateUserThunk = createAsyncThunk(
   'update/user',
-  async ({ id, formData, navigate }: TUpdateItem<FormikValues>, { rejectWithValue }) => {
+  async ({ id, formData }: TUpdateItem<FormikValues>, { rejectWithValue }) => {
     try {
       const { data } = await $authHost.put<TUser>(`user/${id}`, formData);
       return data;
