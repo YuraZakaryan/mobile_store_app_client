@@ -135,6 +135,9 @@ export const productSlice = createSlice({
       state.productsForHomeScreen = initialState.productsForHomeScreen;
       state.discountedProductsForHomeScreen = initialState.discountedProductsForHomeScreen;
     },
+    resetProductsByCategory(state: TInitialProductState): void {
+      state.productsByCategory = initialState.productsByCategory;
+    },
   },
   extraReducers: (builder): void => {
     builder
@@ -407,13 +410,21 @@ export const productSlice = createSlice({
         ): void => {
           const { total_items, items } = action.payload;
 
-          state.productsByCategory = {
-            total_items,
-            items,
-            isError: false,
-            isLoading: false,
-            isNetworkError: false,
-          };
+          // Create a Set to store unique product IDs
+          const existingProductIds = new Set(
+            state.productsByCategory.items.map((item) => item._id)
+          );
+
+          // Filter out duplicates from new items
+          const uniqueItems = items.filter((item) => !existingProductIds.has(item._id));
+
+          // Update state with unique items
+          state.productsByCategory.total_items = total_items;
+          state.productsByCategory.items = [...state.productsByCategory.items, ...uniqueItems];
+
+          state.productsByCategory.isError = false;
+          state.productsByCategory.isLoading = false;
+          state.productsByCategory.isNetworkError = false;
         }
       )
       .addCase(fetchProductsByCategoryThunk.pending, (state: TInitialProductState): void => {
@@ -483,4 +494,5 @@ export const {
   updateCurrentProduct,
   syncProductIsLoading,
   clearCategoryThunk,
+  resetProductsByCategory,
 } = productSlice.actions;

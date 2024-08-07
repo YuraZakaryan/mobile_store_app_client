@@ -8,6 +8,7 @@ export { isAdmin };
 
 export const selectRoles: TRoleSelect[] = [
   { label: 'Հաճախորդ', value: 'USER' },
+  { label: 'Հաճախորդ (արտոնություններով)', value: 'SUPERUSER' },
   { label: 'Մոդերատոր', value: 'MODERATOR' },
   { label: 'Ադմինիստրատոր', value: 'ADMIN' },
 ];

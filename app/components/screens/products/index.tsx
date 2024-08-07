@@ -7,8 +7,8 @@ import { fetchCategoriesThunk } from '../../../redux/http/categoryThunk';
 import { fetchProductsByCategoryThunk } from '../../../redux/http/productThunk';
 import { ETypeError } from '../../../types';
 import { LIMIT_NUMBER } from '../../../utils/constants';
-import { Loading, NetworkError } from '../../ui';
-import { PaginationButtons, ProductItem } from '../../wrappers';
+import { Loading, NetworkError, ScrollLoader } from '../../ui';
+import { ProductItem } from '../../wrappers';
 import { ProductCategoryItem } from './wrapper';
 
 export const Products = () => {
@@ -30,13 +30,14 @@ export const Products = () => {
     productsByCategory,
     create: createProduct,
     createByDocument,
-    syncProducts,
     update: updateProduct,
     delete: deleteProduct,
   } = useAppSelector((state) => state.product);
 
   // State to track the current page for fetching products by category
   const [currentProductPage, setProductCurrentPage] = React.useState<number>(1);
+
+  const [isLoadingMore, setIsLoadingMore] = React.useState<boolean>(false);
 
   // Loading status based on multiple order-related actions
   const loadingStates: (boolean | null)[] = [
@@ -70,14 +71,20 @@ export const Products = () => {
     dispatch(fetchCategoriesThunk({}));
   };
 
-  const fetchProductsByCategoryData = (): void => {
+  const fetchProductsByCategoryData = (isRefreshing: boolean = false): void => {
+    if (isRefreshing) {
+      setProductCurrentPage(1);
+    }
+
     dispatch(
       fetchProductsByCategoryThunk({
         category: chosen._id,
         limit: LIMIT_NUMBER,
         page: currentProductPage,
       })
-    );
+    ).then(() => {
+      setIsLoadingMore(false);
+    });
   };
 
   // Fetch categories data on component mount
@@ -99,28 +106,34 @@ export const Products = () => {
     fetchProductsByCategoryData();
   }, [currentProductPage, isLoading]);
 
-  // Function to handle moving to the previous page of products
-  const handlePrevProductPage = (): void => {
-    if (currentProductPage > 1) {
-      setProductCurrentPage((prevPage: number) => prevPage - 1);
-    }
-  };
+  // // Function to handle moving to the previous page of products
+  // const handlePrevProductPage = (): void => {
+  //   if (currentProductPage > 1) {
+  //     setProductCurrentPage((prevPage: number) => prevPage - 1);
+  //   }
+  // };
 
-  // Function to handle moving to the next page of products
-  const handleNextProductPage = (): void => {
-    if (currentProductPage * LIMIT_NUMBER < productsByCategory.total_items) {
+  // // Function to handle moving to the next page of products
+  // const handleNextProductPage = (): void => {
+  //   if (currentProductPage * LIMIT_NUMBER < productsByCategory.total_items) {
+  //     setProductCurrentPage((prevPage: number) => prevPage + 1);
+  //   }
+  // };
+
+  // // Determine button disable status based on current page and total items
+  // const previousButtonDisable: boolean = currentProductPage <= 1;
+  // const nextButtonDisable: boolean =
+  //   currentProductPage * LIMIT_NUMBER >= productsByCategory.total_items;
+
+  const handleLoadMore = () => {
+    if (currentProductPage * LIMIT_NUMBER < productsByCategory.total_items && !isLoadingMore) {
+      setIsLoadingMore(true);
       setProductCurrentPage((prevPage: number) => prevPage + 1);
     }
   };
-
-  // Determine button disable status based on current page and total items
-  const previousButtonDisable: boolean = currentProductPage <= 1;
-  const nextButtonDisable: boolean =
-    currentProductPage * LIMIT_NUMBER >= productsByCategory.total_items;
-
   // Function to handle manual data refresh
   const handleRefresh = (): void => {
-    fetchProductsByCategoryData();
+    fetchProductsByCategoryData(true);
   };
 
   const isNetworkError: boolean = categories.isNetworkError || productsByCategory.isNetworkError;
@@ -174,14 +187,17 @@ export const Products = () => {
                   }
                 />
               )}
+              onEndReached={handleLoadMore}
+              onEndReachedThreshold={0.5}
+              ListFooterComponent={isLoadingMore ? <ScrollLoader /> : null}
             />
-            <PaginationButtons
+            {/* <PaginationButtons
               total_items={productsByCategory.total_items}
               previousButtonDisable={previousButtonDisable}
               nextButtonDisable={nextButtonDisable}
               handlePrevPage={handlePrevProductPage}
               handleNextPage={handleNextProductPage}
-            />
+            /> */}
           </View>
         </View>
       )}

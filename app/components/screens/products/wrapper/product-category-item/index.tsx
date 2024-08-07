@@ -3,6 +3,7 @@ import { Image, TouchableOpacity, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../../../hooks/redux';
 import { setCategory } from '../../../../../redux/reducers/category/categorySlice';
+import { resetProductsByCategory } from '../../../../../redux/reducers/product/productSlice';
 import { API_URL } from '../../../../../utils/constants';
 import { IProductCategoryItem } from '../../types';
 
@@ -12,9 +13,15 @@ export const ProductCategoryItem: React.FC<IProductCategoryItem> = React.memo((p
   const { chosen } = useAppSelector((state) => state.category);
 
   const handleChose = (): void => {
+    dispatch(resetProductsByCategory());
     setProductCurrentPage(1);
-    dispatch(setCategory({ _id: item._id, title: item.title }));
+    if (chosen._id === item._id) {
+      dispatch(setCategory({ _id: '', title: '' }));
+    } else {
+      dispatch(setCategory({ _id: item._id, title: item.title }));
+    }
   };
+
   return (
     <TouchableOpacity onPress={handleChose} className="w-full">
       <View
@@ -23,7 +30,7 @@ export const ProductCategoryItem: React.FC<IProductCategoryItem> = React.memo((p
           chosen._id === item._id ? ' bg-gray-500' : ''
         }`}>
         <Image
-          source={{ uri: `${API_URL}/${item.picture}` ?? '' }}
+          source={{ uri: `${API_URL}/${item.picture}` || '' }}
           className="w-14 h-14"
           alt={item.title}
         />
