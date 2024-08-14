@@ -4,12 +4,12 @@ import { FormikValues } from 'formik';
 import React from 'react';
 import { Image, Keyboard, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-import { TCategoryCreateEditRouteParams, TInitialCategoryCreateEditFormValue } from './types';
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
 import {
   createCategoryThunk,
   deleteCategoryThunk,
   updateCategoryThunk,
+  updateProductsCategoryByKeywordThunk,
 } from '../../../../redux/http/categoryThunk';
 import { TCategory } from '../../../../redux/types';
 import { SHOW_ERROR, SHOW_SUCCESS } from '../../../../toasts';
@@ -25,6 +25,7 @@ import {
   Main,
 } from '../../../wrappers';
 import { CrudMainButton } from '../../../wrappers/crud-main-button';
+import { TCategoryCreateEditRouteParams, TInitialCategoryCreateEditFormValue } from './types';
 
 export const CategoryCreateEdit = () => {
   const dispatch = useAppDispatch();
@@ -33,8 +34,14 @@ export const CategoryCreateEdit = () => {
     (route.params as TCategoryCreateEditRouteParams) || {};
   const { setOptions, navigate } = useNavigation<NavigationProp<ParamListBase>>();
 
+  const [categoryKeyword, setCategoryKeyword] = React.useState(item?.keyword || '');
   const { user } = useAppSelector((state) => state.user);
-  const { delete: deleteStatus, create, update } = useAppSelector((state) => state.category);
+  const {
+    delete: deleteStatus,
+    create,
+    update,
+    updateProductsCategoryByKeyword,
+  } = useAppSelector((state) => state.category);
 
   React.useLayoutEffect((): void => {
     setOptions({
@@ -51,6 +58,33 @@ export const CategoryCreateEdit = () => {
 
   const clearPicture = (setFieldValue: FormikValues['setFieldValue']): void => {
     setFieldValue('picture', null);
+  };
+
+  const onUpdateProductsCategoryByKeyword = async () => {
+    if (item) {
+      await dispatch(
+        updateProductsCategoryByKeywordThunk({
+          id: item?._id as string,
+          keyword: categoryKeyword,
+        })
+      )
+        .unwrap()
+        .then(
+          (res) =>
+            res && SHOW_SUCCESS('Ապրանքների կատեգորիան հաջողությամբ թարմացվեց,ըստ բանալինային բառի')
+        )
+        .catch((err) => {
+          if (err === 'NetworkError') {
+            SHOW_ERROR(NETWORK_ERROR_MESSAGE);
+          } else if (err === 403) {
+            SHOW_ERROR('Դուք չունեք բավարար իրավունքներ');
+          } else if (err === 404) {
+            SHOW_ERROR('Չեն հայտնաբերվել ապրանքներ տվյալ բանալինային բառով');
+          } else {
+            SHOW_ERROR('Կատեգորիայի փոփոխման հետ կապված խնդիր է առաջացել');
+          }
+        });
+    }
   };
 
   const onSubmit = async (values: FormikValues): Promise<void> => {
@@ -178,7 +212,7 @@ export const CategoryCreateEdit = () => {
                                 ? (values.picture as { uri: string })?.uri
                                 : values.picture.includes('file')
                                   ? values.picture
-                                  : `${API_URL}/${values.picture}` ?? '',
+                                  : `${API_URL}/${values.picture}` || '',
                           }}
                           className="w-36 h-36 rounded"
                         />
@@ -215,6 +249,28 @@ export const CategoryCreateEdit = () => {
                   </View>
                 ) : null}
               </CrudButtonGroup>
+              {item ? (
+                <View className="mt-5 bg-white px-2 py-3 rounded-lg">
+                  <Text className="text-center font-bold text-base">
+                    Սիխրոնիզացնել ապրանքները ըստ համապատասխան բանալինային բառի
+                  </Text>
+                  <View className="py-3">
+                    <TextInput
+                      onChangeText={(text: string) => setCategoryKeyword(text)}
+                      onSubmitEditing={Keyboard.dismiss}
+                      placeholder="Բանալի բառ"
+                      value={categoryKeyword}
+                      className="rounded px-3 py-3 border border-gray-600"
+                    />
+                  </View>
+                  <CrudMainButton
+                    handleSubmit={onUpdateProductsCategoryByKeyword}
+                    disabled={categoryKeyword.length < 3}
+                    isLoading={updateProductsCategoryByKeyword.isLoading || false}>
+                    Սիխրոնիզացնել ապրանքները
+                  </CrudMainButton>
+                </View>
+              ) : null}
             </>
           );
         }}

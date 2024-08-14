@@ -6,7 +6,6 @@ import { Keyboard, TextInput, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import MaskInput from 'react-native-mask-input';
 
-import { TInitialUserCreateEditFormValue, TUserCreateEditRouteParams } from './types';
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
 import {
   cancelUserThunk,
@@ -14,9 +13,9 @@ import {
   toggleBanThunk,
   updateUserThunk,
 } from '../../../../redux/http/userThunk';
-import { TPayloadActionUser, TUser } from '../../../../redux/types';
+import { TPayloadActionUser, TRole, TUser } from '../../../../redux/types';
 import { SHOW_ERROR, SHOW_SUCCESS } from '../../../../toasts';
-import { selectRoles } from '../../../../utils';
+import { isAdmin, selectRoles } from '../../../../utils';
 import { ICON_MAIN_COLOR, NETWORK_ERROR_MESSAGE } from '../../../../utils/constants';
 import { registrationFormSchema, updateUserFormSchema } from '../../../../validation';
 import {
@@ -28,6 +27,7 @@ import {
   Main,
 } from '../../../wrappers';
 import { CrudMainButton } from '../../../wrappers/crud-main-button';
+import { TInitialUserCreateEditFormValue, TUserCreateEditRouteParams } from './types';
 
 export const UserCreateEdit = () => {
   const dispatch = useAppDispatch();
@@ -233,18 +233,6 @@ export const UserCreateEdit = () => {
                   />
                 </FieldWithError>
               </LabelInput>
-              <LabelInput label="Պահոցի թոքեն" required>
-                <FieldWithError fieldName="stockToken" errors={errors} touched={touched}>
-                  <TextInput
-                    onChangeText={handleChange('stockToken')}
-                    onBlur={handleBlur('stockToken')}
-                    onSubmitEditing={Keyboard.dismiss}
-                    placeholder="Թոքեն"
-                    value={values.stockToken}
-                    className="rounded px-3 py-3 border border-gray-600"
-                  />
-                </FieldWithError>
-              </LabelInput>
               <LabelInput label="Հեռախոսահամար" required>
                 <FieldWithError fieldName="phone" errors={errors} touched={touched}>
                   <MaskInput
@@ -272,6 +260,21 @@ export const UserCreateEdit = () => {
                   />
                 </FieldWithError>
               </LabelInput>
+              {isAdmin((user?.role as TRole) || 'USER') ? (
+                <LabelInput label="Պահոցի թոքեն">
+                  <FieldWithError fieldName="stockToken" errors={errors} touched={touched}>
+                    <TextInput
+                      onChangeText={handleChange('stockToken')}
+                      onBlur={handleBlur('stockToken')}
+                      onSubmitEditing={Keyboard.dismiss}
+                      placeholder="Թոքեն"
+                      value={values.stockToken}
+                      className="rounded px-3 py-3 border border-gray-600"
+                    />
+                  </FieldWithError>
+                </LabelInput>
+              ) : null}
+
               {!item ? (
                 <>
                   <LabelInput label="Գաղտնաբառ" required>

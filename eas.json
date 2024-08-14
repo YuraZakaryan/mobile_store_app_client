@@ -10,7 +10,7 @@
     "preview": {
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_SERVER_URL": "https://www.mobiart.am"
+        "EXPO_PUBLIC_SERVER_API_URL": "https://www.mobiart.am"
       }
     },
     "production": {}

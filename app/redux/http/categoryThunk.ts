@@ -1,8 +1,7 @@
-import { createAsyncThunk } from '@reduxjs/toolkit';
-import { AxiosError } from 'axios';
-import { FormikValues } from 'formik';
+import { createAsyncThunk } from '@reduxjs/toolkit'
+import { AxiosError } from 'axios'
+import { FormikValues } from 'formik'
 
-import { $authHost } from './index';
 import {
   TCategory,
   TCreateItemAndNavigate,
@@ -10,7 +9,8 @@ import {
   TFetchOptions,
   TItemsWithTotalLength,
   TUpdateItem,
-} from '../types';
+} from '../types'
+import { $authHost } from './index'
 
 export const fetchCategoriesThunk = createAsyncThunk(
   'fetch/categories',
@@ -82,6 +82,28 @@ export const updateCategoryThunk = createAsyncThunk(
           'Content-Type': 'multipart/form-data',
         },
       });
+      return data;
+    } catch (err) {
+      const error = err as AxiosError;
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
+    }
+  }
+);
+export const updateProductsCategoryByKeywordThunk = createAsyncThunk(
+  'update/productsCategoryByKeyword',
+  async ({ id, keyword }: { id: string; keyword: string }, { rejectWithValue }) => {
+    try {
+      const { data } = await $authHost.put(
+        `category/update-products-category-by-keyword/${id}`,
+        {
+          keyword,
+        },
+        { timeout: 0 }
+      );
       return data;
     } catch (err) {
       const error = err as AxiosError;

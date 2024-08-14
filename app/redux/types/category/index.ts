@@ -6,6 +6,7 @@ export type TCategory = {
   _id: string;
   title: string;
   description: string;
+  keyword: string;
   products: TProduct;
   picture: string;
   author: string;
@@ -21,6 +22,7 @@ export type TInitialCategoryState = {
   categories: TItemsWithTotalLength<TCategory[]>;
   categoriesControl: TItemsWithTotalLength<TCategory[]>;
   create: TStateStatus;
+  updateProductsCategoryByKeyword: TStateStatus;
   update: TStateStatus;
   delete: TStateStatus;
   chosen: TChosen;

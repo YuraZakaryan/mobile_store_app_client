@@ -6,6 +6,7 @@ import {
   fetchCategoriesThunk,
   fetchControlCategoriesThunk,
   updateCategoryThunk,
+  updateProductsCategoryByKeywordThunk,
 } from '../../http/categoryThunk';
 import { TCategory, TChosen, TInitialCategoryState, TItemsWithTotalLength } from '../../types';
 
@@ -28,6 +29,9 @@ const initialState: TInitialCategoryState = {
     isLoading: false,
   },
   update: {
+    isLoading: false,
+  },
+  updateProductsCategoryByKeyword: {
     isLoading: false,
   },
   delete: {
@@ -138,6 +142,24 @@ const categorySlice = createSlice({
       .addCase(updateCategoryThunk.rejected, (state: TInitialCategoryState): void => {
         state.update.isLoading = false;
       })
+      .addCase(
+        updateProductsCategoryByKeywordThunk.fulfilled,
+        (state: TInitialCategoryState): void => {
+          state.updateProductsCategoryByKeyword.isLoading = false;
+        }
+      )
+      .addCase(
+        updateProductsCategoryByKeywordThunk.pending,
+        (state: TInitialCategoryState): void => {
+          state.updateProductsCategoryByKeyword.isLoading = true;
+        }
+      )
+      .addCase(
+        updateProductsCategoryByKeywordThunk.rejected,
+        (state: TInitialCategoryState): void => {
+          state.updateProductsCategoryByKeyword.isLoading = false;
+        }
+      )
       .addCase(deleteCategoryThunk.fulfilled, (state: TInitialCategoryState): void => {
         state.delete.isLoading = false;
       })

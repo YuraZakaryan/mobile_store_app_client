@@ -10,3 +10,6 @@ export type TInitialCategoryCreateEditFormValue = {
   picture: string | null;
   author: string;
 };
+export type TInitialCategoryKeywordFormValue = {
+  keyword: string;
+};
