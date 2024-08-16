@@ -1,6 +1,6 @@
-import { createAsyncThunk } from '@reduxjs/toolkit'
-import { AxiosError } from 'axios'
-import { FormikValues } from 'formik'
+import { createAsyncThunk } from '@reduxjs/toolkit';
+import { AxiosError } from 'axios';
+import { FormikValues } from 'formik';
 
 import {
   TCategory,
@@ -9,18 +9,14 @@ import {
   TFetchOptions,
   TItemsWithTotalLength,
   TUpdateItem,
-} from '../types'
-import { $authHost } from './index'
+} from '../types';
+import { $authHost } from './index';
 
 export const fetchCategoriesThunk = createAsyncThunk(
   'fetch/categories',
-  async ({ page = 1, limit = 5, query = '' }: TFetchOptions, { rejectWithValue }) => {
-    const skip = (page - 1) * limit;
-
+  async (_, { rejectWithValue }) => {
     try {
-      const { data } = await $authHost.get<TItemsWithTotalLength<TCategory[]>>(
-        `category/all?limit=${limit}&skip=${skip}`
-      );
+      const { data } = await $authHost.get<TItemsWithTotalLength<TCategory[]>>('category/all');
       return data;
     } catch (err) {
       const error = err as AxiosError;
@@ -107,6 +103,7 @@ export const updateProductsCategoryByKeywordThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
+      console.log(error.response);
       if (!error.response) {
         return rejectWithValue('NetworkError');
       } else {

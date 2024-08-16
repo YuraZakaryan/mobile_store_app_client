@@ -186,7 +186,7 @@ export const ProductCreateEdit = () => {
                   />
                 </FieldWithError>
               </LabelInput>
-              <LabelInput className="z-30" label="Կատեգորիա" required>
+              <LabelInput label="Կատեգորիա" required>
                 <DropDownPicker
                   open={open}
                   value={values.category}

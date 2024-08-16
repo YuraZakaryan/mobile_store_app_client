@@ -11,13 +11,13 @@ export const LabelInput: React.FC<ILabelInput> = React.memo((props) => {
         {required ? <Text className="text-red-600">*</Text> : null}
         <Text className="mb-2 font-bold text-gray-600">{label}</Text>
         {additionalLabel ? (
-          <Text className="text-gray-500 font-semibold">({additionalLabel})</Text>
+          <Text className="text-gray-500 font-semibold -z-0">({additionalLabel})</Text>
         ) : null}
       </View>
-      <View>
+      <>
         {children}
         {icon && <View className="absolute right-3 h-full justify-center">{icon}</View>}
-      </View>
+      </>
     </View>
   );
 });
