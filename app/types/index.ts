@@ -16,6 +16,7 @@ export interface ICrudListProps<T> {
   labelList?: string;
   data: T[];
   navigateTo: string;
+  renderButton?: () => React.ReactNode;
   renderItemComponent: (index: number, item: T) => React.ReactNode;
   fieldButtonType?: 'edit' | 'view';
   handlePreviousPage: () => void;
@@ -107,6 +108,5 @@ export interface INetworkError {
   type?: ETypeError;
 }
 export type TCustomFileType = { size: number; name: string; type: string; uri: string };
-export interface ISyncProducts extends TClassName {
-  showDocumentDialogButton: boolean;
-}
+
+export interface ISyncProducts extends TClassName {}

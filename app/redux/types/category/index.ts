@@ -7,6 +7,7 @@ export type TCategory = {
   title: string;
   description: string;
   keyword: string;
+  orderIndex: number;
   products: TProduct;
   picture: string;
   author: string;
@@ -18,6 +19,10 @@ export type TChosen = {
   title: string;
 };
 
+export interface ISortCategories extends TStateStatus {
+  dialogStatus: boolean;
+}
+
 export type TInitialCategoryState = {
   categories: TItemsWithTotalLength<TCategory[]>;
   categoriesControl: TItemsWithTotalLength<TCategory[]>;
@@ -26,4 +31,5 @@ export type TInitialCategoryState = {
   update: TStateStatus;
   delete: TStateStatus;
   chosen: TChosen;
+  sortCategories: ISortCategories;
 };

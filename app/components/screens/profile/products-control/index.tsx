@@ -15,7 +15,7 @@ import { SHOW_ERROR } from '../../../../toasts';
 import { handleSync } from '../../../../utils';
 import { LIMIT_NUMBER } from '../../../../utils/constants';
 import { Loading } from '../../../ui';
-import { CreateItemButton, CrudList, Main } from '../../../wrappers';
+import { CreateItemButton, CrudList, Main, SyncProducts } from '../../../wrappers';
 import { ProductRenderContent } from './ui';
 
 export const ProductsControl = () => {
@@ -62,7 +62,7 @@ export const ProductsControl = () => {
         query: searchQuery,
       })
     );
-    dispatch(fetchCategoriesThunk({}));
+    dispatch(fetchCategoriesThunk());
   };
 
   const fetchSearchNotActivated = (): void => {
@@ -177,6 +177,7 @@ export const ProductsControl = () => {
               renderItemComponent={(index: number, item: TProduct) => (
                 <ProductRenderContent index={index} title={item.title} picture={item.picture} />
               )}
+              renderButton={() => <SyncProducts />}
             />
           ) : null}
           {notActivatedProducts.total_items > 0 || hasSearchedNotActivated ? (

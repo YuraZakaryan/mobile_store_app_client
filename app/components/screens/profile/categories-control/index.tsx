@@ -9,16 +9,24 @@ import { TCategory } from '../../../../redux/types';
 import { API_URL, LIMIT_NUMBER } from '../../../../utils/constants';
 import { Loading } from '../../../ui';
 import { CreateItemButton, CrudList, Main } from '../../../wrappers';
+import CategoriesDraggableDialog from '../categories-draggable';
+import { ButtonSortCategories } from './ui';
 
 export const CategoriesControl = () => {
   const dispatch = useAppDispatch();
-  const { create, update, delete: deleteCategory } = useAppSelector((state) => state.category);
-  const { categoriesControl: categories } = useAppSelector((state) => state.category);
+  const {
+    categoriesControl: categories,
+    sortCategories,
+    create,
+    update,
+    delete: deleteCategory,
+  } = useAppSelector((state) => state.category);
   const { navigate } = useNavigation<NavigationProp<ParamListBase>>();
   const [currentCategoryPage, setCategoryCurrentPage] = React.useState<number>(1);
   const [searchQuery, setSearchQuery] = React.useState<string>('');
   const [hasSearched, setHasSearched] = React.useState<boolean>(false);
-  const isLoading = create.isLoading || update.isLoading || deleteCategory.isLoading;
+  const isLoading =
+    create.isLoading || update.isLoading || deleteCategory.isLoading || sortCategories.isLoading;
 
   const debouncedSearch: string = useDebounce(searchQuery, 500);
 
@@ -95,6 +103,7 @@ export const CategoriesControl = () => {
               setSearchQuery={setSearchQuery}
               hasSearched={hasSearched}
               setHasSearched={setHasSearched}
+              showDocumentDialogButton
               renderItemComponent={(index: number, item: TCategory) => (
                 <>
                   <View className="flex-row items-center gap-2">
@@ -110,8 +119,10 @@ export const CategoriesControl = () => {
                   />
                 </>
               )}
+              renderButton={() => <ButtonSortCategories />}
             />
           ) : null}
+          <CategoriesDraggableDialog />
           <CreateItemButton handleClick={handleClick} createButtonLabel="Ստեղծել կատեգորիա" />
         </View>
       </ScrollView>

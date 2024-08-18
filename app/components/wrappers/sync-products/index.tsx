@@ -5,7 +5,7 @@ import { useAppDispatch, useAppSelector } from '../../../hooks/redux';
 import { ISyncProducts } from '../../../types';
 import { handleSync } from '../../../utils';
 
-export const SyncProducts: React.FC<ISyncProducts> = ({ showDocumentDialogButton, className }) => {
+export const SyncProducts: React.FC<ISyncProducts> = ({ className }) => {
   const { syncProducts } = useAppSelector((state) => state.product);
   const dispatch = useAppDispatch();
 
@@ -14,7 +14,7 @@ export const SyncProducts: React.FC<ISyncProducts> = ({ showDocumentDialogButton
   };
   const isLoading: boolean = syncProducts.isLoading ?? false;
 
-  return showDocumentDialogButton ? (
+  return (
     <TouchableOpacity
       className={`px-6 py-2 bg-orange-400 min-w-[170px] rounded ${className}`}
       onPress={syncButton}>
@@ -26,5 +26,5 @@ export const SyncProducts: React.FC<ISyncProducts> = ({ showDocumentDialogButton
         <Text className="font-semibold text-white">Սիխրոնիզացնել</Text>
       )}
     </TouchableOpacity>
-  ) : null;
+  );
 };

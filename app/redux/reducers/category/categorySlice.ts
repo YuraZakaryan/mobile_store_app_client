@@ -5,6 +5,7 @@ import {
   deleteCategoryThunk,
   fetchCategoriesThunk,
   fetchControlCategoriesThunk,
+  updateCategoriesOrderIndexThunk,
   updateCategoryThunk,
   updateProductsCategoryByKeywordThunk,
 } from '../../http/categoryThunk';
@@ -41,6 +42,11 @@ const initialState: TInitialCategoryState = {
     _id: '',
     title: '',
   },
+  sortCategories: {
+    dialogStatus: false,
+    isLoading: false,
+    isError: false,
+  },
 };
 
 const categorySlice = createSlice({
@@ -53,6 +59,9 @@ const categorySlice = createSlice({
         _id,
         title,
       };
+    },
+    setSortCategoriesDialogStatus(state: TInitialCategoryState, action: PayloadAction<boolean>) {
+      state.sortCategories.dialogStatus = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -168,9 +177,20 @@ const categorySlice = createSlice({
       })
       .addCase(deleteCategoryThunk.rejected, (state: TInitialCategoryState): void => {
         state.delete.isLoading = false;
+      })
+
+      .addCase(updateCategoriesOrderIndexThunk.fulfilled, (state: TInitialCategoryState): void => {
+        state.sortCategories.dialogStatus = false;
+        state.sortCategories.isLoading = false;
+      })
+      .addCase(updateCategoriesOrderIndexThunk.pending, (state: TInitialCategoryState): void => {
+        state.sortCategories.isLoading = true;
+      })
+      .addCase(updateCategoriesOrderIndexThunk.rejected, (state: TInitialCategoryState): void => {
+        state.sortCategories.isLoading = false;
       });
   },
 });
 
 export const categoryReducer = categorySlice.reducer;
-export const { setCategory } = categorySlice.actions;
+export const { setCategory, setSortCategoriesDialogStatus } = categorySlice.actions;

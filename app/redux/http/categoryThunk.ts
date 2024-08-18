@@ -2,6 +2,7 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { AxiosError } from 'axios';
 import { FormikValues } from 'formik';
 
+import { TCategoriesWithOrderIndex } from '../../components/screens/profile/categories-control/types';
 import {
   TCategory,
   TCreateItemAndNavigate,
@@ -89,6 +90,7 @@ export const updateCategoryThunk = createAsyncThunk(
     }
   }
 );
+
 export const updateProductsCategoryByKeywordThunk = createAsyncThunk(
   'update/productsCategoryByKeyword',
   async ({ id, keyword }: { id: string; keyword: string }, { rejectWithValue }) => {
@@ -103,7 +105,6 @@ export const updateProductsCategoryByKeywordThunk = createAsyncThunk(
       return data;
     } catch (err) {
       const error = err as AxiosError;
-      console.log(error.response);
       if (!error.response) {
         return rejectWithValue('NetworkError');
       } else {
@@ -112,6 +113,24 @@ export const updateProductsCategoryByKeywordThunk = createAsyncThunk(
     }
   }
 );
+
+export const updateCategoriesOrderIndexThunk = createAsyncThunk(
+  'update/updateOrders',
+  async (categories: TCategoriesWithOrderIndex[], { rejectWithValue }) => {
+    try {
+      const { data } = await $authHost.post(`category/update-order-indexes`, { categories });
+      return data;
+    } catch (err) {
+      const error = err as AxiosError;
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
+    }
+  }
+);
+
 export const deleteCategoryThunk = createAsyncThunk(
   'delete/category',
   async ({ _id, navigate }: TDeleteItem, { rejectWithValue }) => {

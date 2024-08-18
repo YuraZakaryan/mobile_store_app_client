@@ -68,7 +68,7 @@ export const Products = () => {
   const navigation = useNavigation<NavigationProp<any, any>>();
 
   const fetchCategoriesData = (): void => {
-    dispatch(fetchCategoriesThunk({}));
+    dispatch(fetchCategoriesThunk());
   };
 
   const fetchProductsByCategoryData = (isRefreshing: boolean = false): void => {
