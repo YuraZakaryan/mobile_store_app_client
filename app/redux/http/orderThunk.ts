@@ -1,7 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { AxiosError } from 'axios';
 
-import { $authHost } from './index';
 import {
   IFetchByAuthorOptions,
   TFetchOptions,
@@ -10,6 +9,7 @@ import {
   TProduct,
 } from '../types';
 import { EOrderStatus, TOrder, TOrderItem } from '../types/order';
+import { $authHost } from './index';
 
 export const createOrAddOrderThunk = createAsyncThunk(
   'createOrAdd/order',
@@ -212,6 +212,23 @@ export const deliverOrderThunk = createAsyncThunk(
         items,
       });
       navigate('orders-control');
+      return data;
+    } catch (err) {
+      const error = err as AxiosError;
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
+    }
+  }
+);
+
+export const getProductsWithStocksThunk = createAsyncThunk(
+  'getStocks/order',
+  async (ids: string[], { rejectWithValue }) => {
+    try {
+      const { data } = await $authHost.post('product/stocks/withCount', { ids });
       return data;
     } catch (err) {
       const error = err as AxiosError;

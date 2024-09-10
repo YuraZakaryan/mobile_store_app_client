@@ -1,3 +1,4 @@
+import { TProductsWithStocks } from '../../../components/screens/profile/order-view/types';
 import { TItemsWithTotalLength } from '../global';
 import { TOrder } from '../order';
 import { TProduct } from '../product';
@@ -18,6 +19,7 @@ export type TInitialBasketState = {
   newItemForm: TNewItemForm;
   orders: TItemsWithTotalLength<TOrder[]>;
   ordersHistory: TItemsWithTotalLength<TOrder[]>;
+  productsWithStocks: TItemsWithTotalLength<TProductsWithStocks[]>;
   basket: TOrder;
   create: TStateStatus;
   deleteItem: TStateStatus;

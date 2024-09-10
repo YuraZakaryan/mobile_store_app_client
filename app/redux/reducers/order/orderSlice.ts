@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
+import { TProductsWithStocks } from '../../../components/screens/profile/order-view/types';
 import {
   cancelOrderThunk,
   changeOrderStatusThunk,
@@ -10,6 +11,7 @@ import {
   fetchDeliveredOrdersThunk,
   fetchOrdersByAuthorThunk,
   getOrderByUserInProgressThunk,
+  getProductsWithStocksThunk,
   toOrderThunk,
 } from '../../http/orderThunk';
 import {
@@ -46,6 +48,13 @@ const initialState: TInitialBasketState = {
     items: [],
   },
   ordersHistory: {
+    isLoading: false,
+    isError: false,
+    isNetworkError: false,
+    total_items: 0,
+    items: [],
+  },
+  productsWithStocks: {
     isLoading: false,
     isError: false,
     isNetworkError: false,
@@ -259,6 +268,33 @@ const orderSlice = createSlice({
       })
       .addCase(fetchDeliveredOrdersThunk.rejected, (state: TInitialBasketState, action): void => {
         state.ordersHistory.total_items = 0;
+        state.ordersHistory.items = [];
+        state.ordersHistory.isLoading = false;
+
+        if (action.payload === 'NetworkError') {
+          state.ordersHistory.isNetworkError = true;
+        } else if (action.payload !== 404) {
+          state.ordersHistory.isError = true;
+        }
+      })
+      .addCase(
+        getProductsWithStocksThunk.fulfilled,
+        (state: TInitialBasketState, action: PayloadAction<TProductsWithStocks[]>): void => {
+          state.productsWithStocks = {
+            total_items: 0,
+            items: action.payload,
+            isError: false,
+            isNetworkError: false,
+            isLoading: false,
+          };
+        }
+      )
+      .addCase(getProductsWithStocksThunk.pending, (state: TInitialBasketState): void => {
+        state.ordersHistory.isLoading = true;
+        state.ordersHistory.isError = false;
+        state.ordersHistory.isNetworkError = false;
+      })
+      .addCase(getProductsWithStocksThunk.rejected, (state: TInitialBasketState, action): void => {
         state.ordersHistory.items = [];
         state.ordersHistory.isLoading = false;
 
