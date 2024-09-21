@@ -1,6 +1,13 @@
 import { TItemsWithTotalLength } from '../global';
 import { TStateStatus } from '../user';
 
+export enum EImageAdd {
+  WITH_IMAGE = 'with_image',
+  WITHOUT_IMAGE = 'without_image',
+  WITH_IMAGE_FOR_EXIST = 'with_image_for_exist',
+  WITH_IMAGE_FOR_NEW = 'with_image_for_new',
+}
+
 export type TProduct = {
   _id: string;
   title: string;
@@ -30,6 +37,11 @@ export interface IProductDocument extends TStateStatus {
   dialogActive: boolean;
 }
 
+export interface ISyncProductsState extends TStateStatus {
+  dialogStatus: boolean;
+  imageSyncType: EImageAdd;
+}
+
 export type TInitialProductState = {
   currentProduct: ICurrentProduct;
   products: TItemsWithTotalLength<TProduct[]>;
@@ -42,7 +54,7 @@ export type TInitialProductState = {
   productsByCategory: TItemsWithTotalLength<TProduct[]>;
   create: TStateStatus;
   createByDocument: TStateStatus;
-  syncProducts: TStateStatus;
+  syncProducts: ISyncProductsState;
   update: TStateStatus;
   delete: TStateStatus;
   history: IProductHistory[];

@@ -15,7 +15,7 @@ import {
   searchProductsThunk,
   updateProductThunk,
 } from '../../http/productThunk';
-import { TInitialProductState, TItemsWithTotalLength, TProduct } from '../../types';
+import { EImageAdd, TInitialProductState, TItemsWithTotalLength, TProduct } from '../../types';
 
 const initialState: TInitialProductState = {
   currentProduct: {
@@ -87,7 +87,10 @@ const initialState: TInitialProductState = {
     isLoading: false,
   },
   syncProducts: {
+    imageSyncType: EImageAdd.WITH_IMAGE_FOR_NEW,
+    dialogStatus: false,
     isLoading: false,
+    isError: false,
   },
   update: {
     isLoading: false,
@@ -137,6 +140,12 @@ export const productSlice = createSlice({
     },
     resetProductsByCategory(state: TInitialProductState): void {
       state.productsByCategory = initialState.productsByCategory;
+    },
+    setSyncProductsDialogStatus(state: TInitialProductState, action: PayloadAction<boolean>) {
+      state.syncProducts.dialogStatus = action.payload;
+    },
+    setSyncProductsImageType(state: TInitialProductState, action: PayloadAction<EImageAdd>) {
+      state.syncProducts.imageSyncType = action.payload;
     },
   },
   extraReducers: (builder): void => {
@@ -495,4 +504,6 @@ export const {
   syncProductIsLoading,
   clearCategoryThunk,
   resetProductsByCategory,
+  setSyncProductsDialogStatus,
+  setSyncProductsImageType,
 } = productSlice.actions;

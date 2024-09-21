@@ -15,8 +15,8 @@ import { SHOW_ERROR } from '../../../../toasts';
 import { handleSync } from '../../../../utils';
 import { LIMIT_NUMBER } from '../../../../utils/constants';
 import { Loading } from '../../../ui';
-import { CreateItemButton, CrudList, Main, SyncProducts } from '../../../wrappers';
-import { ProductRenderContent } from './ui';
+import { ButtonSyncProducts, CreateItemButton, CrudList, Main } from '../../../wrappers';
+import { ProductRenderContent, SyncProductsDialog } from './ui';
 
 export const ProductsControl = () => {
   const dispatch = useAppDispatch();
@@ -177,7 +177,7 @@ export const ProductsControl = () => {
               renderItemComponent={(index: number, item: TProduct) => (
                 <ProductRenderContent index={index} title={item.title} picture={item.picture} />
               )}
-              renderButton={() => <SyncProducts />}
+              renderButton={() => <ButtonSyncProducts />}
             />
           ) : null}
           {notActivatedProducts.total_items > 0 || hasSearchedNotActivated ? (
@@ -209,6 +209,7 @@ export const ProductsControl = () => {
               isLoading={syncLoading}
             />
           ) : null}
+          <SyncProductsDialog />
           {/*<CreateItemButton handleClick={handleClick} createButtonLabel="Ստեղծել ապրանք" />*/}
         </View>
       </ScrollView>

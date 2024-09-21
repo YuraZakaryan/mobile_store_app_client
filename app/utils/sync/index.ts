@@ -1,17 +1,22 @@
 import { syncProductsByStockThunk } from '../../redux/http/productThunk';
-import { syncProductIsLoading } from '../../redux/reducers/product/productSlice';
+import {
+  setSyncProductsDialogStatus,
+  syncProductIsLoading,
+} from '../../redux/reducers/product/productSlice';
 import { AppDispatch } from '../../redux/store';
+import { EImageAdd } from '../../redux/types';
 import { SHOW_ERROR, SHOW_SUCCESS } from '../../toasts';
 
-export const handleSync = (dispatch: AppDispatch): void => {
+export const handleSync = (syncImageType: EImageAdd, dispatch: AppDispatch): void => {
   dispatch(syncProductIsLoading(true));
 
   const timeoutId = setTimeout(() => {
     SHOW_SUCCESS('Սիխրոնիզացման ավարտից հետո ձեր Էլ. փոստին, հաստատման նամակ կուղարկվի');
+    dispatch(setSyncProductsDialogStatus(false));
     dispatch(syncProductIsLoading(false));
   }, 1800);
 
-  dispatch(syncProductsByStockThunk())
+  dispatch(syncProductsByStockThunk(syncImageType))
     .unwrap()
     .then(() => {
       clearTimeout(timeoutId);

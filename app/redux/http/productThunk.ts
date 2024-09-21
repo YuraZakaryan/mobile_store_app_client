@@ -3,6 +3,7 @@ import { AxiosError } from 'axios';
 import { FormikValues } from 'formik';
 
 import {
+  EImageAdd,
   IFetchByCategoryOptions,
   ISearchProductOptions,
   TCreateItemAndNavigate,
@@ -237,9 +238,9 @@ export const createProductByDocumentThunk = createAsyncThunk(
 
 export const syncProductsByStockThunk = createAsyncThunk(
   'sync/product',
-  async (_, { rejectWithValue }) => {
+  async (syncImageType: EImageAdd, { rejectWithValue }) => {
     try {
-      const { data } = await $authHost.get('product/sync', {
+      const { data } = await $authHost.get(`product/sync?image=${syncImageType}`, {
         timeout: 0,
       });
       return data;
