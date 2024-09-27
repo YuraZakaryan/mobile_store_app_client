@@ -4,6 +4,7 @@ import { ActivityIndicator, Modal, ScrollView, Text, TouchableOpacity, View } fr
 
 import DragList, { DragListRenderItemInfo } from 'react-native-draglist';
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
+import { useIsTablet } from '../../../../hooks/useIsTablet';
 import {
   fetchCategoriesThunk,
   updateCategoriesOrderIndexThunk,
@@ -15,6 +16,8 @@ import { TCategoriesWithOrderIndex } from '../categories-control/types';
 
 export default function CategoriesDraggableDialog() {
   const dispatch = useAppDispatch();
+  const { isTablet } = useIsTablet();
+
   const { categories, sortCategories } = useAppSelector((state) => state.category);
 
   React.useEffect(() => {
@@ -124,7 +127,8 @@ export default function CategoriesDraggableDialog() {
             <Text>Սեղմած պահել համապատասխան կատեգորայի վրա և տեղաշարժել</Text>
           </View>
 
-          <ScrollView className="my-2">
+          {/* for planshet without scroll */}
+          <ScrollView className="my-2" scrollEnabled={!isTablet}>
             <DragList
               data={categoriesState}
               keyExtractor={keyExtractor}

@@ -7,9 +7,12 @@ import {
   createOrAddOrderThunk,
   deleteOrderItemThunk,
   deliverOrderThunk,
+  fetchAdminActiveOrdersThunk,
+  fetchAdminHistoryOrdersThunk,
   fetchAllOrdersThunk,
   fetchDeliveredOrdersThunk,
   fetchOrdersByAuthorThunk,
+  getOneAdminOrderThunk,
   getOrderByUserInProgressThunk,
   getProductsWithStocksThunk,
   toOrderThunk,
@@ -20,7 +23,7 @@ import {
   TNewItemForm,
   TUpdateFieldAction,
 } from '../../types';
-import { EOrderStatus, EPackage, TOrder, TOrderItem } from '../../types/order';
+import { EOrderStatus, EPackage, TAdminOrder, TOrder, TOrderItem } from '../../types/order';
 
 const initialState: TInitialBasketState = {
   newItemForm: {
@@ -40,6 +43,22 @@ const initialState: TInitialBasketState = {
     rejectedTime: null,
     createdAt: null,
   },
+  adminOrder: {
+    requestStatus: {
+      isLoading: null,
+      isError: false,
+      isNetworkError: false,
+    },
+    _id: '',
+    counterpartyName: '',
+    counterpartyId: '',
+    items: [],
+    status: EOrderStatus.IN_PROGRESS,
+    necessaryNotes: '',
+    author: null,
+    createdAt: null,
+    confirmedTime: null,
+  },
   orders: {
     isLoading: false,
     isError: false,
@@ -48,6 +67,20 @@ const initialState: TInitialBasketState = {
     items: [],
   },
   ordersHistory: {
+    isLoading: false,
+    isError: false,
+    isNetworkError: false,
+    total_items: 0,
+    items: [],
+  },
+  adminActiveOrders: {
+    isLoading: false,
+    isError: false,
+    isNetworkError: false,
+    total_items: 0,
+    items: [],
+  },
+  adminHistoryOrders: {
     isLoading: false,
     isError: false,
     isNetworkError: false,
@@ -120,6 +153,9 @@ const orderSlice = createSlice({
     },
     setNecessaryNotes(state: TInitialBasketState, action: PayloadAction<string>): void {
       state.basket.necessaryNotes = action.payload;
+    },
+    setAdminOrderNecessaryNotes(state: TInitialBasketState, action: PayloadAction<string>): void {
+      state.adminOrder.necessaryNotes = action.payload;
     },
     updateItemCount: (
       state: TInitialBasketState,
@@ -390,8 +426,117 @@ const orderSlice = createSlice({
         } else if (action.payload !== 404) {
           state.deliverOrder.isError = true;
         }
+      })
+      .addCase(
+        fetchAdminActiveOrdersThunk.fulfilled,
+        (
+          state: TInitialBasketState,
+          action: PayloadAction<TItemsWithTotalLength<TAdminOrder[]>>
+        ): void => {
+          const { total_items, items } = action.payload;
+          state.adminActiveOrders = {
+            total_items,
+            items,
+            isError: false,
+            isNetworkError: false,
+            isLoading: false,
+          };
+        }
+      )
+      .addCase(fetchAdminActiveOrdersThunk.pending, (state: TInitialBasketState): void => {
+        state.adminActiveOrders.isLoading = true;
+        state.adminActiveOrders.isError = false;
+        state.adminActiveOrders.isNetworkError = false;
+      })
+      .addCase(fetchAdminActiveOrdersThunk.rejected, (state: TInitialBasketState, action): void => {
+        state.adminActiveOrders.total_items = 0;
+        state.adminActiveOrders.items = [];
+        state.adminActiveOrders.isLoading = false;
+
+        if (action.payload === 'NetworkError') {
+          state.adminActiveOrders.isNetworkError = true;
+        } else if (action.payload !== 404) {
+          state.adminActiveOrders.isError = true;
+        }
+      })
+      .addCase(
+        fetchAdminHistoryOrdersThunk.fulfilled,
+        (
+          state: TInitialBasketState,
+          action: PayloadAction<TItemsWithTotalLength<TAdminOrder[]>>
+        ): void => {
+          const { total_items, items } = action.payload;
+          state.adminHistoryOrders = {
+            total_items,
+            items,
+            isError: false,
+            isNetworkError: false,
+            isLoading: false,
+          };
+        }
+      )
+      .addCase(fetchAdminHistoryOrdersThunk.pending, (state: TInitialBasketState): void => {
+        state.adminHistoryOrders.isLoading = true;
+        state.adminHistoryOrders.isError = false;
+        state.adminHistoryOrders.isNetworkError = false;
+      })
+      .addCase(
+        fetchAdminHistoryOrdersThunk.rejected,
+        (state: TInitialBasketState, action): void => {
+          state.adminHistoryOrders.total_items = 0;
+          state.adminHistoryOrders.items = [];
+          state.adminHistoryOrders.isLoading = false;
+
+          if (action.payload === 'NetworkError') {
+            state.adminHistoryOrders.isNetworkError = true;
+          } else if (action.payload !== 404) {
+            state.adminHistoryOrders.isError = true;
+          }
+        }
+      )
+      .addCase(
+        getOneAdminOrderThunk.fulfilled,
+        (state: TInitialBasketState, action: PayloadAction<TAdminOrder>): void => {
+          state.adminOrder = {
+            requestStatus: {
+              isLoading: false,
+              isError: false,
+              isNetworkError: false,
+            },
+            ...action.payload,
+          };
+        }
+      )
+      .addCase(getOneAdminOrderThunk.pending, (state: TInitialBasketState): void => {
+        state.adminOrder.requestStatus.isLoading = true;
+        state.adminOrder.requestStatus.isError = false;
+        state.adminOrder.requestStatus.isNetworkError = false;
+      })
+      .addCase(getOneAdminOrderThunk.rejected, (state: TInitialBasketState, action): void => {
+        const { isError, isNetworkError } = state.adminOrder.requestStatus;
+
+        state.adminOrder = {
+          ...initialState.adminOrder,
+          requestStatus: {
+            ...initialState.adminOrder.requestStatus,
+            isError,
+            isNetworkError,
+          },
+        };
+
+        if (action.payload === 'NetworkError') {
+          state.adminOrder.requestStatus.isNetworkError = true;
+        } else if (action.payload !== 404) {
+          state.adminOrder.requestStatus.isError = true;
+        }
       }),
 });
 export const orderReducer = orderSlice.reducer;
-export const { changeForm, setProductId, setPackaging, updateItemCount, setNecessaryNotes } =
-  orderSlice.actions;
+export const {
+  changeForm,
+  setProductId,
+  setPackaging,
+  updateItemCount,
+  setNecessaryNotes,
+  setAdminOrderNecessaryNotes,
+} = orderSlice.actions;

@@ -36,7 +36,6 @@ export const CrudList = <T,>(props: ICrudListProps<T>): React.ReactElement => {
     searchQuery,
     hasSearched,
     searchFieldPlaceholder,
-    showDocumentDialogButton,
   } = props;
 
   const dispatch = useAppDispatch();

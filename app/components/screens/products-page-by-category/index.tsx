@@ -3,12 +3,13 @@ import React from 'react';
 import { FlatList, RefreshControl, SafeAreaView, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../hooks/redux';
+import { useIsTablet } from '../../../hooks/useIsTablet';
 import {
   fetchDiscountedProductsForHomeCategoryThunk,
   fetchProductsForHomeCategoryThunk,
 } from '../../../redux/http/productThunk';
 import { TProduct } from '../../../redux/types';
-import { LIMIT_NUMBER } from '../../../utils/constants';
+import { getLimitNumber } from '../../../utils/constants';
 import { categoryHome } from '../../../utils/product';
 import { Loading, ScrollLoader } from '../../ui';
 import { ProductItem } from '../../wrappers';
@@ -16,6 +17,8 @@ import { TCategoryRouteParams } from './types';
 
 export const ProductsPageByCategory = () => {
   const dispatch = useAppDispatch();
+  const { isTablet, executeAfterDeviceCheck } = useIsTablet();
+  const LIMIT_NUMBER = getLimitNumber(isTablet);
 
   // React Navigation hooks
   const navigation = useNavigation<NavigationProp<any, any>>();
@@ -59,8 +62,8 @@ export const ProductsPageByCategory = () => {
 
   // Fetch data on component mount or page change
   React.useEffect((): void => {
-    fetchData();
-  }, [currentProductPage]);
+    executeAfterDeviceCheck(fetchData);
+  }, [currentProductPage, isTablet]);
 
   // Update header title based on the selected category
   React.useLayoutEffect((): void => {

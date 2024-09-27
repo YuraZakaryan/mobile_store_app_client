@@ -35,3 +35,15 @@ export type TOrder = {
   deliveredTime: string | null;
   rejectedTime: string | null;
 };
+
+export type TAdminOrder = {
+  _id?: string;
+  counterpartyName: string;
+  counterpartyId: string;
+  items: TOrderItem[];
+  necessaryNotes: string;
+  status: EOrderStatus;
+  author: TUser | null;
+  confirmedTime: string | null;
+  createdAt: string | null;
+};

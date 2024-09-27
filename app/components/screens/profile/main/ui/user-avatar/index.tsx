@@ -6,6 +6,7 @@ import { useAppSelector } from '../../../../../../hooks/redux';
 
 export const UserAvatar = () => {
   const { user, isAuth } = useAppSelector((state) => state.user);
+
   return (
     <View className="overflow-hidden flex-1 flex-col relative">
       <View className="absolute z-50 right-1 top-1">

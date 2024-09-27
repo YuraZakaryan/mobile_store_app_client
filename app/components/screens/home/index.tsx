@@ -1,18 +1,18 @@
-import { AntDesign, Foundation, MaterialCommunityIcons } from '@expo/vector-icons'
-import { NavigationProp, ParamListBase, useNavigation } from '@react-navigation/native'
-import React from 'react'
-import { FlatList, RefreshControl, ScrollView, TouchableOpacity, View } from 'react-native'
+import { AntDesign, Foundation, MaterialCommunityIcons } from '@expo/vector-icons';
+import { NavigationProp, ParamListBase, useNavigation } from '@react-navigation/native';
+import React from 'react';
+import { FlatList, RefreshControl, ScrollView, TouchableOpacity, View } from 'react-native';
 
-import { useAppDispatch, useAppSelector } from '../../../hooks/redux'
-import { getOrderByUserInProgressThunk } from '../../../redux/http/orderThunk'
-import { fetchDiscountedProductsThunk, fetchProductsThunk } from '../../../redux/http/productThunk'
-import { TItemsWithTotalLength, TProduct } from '../../../redux/types'
-import { ETypeError } from '../../../types'
-import { ICON_MAIN_COLOR, LIMIT_NUMBER } from '../../../utils/constants'
-import { categoryHome } from '../../../utils/product'
-import { Loading, NetworkError } from '../../ui'
-import { Main } from '../../wrappers'
-import { ItemsByCategory } from './ui'
+import { useAppDispatch, useAppSelector } from '../../../hooks/redux';
+import { getOrderByUserInProgressThunk } from '../../../redux/http/orderThunk';
+import { fetchDiscountedProductsThunk, fetchProductsThunk } from '../../../redux/http/productThunk';
+import { TItemsWithTotalLength, TProduct } from '../../../redux/types';
+import { ETypeError } from '../../../types';
+import { ICON_MAIN_COLOR, LIMIT_NUMBER } from '../../../utils/constants';
+import { categoryHome } from '../../../utils/product';
+import { Loading, NetworkError } from '../../ui';
+import { Main } from '../../wrappers';
+import { ItemsByCategory } from './ui';
 
 export const Home = () => {
   const dispatch = useAppDispatch();

@@ -16,16 +16,20 @@ import {
 
 import { useAppDispatch, useAppSelector } from '../../../hooks/redux';
 import { useDebounce } from '../../../hooks/useDebounce';
+import { useIsTablet } from '../../../hooks/useIsTablet';
 import { searchProductsThunk } from '../../../redux/http/productThunk';
 import { clearSearchQuery, setSearchQuery } from '../../../redux/reducers/product/productSlice';
 import { TProduct } from '../../../redux/types';
 import { ETypeError } from '../../../types';
-import { LIMIT_NUMBER } from '../../../utils/constants';
+import { getLimitNumber } from '../../../utils/constants';
 import { Loading, NetworkError } from '../../ui';
 import { PaginationButtons, ProductItem } from '../../wrappers';
+import { SearchByBarCode } from './ui';
 
 export const Search = () => {
   const dispatch = useAppDispatch();
+  const { isTablet, executeAfterDeviceCheck } = useIsTablet();
+  const LIMIT_NUMBER = getLimitNumber(isTablet);
 
   // Redux state selectors for product search and order-related states
   const {
@@ -91,12 +95,12 @@ export const Search = () => {
   // Effect to trigger searchProductsThunk when search query changes or initial search is true
 
   React.useEffect((): void => {
-    fetchSearchData();
-  }, [debouncedSearch]);
+    executeAfterDeviceCheck(fetchSearchData);
+  }, [debouncedSearch, isTablet]);
 
   React.useEffect((): void => {
-    fetchData();
-  }, [initialSearch, isLoading, currentSearchProductPage]);
+    executeAfterDeviceCheck(fetchData);
+  }, [initialSearch, isLoading, currentSearchProductPage, isTablet]);
 
   const handleSearchChange = (text: string): void => {
     // Dispatch action to set the search query and indicate an initial search
@@ -138,7 +142,7 @@ export const Search = () => {
   const nextButtonDisable: boolean = currentSearchProductPage * LIMIT_NUMBER >= search.total_items;
   const totalCurrentPage: number = search.items.length;
 
-  return search.isLoading && !initialSearch ? (
+  return (search.isLoading && !initialSearch) || isTablet === null ? (
     <Loading />
   ) : (
     <SafeAreaView>
@@ -152,24 +156,27 @@ export const Search = () => {
         keyboardShouldPersistTaps="handled">
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
           <View className="p-4">
-            <View className="relative flex-1 justify-center">
-              <TextInput
-                className="p-3 pr-9 rounded-lg border border-gray-500"
-                placeholder="Փնտրել"
-                value={searchQuery}
-                onChangeText={handleSearchChange}
-              />
-              <View className="absolute right-3">
-                {searchQuery.length !== 0 ? (
-                  <TouchableOpacity onPress={handleClearSearch}>
-                    <AntDesign name="close" size={21} color="gray" />
-                  </TouchableOpacity>
-                ) : (
-                  <View>
-                    <AntDesign name="search1" size={21} color="gray" />
-                  </View>
-                )}
+            <View className="flex-row">
+              <View className="relative flex-1 justify-center">
+                <TextInput
+                  className="p-3 pr-9 rounded-lg border border-gray-500"
+                  placeholder="Փնտրել"
+                  value={searchQuery}
+                  onChangeText={handleSearchChange}
+                />
+                <View className="absolute right-3">
+                  {searchQuery.length !== 0 ? (
+                    <TouchableOpacity onPress={handleClearSearch}>
+                      <AntDesign name="close" size={21} color="gray" />
+                    </TouchableOpacity>
+                  ) : (
+                    <View>
+                      <AntDesign name="search1" size={21} color="gray" />
+                    </View>
+                  )}
+                </View>
               </View>
+              <SearchByBarCode handleSearchChange={handleSearchChange} />
             </View>
             {isError ? (
               <NetworkError

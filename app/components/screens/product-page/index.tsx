@@ -1,9 +1,10 @@
-import { Feather } from '@expo/vector-icons';
+import { Feather, FontAwesome } from '@expo/vector-icons';
 import { NavigationProp, useNavigation, useRoute } from '@react-navigation/native';
 import React from 'react';
 import {
   ActivityIndicator,
   Image,
+  Modal,
   RefreshControl,
   SafeAreaView,
   ScrollView,
@@ -12,8 +13,7 @@ import {
   View,
 } from 'react-native';
 
-import { ETypeInfo, TProductRouteParams } from './types';
-import { InfoItem } from './wrapper';
+import ImageViewer from 'react-native-image-zoom-viewer';
 import { useAppDispatch, useAppSelector } from '../../../hooks/redux';
 import { createOrAddOrderThunk } from '../../../redux/http/orderThunk';
 import { fetchProductThunk } from '../../../redux/http/productThunk';
@@ -23,10 +23,14 @@ import { TOrderItem } from '../../../redux/types/order';
 import { SHOW_ERROR } from '../../../toasts';
 import { API_URL, ICON_MAIN_COLOR } from '../../../utils/constants';
 import { NumericInputCustom, SaleIcon } from '../../wrappers';
+import { ETypeInfo, TProductRouteParams } from './types';
+import { InfoItem } from './wrapper';
 
 export const ProductPage = () => {
   const dispatch = useAppDispatch();
   const [orderExistsAfterClick, setOrderExistsAfterClick] = React.useState<boolean>(false);
+  const [isModalVisible, setModalVisible] = React.useState(false);
+
   const { setOptions } = useNavigation<NavigationProp<any, any>>();
   const route = useRoute();
   const { title, productId }: TProductRouteParams = route.params as TProductRouteParams;
@@ -106,6 +110,12 @@ export const ProductPage = () => {
   const value = newItemForm.itemCount;
   const role = user?.role as TRole;
 
+  const images = product?.picture ? [{ url: `${API_URL}/${product.picture}` }] : [];
+
+  const toggleModal = () => {
+    setModalVisible(!isModalVisible);
+  };
+
   return (
     <SafeAreaView>
       <ScrollView
@@ -119,18 +129,42 @@ export const ProductPage = () => {
           {product && (
             <>
               <View className="overflow-hidden w-full items-center relative">
-                <Image
-                  source={
-                    product.picture
-                      ? {
-                          uri: (product.picture && `${API_URL}/${product.picture}`) ?? false,
-                        }
-                      : require('./../../../assets/images/no_image.jpg')
-                  }
-                  className="w-60 h-60 rounded-lg"
-                  alt="picture"
-                />
+                <TouchableOpacity onPress={toggleModal}>
+                  <Image
+                    source={
+                      product.picture
+                        ? { uri: `${API_URL}/${product.picture}` }
+                        : require('./../../../assets/images/no_image.jpg')
+                    }
+                    className="w-60 h-60 rounded-lg"
+                    alt="picture"
+                  />
+                </TouchableOpacity>
                 {checkDiscount ? <SaleIcon discount={product.discount} /> : null}
+                <Modal visible={isModalVisible} transparent>
+                  <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+                    <TouchableOpacity
+                      onPress={toggleModal}
+                      style={{ position: 'absolute', top: 40, right: 20, zIndex: 1 }}>
+                      <FontAwesome name="window-close" size={25} color="white" />
+                    </TouchableOpacity>
+                    <ImageViewer
+                      imageUrls={images}
+                      enableSwipeDown
+                      onSwipeDown={toggleModal}
+                      backgroundColor="transparent"
+                      enableImageZoom
+                      minScale={0.9}
+                      renderIndicator={() => (
+                        <View
+                          style={{
+                            display: 'none',
+                          }}
+                        />
+                      )}
+                    />
+                  </View>
+                </Modal>
               </View>
               <View className="w-full mt-4">
                 <View className="bg-white flex-row items-center justify-between border border-gray-200 mb-1 rounded-lg">

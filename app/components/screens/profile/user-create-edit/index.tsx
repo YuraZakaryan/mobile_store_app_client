@@ -305,7 +305,7 @@ export const UserCreateEdit = () => {
                 </>
               ) : null}
               {!isUser && (
-                <LabelInput label="Պարտականությունը" required>
+                <LabelInput label="Պարտականությունը" className="z-30" required>
                   <DropDownPicker
                     open={open}
                     value={values.role}

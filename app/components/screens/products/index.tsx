@@ -3,15 +3,19 @@ import React from 'react';
 import { FlatList, RefreshControl, SafeAreaView, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../hooks/redux';
+import { useIsTablet } from '../../../hooks/useIsTablet';
 import { fetchCategoriesThunk } from '../../../redux/http/categoryThunk';
 import { fetchProductsByCategoryThunk } from '../../../redux/http/productThunk';
 import { ETypeError } from '../../../types';
-import { LIMIT_NUMBER } from '../../../utils/constants';
+import { getLimitNumber } from '../../../utils/constants';
 import { Loading, NetworkError, ScrollLoader } from '../../ui';
 import { ProductItem } from '../../wrappers';
 import { ProductCategoryItem } from './wrapper';
 
 export const Products = () => {
+  const { isTablet, executeAfterDeviceCheck } = useIsTablet();
+  const LIMIT_NUMBER = getLimitNumber(isTablet);
+
   // Redux state selectors
   const { chosen } = useAppSelector((state) => state.category);
   const {
@@ -103,27 +107,8 @@ export const Products = () => {
 
   // Fetch products by category data on component mount, page change, or loading state change
   React.useEffect((): void => {
-    fetchProductsByCategoryData();
-  }, [currentProductPage, isLoading]);
-
-  // // Function to handle moving to the previous page of products
-  // const handlePrevProductPage = (): void => {
-  //   if (currentProductPage > 1) {
-  //     setProductCurrentPage((prevPage: number) => prevPage - 1);
-  //   }
-  // };
-
-  // // Function to handle moving to the next page of products
-  // const handleNextProductPage = (): void => {
-  //   if (currentProductPage * LIMIT_NUMBER < productsByCategory.total_items) {
-  //     setProductCurrentPage((prevPage: number) => prevPage + 1);
-  //   }
-  // };
-
-  // // Determine button disable status based on current page and total items
-  // const previousButtonDisable: boolean = currentProductPage <= 1;
-  // const nextButtonDisable: boolean =
-  //   currentProductPage * LIMIT_NUMBER >= productsByCategory.total_items;
+    executeAfterDeviceCheck(fetchProductsByCategoryData);
+  }, [currentProductPage, isLoading, isTablet]);
 
   const handleLoadMore = () => {
     if (currentProductPage * LIMIT_NUMBER < productsByCategory.total_items && !isLoadingMore) {
@@ -139,7 +124,7 @@ export const Products = () => {
   const isNetworkError: boolean = categories.isNetworkError || productsByCategory.isNetworkError;
   const isTechnicalError: boolean = categories.isError || productsByCategory.isError;
 
-  return categories.isLoading && productsByCategory.isLoading ? (
+  return (categories.isLoading && productsByCategory.isLoading) || isTablet === null ? (
     <Loading />
   ) : (
     <SafeAreaView style={{ flex: 1 }}>
@@ -191,13 +176,6 @@ export const Products = () => {
               onEndReachedThreshold={0.5}
               ListFooterComponent={isLoadingMore ? <ScrollLoader /> : null}
             />
-            {/* <PaginationButtons
-              total_items={productsByCategory.total_items}
-              previousButtonDisable={previousButtonDisable}
-              nextButtonDisable={nextButtonDisable}
-              handlePrevPage={handlePrevProductPage}
-              handleNextPage={handleNextProductPage}
-            /> */}
           </View>
         </View>
       )}

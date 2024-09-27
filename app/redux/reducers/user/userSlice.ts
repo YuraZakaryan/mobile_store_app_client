@@ -36,6 +36,13 @@ const initialState: TInitialUserState = {
     total_items: 0,
     items: [],
   },
+  counterParties: {
+    total_items: 0,
+    items: [],
+    isLoading: false,
+    isError: false,
+    isNetworkError: false,
+  },
   unconfirmedUsers: {
     isLoading: false,
     isError: false,

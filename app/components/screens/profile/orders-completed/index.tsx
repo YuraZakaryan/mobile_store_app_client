@@ -3,15 +3,19 @@ import { RefreshControl, ScrollView, Text, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
 import { useDebounce } from '../../../../hooks/useDebounce';
+import { useIsTablet } from '../../../../hooks/useIsTablet';
 import { fetchDeliveredOrdersThunk } from '../../../../redux/http/orderThunk';
 import { EOrderStatus, TOrder } from '../../../../redux/types/order';
 import { formatDate } from '../../../../utils';
-import { LIMIT_NUMBER } from '../../../../utils/constants';
+import { getLimitNumber } from '../../../../utils/constants';
 import { EmptyOrder, Loading } from '../../../ui';
 import { CrudList, Main } from '../../../wrappers';
 
 export const OrdersCompleted = () => {
   const dispatch = useAppDispatch();
+  const { isTablet, executeAfterDeviceCheck } = useIsTablet();
+  const LIMIT_NUMBER = getLimitNumber(isTablet);
+
   const { ordersHistory, cancelOrder } = useAppSelector((state) => state.order);
   const [currentStatusOrderPage, setStatusOrderCurrentPage] = React.useState<number>(1);
   const [searchQuery, setSearchQuery] = React.useState<string>('');
@@ -35,12 +39,12 @@ export const OrdersCompleted = () => {
   };
 
   React.useEffect((): void => {
-    fetchSearchData();
-  }, [debouncedSearch]);
+    executeAfterDeviceCheck(fetchSearchData);
+  }, [debouncedSearch, isTablet]);
 
   React.useEffect((): void => {
-    fetchData();
-  }, [currentStatusOrderPage, isLoading]);
+    executeAfterDeviceCheck(fetchData);
+  }, [currentStatusOrderPage, isLoading, isTablet]);
 
   const handlePrevUserPage = (): void => {
     if (currentStatusOrderPage > 1) {
@@ -59,7 +63,7 @@ export const OrdersCompleted = () => {
     fetchData();
   };
 
-  return ordersHistory.isLoading && !hasSearched ? (
+  return (ordersHistory.isLoading && !hasSearched) || isTablet === null ? (
     <Loading />
   ) : (
     <Main>

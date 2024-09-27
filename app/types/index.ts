@@ -2,6 +2,7 @@ import { FormikErrors, FormikHandlers, FormikProps, FormikTouched, FormikValues 
 import React, { PropsWithChildren } from 'react';
 import { ObjectSchema } from 'yup';
 
+import { TabKeys } from '../components/screens/profile/orders-admin-control/types';
 import { TProduct } from '../redux/types';
 import { TOrder } from '../redux/types/order';
 
@@ -82,7 +83,7 @@ export interface ISaleIcon {
 export interface IOrderList extends PropsWithChildren {
   item: TOrder;
 }
-export interface IEmptyOrder {
+export interface IEmptyOrder extends TClassName {
   text: string;
 }
 export interface IPaginationButtons {
@@ -110,3 +111,10 @@ export interface INetworkError {
 export type TCustomFileType = { size: number; name: string; type: string; uri: string };
 
 export interface ISyncProducts extends TClassName {}
+
+export interface IButtonTab extends TClassName {
+  activeTab: TabKeys;
+  expectedTab: TabKeys;
+  tabName: string;
+  handleTabClick: (tab: TabKeys) => void;
+}

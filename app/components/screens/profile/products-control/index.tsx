@@ -4,22 +4,25 @@ import { RefreshControl, ScrollView, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
 import { useDebounce } from '../../../../hooks/useDebounce';
+import { useIsTablet } from '../../../../hooks/useIsTablet';
 import { fetchCategoriesThunk } from '../../../../redux/http/categoryThunk';
 import {
   fetchControlNotActivatedProductsThunk,
   fetchControlProductsThunk,
 } from '../../../../redux/http/productThunk';
-import { toggleProductDocumentActive } from '../../../../redux/reducers/product/productSlice';
+import { setSyncProductsDialogStatus } from '../../../../redux/reducers/product/productSlice';
 import { TProduct } from '../../../../redux/types';
 import { SHOW_ERROR } from '../../../../toasts';
-import { handleSync } from '../../../../utils';
-import { LIMIT_NUMBER } from '../../../../utils/constants';
+import { getLimitNumber } from '../../../../utils/constants';
 import { Loading } from '../../../ui';
 import { ButtonSyncProducts, CreateItemButton, CrudList, Main } from '../../../wrappers';
 import { ProductRenderContent, SyncProductsDialog } from './ui';
 
 export const ProductsControl = () => {
   const dispatch = useAppDispatch();
+  const { isTablet, executeAfterDeviceCheck } = useIsTablet();
+  const LIMIT_NUMBER = getLimitNumber(isTablet);
+
   const {
     productsControl: products,
     notActivatedProductsControl: notActivatedProducts,
@@ -86,20 +89,20 @@ export const ProductsControl = () => {
   };
 
   React.useEffect((): void => {
-    fetchData();
-  }, [currentProductPage, isLoading]);
+    executeAfterDeviceCheck(fetchData);
+  }, [currentProductPage, isLoading, isTablet]);
 
   React.useEffect((): void => {
-    fetchSearchData();
-  }, [debouncedSearch]);
+    executeAfterDeviceCheck(fetchSearchData);
+  }, [debouncedSearch, isTablet]);
 
   React.useEffect((): void => {
-    fetchNotActivatedData();
-  }, [currentNotActivatedProductPage, isLoading]);
+    executeAfterDeviceCheck(fetchNotActivatedData);
+  }, [currentNotActivatedProductPage, isLoading, isTablet]);
 
   React.useEffect((): void => {
-    fetchSearchNotActivated();
-  }, [debouncedSearchNotActivated]);
+    executeAfterDeviceCheck(fetchSearchNotActivated);
+  }, [debouncedSearchNotActivated, isTablet]);
 
   const handlePrevProductPage = (): void => {
     if (currentProductPage > 1) {
@@ -140,16 +143,17 @@ export const ProductsControl = () => {
     fetchNotActivatedData();
   };
 
-  const toggleDialog = (): void => {
-    dispatch(toggleProductDocumentActive());
-  };
+  // const toggleDialog = (): void => {
+  //   dispatch(toggleProductDocumentActive());
+  // };
 
-  const syncButton = () => handleSync(dispatch);
+  const syncButton = () => dispatch(setSyncProductsDialogStatus(true));
   const syncLoading = syncProducts.isLoading ?? false;
 
-  return products.isLoading &&
+  return (products.isLoading &&
     notActivatedProducts.isLoading &&
-    (!hasSearched || !hasSearchedNotActivated) ? (
+    (!hasSearched || !hasSearchedNotActivated)) ||
+    isTablet === null ? (
     <Loading />
   ) : (
     <Main>

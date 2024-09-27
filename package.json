@@ -8,7 +8,8 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "cypress": "cypress open"
   },
   "dependencies": {
     "@expo/webpack-config": "^19.0.0",
@@ -23,7 +24,9 @@
     "axios": "^1.6.2",
     "clsx": "^2.0.0",
     "expo": "~51.0.26",
+    "expo-camera": "~15.0.16",
     "expo-constants": "~16.0.2",
+    "expo-device": "~6.0.2",
     "expo-document-picker": "~12.0.2",
     "expo-image": "~1.12.13",
     "expo-image-picker": "~15.0.7",
@@ -43,6 +46,7 @@
     "react-native-elements": "^3.4.3",
     "react-native-gesture-handler": "^2.18.1",
     "react-native-image-picker": "^7.1.0",
+    "react-native-image-zoom-viewer": "^3.0.1",
     "react-native-mask-input": "^1.2.3",
     "react-native-modal-datetime-picker": "^17.1.0",
     "react-native-number-please": "^1.0.5",
@@ -69,6 +73,7 @@
     "@typescript-eslint/eslint-plugin": "^6.14.0",
     "@typescript-eslint/parser": "^6.14.0",
     "babel-plugin-module-resolver": "^5.0.0",
+    "cypress": "^13.15.0",
     "eslint": "^8.55.0",
     "eslint-config-universe": "^12.0.0",
     "prettier": "^3.1.1",

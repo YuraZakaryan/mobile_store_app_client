@@ -8,11 +8,16 @@ import { ActivityIndicator, Text, View } from 'react-native';
 import Toast from 'react-native-toast-message';
 
 import {
+  AboutApp,
   Basket,
   CategoriesControl,
   CategoryCreateEdit,
   Home,
   LastOrders,
+  OrderAdminEdit,
+  OrderCompletedView,
+  OrdersAdminControl,
+  OrdersCompleted,
   OrdersControl,
   OrderView,
   ProductCreateEdit,
@@ -21,14 +26,11 @@ import {
   ProductsControl,
   ProductsPageByCategory,
   Profile,
+  ResetPassword,
   Search,
   UserCreateEdit,
   UserPasswordEdit,
   UsersControl,
-  OrderCompletedView,
-  OrdersCompleted,
-  AboutApp,
-  ResetPassword,
 } from './components/screens';
 import { Auth } from './components/screens/auth';
 import { useAppDispatch, useAppSelector } from './hooks/redux';
@@ -64,6 +66,29 @@ const OrderViewPageStackGroup = () => {
       <MyPageStack.Screen
         name="order-view"
         component={OrderView}
+        options={{
+          headerShown: false,
+          presentation: 'modal',
+          headerTitleStyle: { fontSize: 14 },
+        }}
+      />
+    </MyPageStack.Navigator>
+  );
+};
+
+const OrderAdminViewPageStackGroup = () => {
+  return (
+    <MyPageStack.Navigator>
+      <MyPageStack.Screen
+        name="orders-admin-control"
+        component={OrdersAdminControl}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <MyPageStack.Screen
+        name="admin-order-edit"
+        component={OrderAdminEdit}
         options={{
           headerShown: false,
           presentation: 'modal',
@@ -119,6 +144,13 @@ const ProfileStackGroup = () => {
         component={OrderViewPageStackGroup}
         options={{
           title: 'Պատվերներ',
+        }}
+      />
+      <MyPageStack.Screen
+        name="adminOrders"
+        component={OrderAdminViewPageStackGroup}
+        options={{
+          title: 'Ադմինիստրային պատվերներ',
         }}
       />
       <MyPageStack.Screen
@@ -455,17 +487,17 @@ const TabGroup = () => {
         options={{
           headerShown: true,
           title: 'Իմ էջը',
-          tabBarLabel: ({ color }) => {
-            if (fetchMe.isLoading) {
-              return null;
-            }
+          // tabBarLabel: ({ color }) => {
+          //   if (fetchMe.isLoading) {
+          //     return null;
+          //   }
 
-            return (
-              <Text className="text-[10px] font-light" style={{ color }}>
-                Իմ էջը
-              </Text>
-            );
-          },
+          //   return (
+          //     <Text className="text-[10px] font-light" style={{ color }}>
+          //       Իմ էջը
+          //     </Text>
+          //   );
+          // },
           tabBarIcon: ({ color }) => {
             if (fetchMe.isLoading) {
               return <ActivityIndicator size="small" color={ICON_MAIN_COLOR} />;

@@ -8,7 +8,7 @@ import {
   TNewItemForm,
   TProduct,
 } from '../types';
-import { EOrderStatus, TOrder, TOrderItem } from '../types/order';
+import { EOrderStatus, TAdminOrder, TOrder, TOrderItem } from '../types/order';
 import { $authHost } from './index';
 
 export const createOrAddOrderThunk = createAsyncThunk(
@@ -99,6 +99,7 @@ export const fetchDeliveredOrdersThunk = createAsyncThunk(
     }
   }
 );
+
 export const fetchAllOrdersThunk = createAsyncThunk(
   'fetchAllOrders/order',
   async ({ page = 1, limit = 5, query = '' }: TFetchOptions, { rejectWithValue }) => {
@@ -119,6 +120,24 @@ export const fetchAllOrdersThunk = createAsyncThunk(
     }
   }
 );
+
+export const getOneAdminOrderThunk = createAsyncThunk(
+  'getOneAdmin/order',
+  async (orderId: string, { rejectWithValue }) => {
+    try {
+      const { data } = await $authHost.get<TAdminOrder>(`order/stock/${orderId}`);
+      return data;
+    } catch (err) {
+      const error = err as AxiosError;
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
+    }
+  }
+);
+
 export const fetchOrdersByAuthorThunk = createAsyncThunk(
   'fetchOrdersByAuthor/order',
   async ({ page = 1, limit = 5, authorId }: IFetchByAuthorOptions, { rejectWithValue }) => {
@@ -229,6 +248,48 @@ export const getProductsWithStocksThunk = createAsyncThunk(
   async (ids: string[], { rejectWithValue }) => {
     try {
       const { data } = await $authHost.post('product/stocks/withCount', { ids });
+      return data;
+    } catch (err) {
+      const error = err as AxiosError;
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
+    }
+  }
+);
+
+export const fetchAdminActiveOrdersThunk = createAsyncThunk(
+  'fetchAdminActive/orders',
+  async ({ page = 1, limit = 5, query = '' }: TFetchOptions, { rejectWithValue }) => {
+    const skip: number = Math.max(page - 1, 0) * limit;
+    try {
+      const { data } = await $authHost.get<TItemsWithTotalLength<TAdminOrder[]>>(
+        `order/stock/all?status=inProgress&limit=${limit}&skip=${skip}`
+      );
+      return data;
+    } catch (err) {
+      const error = err as AxiosError;
+
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
+    }
+  }
+);
+
+export const fetchAdminHistoryOrdersThunk = createAsyncThunk(
+  'fetchAdminHistory/orders',
+  async ({ page = 1, limit = 5, query = '' }: TFetchOptions, { rejectWithValue }) => {
+    const skip: number = Math.max(page - 1, 0) * limit;
+
+    try {
+      const { data } = await $authHost.get<TItemsWithTotalLength<TAdminOrder[]>>(
+        `order/stock/all?status=confirmed&limit=${limit}&skip=${skip}&name=${query}`
+      );
       return data;
     } catch (err) {
       const error = err as AxiosError;

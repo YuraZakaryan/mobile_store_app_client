@@ -1,10 +1,10 @@
 import React from 'react';
 import { Image, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
-import { AccountEditButton, LastOrderButton, UserAvatar, UserName } from './ui';
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
 import { logOut } from '../../../../redux/reducers/user/userSlice';
 import { accountEditLabels, isAdmin } from '../../../../utils';
+import { AccountEditButton, LastOrderButton, UserAvatar, UserName } from './ui';
 
 export const Profile = () => {
   const dispatch = useAppDispatch();
@@ -32,10 +32,11 @@ export const Profile = () => {
               <View>
                 <LastOrderButton label="Պատվերներ" navigateTo="allOrders" />
                 <LastOrderButton
-                  label="Պատվերների պամություն"
-                  navigateTo="ordersCompleted"
-                  className="mt-5"
+                  label="Ադմինիստրային պատվերներ"
+                  navigateTo="adminOrders"
+                  className="my-4"
                 />
+                <LastOrderButton label="Պատվերների պամություն" navigateTo="ordersCompleted" />
               </View>
             ) : (
               <LastOrderButton label="Վերջին պատվերներ" navigateTo="lastOrders" />

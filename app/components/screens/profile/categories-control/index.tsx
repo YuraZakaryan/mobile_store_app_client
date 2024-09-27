@@ -4,9 +4,10 @@ import { Image, RefreshControl, ScrollView, Text, View } from 'react-native';
 
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
 import { useDebounce } from '../../../../hooks/useDebounce';
+import { useIsTablet } from '../../../../hooks/useIsTablet';
 import { fetchControlCategoriesThunk } from '../../../../redux/http/categoryThunk';
 import { TCategory } from '../../../../redux/types';
-import { API_URL, LIMIT_NUMBER } from '../../../../utils/constants';
+import { API_URL, getLimitNumber } from '../../../../utils/constants';
 import { Loading } from '../../../ui';
 import { CreateItemButton, CrudList, Main } from '../../../wrappers';
 import CategoriesDraggableDialog from '../categories-draggable';
@@ -14,6 +15,9 @@ import { ButtonSortCategories } from './ui';
 
 export const CategoriesControl = () => {
   const dispatch = useAppDispatch();
+  const { isTablet, executeAfterDeviceCheck } = useIsTablet();
+  const LIMIT_NUMBER = getLimitNumber(isTablet);
+
   const {
     categoriesControl: categories,
     sortCategories,
@@ -27,7 +31,6 @@ export const CategoriesControl = () => {
   const [hasSearched, setHasSearched] = React.useState<boolean>(false);
   const isLoading =
     create.isLoading || update.isLoading || deleteCategory.isLoading || sortCategories.isLoading;
-
   const debouncedSearch: string = useDebounce(searchQuery, 500);
 
   const fetchSearchData = (): void => {
@@ -51,12 +54,12 @@ export const CategoriesControl = () => {
   };
 
   React.useEffect((): void => {
-    fetchSearchData();
-  }, [debouncedSearch]);
+    executeAfterDeviceCheck(fetchSearchData);
+  }, [debouncedSearch, isTablet]);
 
   React.useEffect((): void => {
-    fetchData();
-  }, [currentCategoryPage, isLoading]);
+    executeAfterDeviceCheck(fetchData);
+  }, [currentCategoryPage, isLoading, isTablet]);
 
   const handleClick = (): void => {
     navigate('categoryCreateEdit');
@@ -79,7 +82,7 @@ export const CategoriesControl = () => {
     fetchData();
   };
 
-  return categories.isLoading && !hasSearched ? (
+  return (categories.isLoading && !hasSearched) || isTablet === null ? (
     <Loading />
   ) : (
     <Main>

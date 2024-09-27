@@ -2,20 +2,24 @@ import { NavigationProp, ParamListBase, useNavigation } from '@react-navigation/
 import React from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 
-import { UserList } from './wrappers/user-list';
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
 import { useDebounce } from '../../../../hooks/useDebounce';
+import { useIsTablet } from '../../../../hooks/useIsTablet';
 import {
   fetchBannedUsers,
   fetchUnconfirmedUsers,
   fetchUsersThunk,
 } from '../../../../redux/http/userThunk';
-import { LIMIT_NUMBER } from '../../../../utils/constants';
+import { getLimitNumber } from '../../../../utils/constants';
 import { Loading } from '../../../ui';
 import { CreateItemButton, Main } from '../../../wrappers';
+import { UserList } from './wrappers/user-list';
 
 export const UsersControl = () => {
   const dispatch = useAppDispatch();
+  const { isTablet, executeAfterDeviceCheck } = useIsTablet();
+  const LIMIT_NUMBER = getLimitNumber(isTablet);
+
   const { createUser, updateUser, cancelUser, banUser } = useAppSelector((state) => state.user);
   const { users, unconfirmedUsers, bannedUsers } = useAppSelector((state) => state.user);
   const { navigate } = useNavigation<NavigationProp<ParamListBase>>();
@@ -74,28 +78,28 @@ export const UsersControl = () => {
     );
   };
   React.useEffect((): void => {
-    fetchSearchUserData();
-  }, [debouncedSearchUser]);
+    executeAfterDeviceCheck(fetchSearchUserData);
+  }, [debouncedSearchUser, isTablet]);
 
   React.useEffect((): void => {
-    fetchUsersData();
-  }, [currentUserPage, isLoading]);
+    executeAfterDeviceCheck(fetchUsersData);
+  }, [currentUserPage, isLoading, isTablet]);
 
   React.useEffect((): void => {
-    fetchUnconfirmedSearchUserData();
-  }, [debouncedSearchUnConfirmedUser]);
+    executeAfterDeviceCheck(fetchUnconfirmedSearchUserData);
+  }, [debouncedSearchUnConfirmedUser, isTablet]);
 
   React.useEffect((): void => {
-    fetchUnconfirmedUsersData();
-  }, [currentUnConfirmedUserPage, isLoading]);
+    executeAfterDeviceCheck(fetchUnconfirmedUsersData);
+  }, [currentUnConfirmedUserPage, isLoading, isTablet]);
 
   React.useEffect((): void => {
-    fetchBannedSearchUserData();
-  }, [debouncedSearchBannedUser]);
+    executeAfterDeviceCheck(fetchBannedSearchUserData);
+  }, [debouncedSearchBannedUser, isTablet]);
 
   React.useEffect((): void => {
-    fetchBannedUsersData();
-  }, [currentBannedUserPage, isLoading]);
+    executeAfterDeviceCheck(fetchBannedUsersData);
+  }, [currentBannedUserPage, isLoading, isTablet]);
 
   const handleClick = (): void => {
     navigate('userCreateEdit');
@@ -148,7 +152,8 @@ export const UsersControl = () => {
 
   return (users.isLoading && !hasSearchedUser) ||
     (unconfirmedUsers.isLoading && !hasSearchedUnConfirmedUser) ||
-    (bannedUsers.isLoading && !hasSearchedBannedUser) ? (
+    (bannedUsers.isLoading && !hasSearchedBannedUser) ||
+    isTablet === null ? (
     <Loading />
   ) : (
     <Main>

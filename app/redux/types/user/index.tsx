@@ -38,12 +38,21 @@ export type TResetPassword = {
   isLoading: boolean;
   isError: boolean;
 };
+export type TCounterParty = {
+  id: string;
+  name: string;
+  code: string;
+  externalCode: string;
+  legalTitle: string;
+  phone: string;
+};
 export type TInitialUserState = {
   isAuth: boolean | null;
   authMode: EAuthMode;
   resetPassword: TResetPassword;
   user: TUser | null;
   users: TItemsWithTotalLength<TUser[]>;
+  counterParties: TItemsWithTotalLength<TCounterParty[]>;
   unconfirmedUsers: TItemsWithTotalLength<TUser[]>;
   bannedUsers: TItemsWithTotalLength<TUser[]>;
   login: TStateStatus;
