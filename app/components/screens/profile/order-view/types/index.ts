@@ -56,7 +56,6 @@ export type TStock = {
   count: number;
 };
 
-
 export type TProductsWithStocks = {
   id: string;
   name: string;

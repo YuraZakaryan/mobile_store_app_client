@@ -8,7 +8,7 @@ export type TNewItemForm = {
   itemCount: number;
   product: string;
   author: string;
-  [key: string]: string | number | null;
+  [key: string]: string | number | boolean | null;
 };
 
 export interface IBasketItem extends TProduct {
@@ -18,6 +18,10 @@ export interface IBasketItem extends TProduct {
 
 export interface IAdminOrderWithStatus extends TAdminOrder {
   requestStatus: TStateStatus;
+}
+
+export interface INewItemFormForStock extends TNewItemForm {
+  forStock: boolean;
 }
 
 export type TInitialBasketState = {
@@ -30,12 +34,16 @@ export type TInitialBasketState = {
   basket: TOrder;
   adminOrder: IAdminOrderWithStatus;
   create: TStateStatus;
+  createEmpty: TStateStatus;
   deleteItem: TStateStatus;
   toOrder: TStateStatus;
   fetchBasketOrder: TStateStatus;
   changeStatus: TStateStatus;
   cancelOrder: TStateStatus;
   deliverOrder: TStateStatus;
+  addItemToAdminBasket: TStateStatus;
+  saveAdminOrder: TStateStatus;
+  confirmAdminOrder: TStateStatus;
 };
 export type TUpdateFieldAction = {
   name: keyof TNewItemForm;

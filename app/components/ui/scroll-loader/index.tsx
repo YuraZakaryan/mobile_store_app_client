@@ -3,10 +3,14 @@ import { ActivityIndicator, View } from 'react-native';
 
 import { ICON_MAIN_COLOR } from '../../../utils/constants';
 
-export const ScrollLoader = () => {
+export interface IScrollLoader {
+  size?: number;
+}
+
+export const ScrollLoader: React.FC<IScrollLoader> = ({ size }) => {
   return (
     <View className="items-center py-2">
-      <ActivityIndicator size={55} color={ICON_MAIN_COLOR} />
+      <ActivityIndicator size={size || 55} color={ICON_MAIN_COLOR} />
     </View>
   );
 };

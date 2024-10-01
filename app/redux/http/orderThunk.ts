@@ -3,12 +3,20 @@ import { AxiosError } from 'axios';
 
 import {
   IFetchByAuthorOptions,
+  INewItemFormForStock,
+  TErrorDataResponse,
   TFetchOptions,
   TItemsWithTotalLength,
   TNewItemForm,
   TProduct,
 } from '../types';
-import { EOrderStatus, TAdminOrder, TOrder, TOrderItem } from '../types/order';
+import {
+  EOrderStatus,
+  IAdminOrderWithIsEdit,
+  TAdminOrder,
+  TOrder,
+  TOrderItem,
+} from '../types/order';
 import { $authHost } from './index';
 
 export const createOrAddOrderThunk = createAsyncThunk(
@@ -59,6 +67,24 @@ export const deleteOrderItemThunk = createAsyncThunk(
     }
   }
 );
+
+export const deleteAdminOrderItemThunk = createAsyncThunk(
+  'delete/orderAdminItem',
+  async (_id: string, { rejectWithValue }) => {
+    try {
+      const { data } = await $authHost.delete<string>(`order/stock/item/${_id}`);
+      return data;
+    } catch (err) {
+      const error = err as AxiosError;
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
+    }
+  }
+);
+
 export const toOrderThunk = createAsyncThunk(
   'toOrder/order',
   async (basket: TOrder, { rejectWithValue }) => {
@@ -266,7 +292,7 @@ export const fetchAdminActiveOrdersThunk = createAsyncThunk(
     const skip: number = Math.max(page - 1, 0) * limit;
     try {
       const { data } = await $authHost.get<TItemsWithTotalLength<TAdminOrder[]>>(
-        `order/stock/all?status=inProgress&limit=${limit}&skip=${skip}`
+        `order/stock/all?status=inProgress&limit=${limit}&skip=${skip}&name=${query}`
       );
       return data;
     } catch (err) {
@@ -290,6 +316,81 @@ export const fetchAdminHistoryOrdersThunk = createAsyncThunk(
       const { data } = await $authHost.get<TItemsWithTotalLength<TAdminOrder[]>>(
         `order/stock/all?status=confirmed&limit=${limit}&skip=${skip}&name=${query}`
       );
+      return data;
+    } catch (err) {
+      const error = err as AxiosError;
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
+    }
+  }
+);
+
+export const createEmptyAdminOrderThunk = createAsyncThunk(
+  'adminEmpty/order',
+  async (_: void, { rejectWithValue }) => {
+    try {
+      const { data } = await $authHost.post('order/stock');
+      return data;
+    } catch (err) {
+      const error = err as AxiosError;
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
+    }
+  }
+);
+
+export const updateAdminOrderThunk = createAsyncThunk(
+  'updateAdmin/order',
+  async (adminOrder: IAdminOrderWithIsEdit, { rejectWithValue }) => {
+    const { _id } = adminOrder;
+    try {
+      const { data } = await $authHost.put(`order/stock/${_id}`, adminOrder);
+      return data;
+    } catch (err) {
+      const error = err as AxiosError;
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
+    }
+  }
+);
+
+export const confirmAdminOrderThunk = createAsyncThunk(
+  'confirmAdmin/order',
+  async (adminOrder: TAdminOrder, { rejectWithValue }) => {
+    const { _id, counterpartyId, items } = adminOrder;
+    try {
+      const { data } = await $authHost.post('order/stock/confirm-order', {
+        orderId: _id,
+        counterpartyId,
+        items,
+      });
+      return data;
+    } catch (err) {
+      const error = err as AxiosError;
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        const data: TErrorDataResponse = error.response.data as TErrorDataResponse;
+        return rejectWithValue(data.message);
+      }
+    }
+  }
+);
+
+export const addItemToAdminBasketThunk = createAsyncThunk(
+  'addItem/stockOrder',
+  async (newItem: INewItemFormForStock, { rejectWithValue }) => {
+    try {
+      const { data } = await $authHost.put('order/stock/add', newItem);
       return data;
     } catch (err) {
       const error = err as AxiosError;

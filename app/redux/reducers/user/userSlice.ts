@@ -6,6 +6,7 @@ import {
   confirmOtpThunk,
   createUserThunk,
   fetchBannedUsers,
+  fetchCounterPartiesThunk,
   fetchMe,
   fetchUnconfirmedUsers,
   fetchUsersThunk,
@@ -20,6 +21,7 @@ import {
 import {
   EAuthMode,
   EResetPasswordMode,
+  TCounterParty,
   TInitialUserState,
   TItemsWithTotalLength,
   TPayloadActionUser,
@@ -42,6 +44,9 @@ const initialState: TInitialUserState = {
     isLoading: false,
     isError: false,
     isNetworkError: false,
+  },
+  counterpartiesSearch: {
+    query: '',
   },
   unconfirmedUsers: {
     isLoading: false,
@@ -108,12 +113,9 @@ export const userSlice = createSlice({
       state = { ...initialState, isAuth: false };
       return state;
     },
-    // setResetPasswordMode(
-    //   state: TInitialUserState,
-    //   action: PayloadAction<EResetPasswordMode>
-    // ): void {
-    //   state.resetPassword.mode = action.payload;
-    // },
+    setCounterpartiesSearchQuery: (state: TInitialUserState, action: PayloadAction<string>) => {
+      state.counterpartiesSearch.query = action.payload;
+    },
   },
   extraReducers: (builder) =>
     builder
@@ -229,6 +231,72 @@ export const userSlice = createSlice({
           state.bannedUsers.isError = true;
         }
       })
+      // .addCase(
+      //   fetchCounterPartiesThunk.fulfilled,
+      //   (
+      //     state: TInitialUserState,
+      //     action: PayloadAction<TItemsWithTotalLength<TCounterParty[]>>
+      //   ): void => {
+      //     const { total_items, items } = action.payload;
+
+      //     state.counterParties = {
+      //       total_items,
+      //       items,
+      //       isError: false,
+      //       isNetworkError: false,
+      //       isLoading: false,
+      //     };
+      //   }
+      // )
+      .addCase(
+        fetchCounterPartiesThunk.fulfilled,
+        (
+          state: TInitialUserState,
+          action: PayloadAction<TItemsWithTotalLength<TCounterParty[]> & { page: number }>
+        ): void => {
+          const { total_items, items, page } = action.payload;
+
+          if (page === 1) {
+            // Если это первая страница, заменяем элементы
+            state.counterParties = {
+              total_items,
+              items,
+              isError: false,
+              isNetworkError: false,
+              isLoading: false,
+            };
+          } else {
+            // Если это последующие страницы, объединяем и фильтруем уникальные элементы по id
+            const uniqueItems = [...state.counterParties.items, ...items].filter(
+              (item, index, self) => index === self.findIndex((t) => t.id === item.id) // Уникальные элементы по id
+            );
+
+            state.counterParties = {
+              total_items,
+              items: uniqueItems,
+              isError: false,
+              isNetworkError: false,
+              isLoading: false,
+            };
+          }
+        }
+      )
+
+      .addCase(fetchCounterPartiesThunk.pending, (state: TInitialUserState): void => {
+        state.counterParties.isLoading = true;
+        state.counterParties.isError = false;
+        state.counterParties.isNetworkError = false;
+      })
+      .addCase(fetchCounterPartiesThunk.rejected, (state: TInitialUserState, action): void => {
+        state.counterParties.total_items = 0;
+        state.counterParties.items = [];
+        state.counterParties.isLoading = false;
+        if (action.payload === 'NetworkError') {
+          state.counterParties.isNetworkError = true;
+        } else if (action.payload !== 404) {
+          state.counterParties.isError = true;
+        }
+      })
       .addCase(updateUserThunk.fulfilled, (state: TInitialUserState): void => {
         state.updateUser.isLoading = false;
       })
@@ -337,4 +405,5 @@ export const userSlice = createSlice({
       }),
 });
 export const userReducer = userSlice.reducer;
-export const { setAuthMode, clearResetPassword, logOut } = userSlice.actions;
+export const { setAuthMode, clearResetPassword, logOut, setCounterpartiesSearchQuery } =
+  userSlice.actions;

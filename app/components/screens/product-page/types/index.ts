@@ -15,3 +15,7 @@ export type TProductRouteParams = {
   title: string;
   productId: string;
 };
+
+export interface IAddToCart {
+  productId: string;
+}

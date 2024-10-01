@@ -41,11 +41,14 @@ export type TResetPassword = {
 export type TCounterParty = {
   id: string;
   name: string;
-  code: string;
-  externalCode: string;
-  legalTitle: string;
   phone: string;
+  code: string;
 };
+
+export type TCounterpartiesSearch = {
+  query: string;
+};
+
 export type TInitialUserState = {
   isAuth: boolean | null;
   authMode: EAuthMode;
@@ -53,6 +56,7 @@ export type TInitialUserState = {
   user: TUser | null;
   users: TItemsWithTotalLength<TUser[]>;
   counterParties: TItemsWithTotalLength<TCounterParty[]>;
+  counterpartiesSearch: TCounterpartiesSearch;
   unconfirmedUsers: TItemsWithTotalLength<TUser[]>;
   bannedUsers: TItemsWithTotalLength<TUser[]>;
   login: TStateStatus;

@@ -16,6 +16,7 @@ export interface IProductItem extends TClassName {
 export interface ICrudListProps<T> {
   labelList?: string;
   data: T[];
+  executeNavigateAfterThisFn?: (orderId: string) => void;
   navigateTo: string;
   renderButton?: () => React.ReactNode;
   renderItemComponent: (index: number, item: T) => React.ReactNode;
@@ -99,6 +100,7 @@ export interface INumericInputCustom {
   minValue: number;
   maxValue: number;
   onChange: (value: number) => void;
+  disabled?: boolean;
 }
 export enum ETypeError {
   NETWORK = 'network',

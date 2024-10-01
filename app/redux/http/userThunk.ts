@@ -5,6 +5,7 @@ import { FormikValues } from 'formik';
 import { TInitialLoginFormValue } from '../../components/screens/auth/types';
 import { SecureStoreService } from '../../services';
 import {
+  TCounterParty,
   TCreateItemAndNavigate,
   TDeleteItem,
   TErrorDataResponse,
@@ -119,6 +120,28 @@ export const fetchBannedUsers = createAsyncThunk(
     }
   }
 );
+
+export const fetchCounterPartiesThunk = createAsyncThunk(
+  'fetch/counterParties',
+  async ({ page = 1, limit = 5, query = '' }: TFetchOptions, { rejectWithValue }) => {
+    const skip: number = Math.max(page - 1, 0) * limit;
+
+    try {
+      const { data } = await $authHost.get<TItemsWithTotalLength<TCounterParty[]>>(
+        `user/counterparties/all?limit=${limit}&skip=${skip}&name=${query}`
+      );
+      return { ...data, page };
+    } catch (err) {
+      const error = err as AxiosError;
+      if (!error.response) {
+        return rejectWithValue('NetworkError');
+      } else {
+        return rejectWithValue(error.response.status);
+      }
+    }
+  }
+);
+
 export const sendOtpToMailThunk = createAsyncThunk(
   'sendOtp/user',
   async (mail: string, { rejectWithValue }) => {

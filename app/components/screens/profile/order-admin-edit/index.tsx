@@ -1,9 +1,10 @@
-import { NavigationProp, useNavigation, useRoute } from '@react-navigation/native';
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
   Image,
+  KeyboardAvoidingView,
   RefreshControl,
   ScrollView,
   Text,
@@ -11,66 +12,88 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import DropDownPicker from 'react-native-dropdown-picker';
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
 import { useIsTablet } from '../../../../hooks/useIsTablet';
-import { getOneAdminOrderThunk } from '../../../../redux/http/orderThunk';
+import {
+  confirmAdminOrderThunk,
+  deleteAdminOrderItemThunk,
+  getOneAdminOrderThunk,
+  updateAdminOrderThunk,
+} from '../../../../redux/http/orderThunk';
 import {
   setAdminOrderNecessaryNotes,
-  updateItemCount,
+  updateAdminItemCount,
 } from '../../../../redux/reducers/order/orderSlice';
-import { TCounterParty } from '../../../../redux/types';
-import { TOrderItem } from '../../../../redux/types/order';
+import { EOrderStatus, TOrderItem } from '../../../../redux/types/order';
+import { SHOW_ERROR, SHOW_SUCCESS } from '../../../../toasts';
 import { API_URL } from '../../../../utils/constants';
 import { calculateDiscountedPrice, formattedPrice } from '../../../../utils/product';
 import { Loading } from '../../../ui';
 import { Main, NumericInputCustom } from '../../../wrappers';
 import { CrudMainButton } from '../../../wrappers/crud-main-button';
-import { TOrderViewRouteParams } from '../order-view/types';
+import { SearchCounterparties } from './ui';
 
 export const OrderAdminEdit = () => {
   const dispatch = useAppDispatch();
+  const [editMode, setEditMode] = useState<boolean>(false);
+  const hasScreenBeenRendered = useRef(false);
 
-  const { navigate, setOptions } =
-    useNavigation<NavigationProp<Record<string, object | undefined>>>();
+  const { navigate } = useNavigation<NavigationProp<Record<string, object | undefined>>>();
 
-  const { isTablet } = useIsTablet();
+  const { isTablet, executeAfterDeviceCheck } = useIsTablet();
 
-  const { adminOrder: order, create, deleteItem } = useAppSelector((state) => state.order);
+  const {
+    adminOrder: order,
+    addItemToAdminBasket,
+    saveAdminOrder: save,
+    confirmAdminOrder: confirm,
+    create,
+    deleteItem,
+  } = useAppSelector((state) => state.order);
 
   const [itemLoadingStates, setItemLoadingStates] = useState<{ [itemId: string]: boolean }>({});
-  const [open, setOpen] = useState<boolean>(false);
-  const [counterParty, setCounterParty] = useState('');
-  const route = useRoute();
 
-  const { item }: TOrderViewRouteParams = route.params as TOrderViewRouteParams;
+  // State to track if more data is being loaded
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
 
-  // Set header title
-  useLayoutEffect((): void => {
-    setOptions({
-      headerTitle: item?._id ? 'Փոփոխել պարվերը' : 'Ստեղծել պատվեր',
-    });
-  }, [item]);
-
-  const orderId = item ? (item?._id as string) : '';
-  const isLoading = order.requestStatus.isLoading || isTablet === null;
   const items = order.items;
   const totalCurrentPage: number = items.length;
   const isAnyItemCountZero = items.some((item) => item.itemCount === 0);
 
+  const isSaveLoading = save.isLoading;
+  const isConfirmLoading = confirm.isLoading;
+  const isLoading =
+    order.requestStatus.isLoading === null ||
+    order.requestStatus.isLoading === true ||
+    isTablet === null;
+
+  const isConfirmed = order.status === EOrderStatus.CONFIRMED;
+  const isEdited = isConfirmed && !editMode;
+
+  const isConfirmDisable =
+    isAnyItemCountZero || !order.counterpartyId || !!isConfirmLoading || order.items.length === 0;
+
+  const setAllItemsCountToZero = () => {
+    if (isConfirmed) {
+      order.items.forEach((item) => {
+        dispatch(updateAdminItemCount({ itemId: item._id, newValue: 0 }));
+      });
+    }
+  };
+
   const fetchData = (): void => {
-    if (item) {
-      dispatch(getOneAdminOrderThunk(orderId));
+    if (order) {
+      dispatch(getOneAdminOrderThunk(order._id as string));
     }
   };
 
   useEffect(() => {
-    fetchData();
-  }, [orderId, deleteItem.isLoading, create.isLoading]);
-
-  useEffect(() => {
-    setCounterParty(order.counterpartyId);
-  }, [order.counterpartyId]);
+    if (hasScreenBeenRendered.current) {
+      executeAfterDeviceCheck(fetchData);
+    } else {
+      hasScreenBeenRendered.current = true;
+    }
+  }, [addItemToAdminBasket.isLoading, deleteItem.isLoading, create.isLoading, isTablet]);
 
   // Handle deletion of an order item
   const handleDelete = (_id: string): void => {
@@ -79,16 +102,16 @@ export const OrderAdminEdit = () => {
       [_id]: true,
     }));
 
-    // dispatch(deleteOrderItemThunk(_id))
-    //   .then((): void => {
-    //     setItemLoadingStates((prevLoadingStates) => ({
-    //       ...prevLoadingStates,
-    //       [_id]: false,
-    //     }));
-    //   })
-    //   .catch((err): void => {
-    //     err && SHOW_ERROR('Ապրանքի ջնջման հետ կապված խնդիր է առաջացել');
-    //   });
+    dispatch(deleteAdminOrderItemThunk(_id))
+      .then((): void => {
+        setItemLoadingStates((prevLoadingStates) => ({
+          ...prevLoadingStates,
+          [_id]: false,
+        }));
+      })
+      .catch((err): void => {
+        err && SHOW_ERROR('Ապրանքի ջնջման հետ կապված խնդիր է առաջացել');
+      });
   };
 
   const sumItemsPrice: number = items.reduce((acc: number, item: TOrderItem): number => {
@@ -101,35 +124,6 @@ export const OrderAdminEdit = () => {
     return acc;
   }, 0);
 
-  const users: TCounterParty[] = [
-    {
-      id: '1',
-      name: 'Vzgo',
-      code: 'wadwa',
-      phone: '044209460',
-      externalCode: 'dwada',
-      legalTitle: 'Vzgo',
-    },
-    {
-      id: '2',
-      name: 'Tatevik',
-      code: 'wada',
-      phone: '041209460',
-      externalCode: 'daw',
-      legalTitle: 'Tatevik',
-    },
-  ];
-
-  const counterParties = users.map((user: TCounterParty) => ({
-    key: user.id,
-    label: user.name,
-    value: user.id,
-  }));
-
-  const handleSelectChange = (value: string): void => {
-    setCounterParty(value);
-  };
-
   const handleChangeNotes = (text: string): void => {
     dispatch(setAdminOrderNecessaryNotes(text));
   };
@@ -138,8 +132,61 @@ export const OrderAdminEdit = () => {
     navigate('search group', {});
   };
 
-  const handleClick = () => {
-    console.log('CLICK');
+  const handleSave = () => {
+    dispatch(updateAdminOrderThunk(isConfirmed ? { ...order, isEdited: true } : order))
+      .then((res) => {
+        if (res) {
+          SHOW_SUCCESS('Փոփոխությունները պահպանվեցին');
+        }
+      })
+      .catch((err) => {
+        if (err) {
+          switch (err) {
+            case 502:
+              SHOW_ERROR('Ապրանքներից մեկի քանակը ավելին է քան պահեստում');
+              break;
+            default:
+              SHOW_ERROR('Փոփոխման հետ կապված խնդիր է առաջացել');
+              break;
+          }
+        }
+      });
+  };
+
+  const handleConfirm = () => {
+    dispatch(confirmAdminOrderThunk(order))
+      .unwrap()
+      .then((res) => {
+        if (res) {
+          SHOW_SUCCESS('Պատվերը հաջողությամբ հաստատվեց');
+        }
+      })
+      .catch((err) => {
+        if (err) {
+          switch (err) {
+            case 'counterparty_not_found':
+              SHOW_ERROR('Պատվիրատուն բացակայում է պահեստոում');
+              break;
+            case 'token_not_found':
+              SHOW_ERROR('Թոքեն չի գտնվել');
+              break;
+            case 'items_array_is_empty':
+              SHOW_ERROR('Ապրանքները բացակայում են');
+              break;
+            case 'one_of_the_values_does_not_match_the_request_body':
+              SHOW_ERROR('Արժեքներից մեկը չի համապատասխանում հարցմանը');
+              break;
+            default:
+              SHOW_ERROR('Հաստատման հետ կապված խնդիր է առաջացել');
+              break;
+          }
+        }
+      });
+  };
+
+  const handleEdit = () => {
+    setAllItemsCountToZero();
+    setEditMode(true);
   };
 
   const renderItem = ({ index, item }: { index: number; item: TOrderItem }) => {
@@ -147,24 +194,28 @@ export const OrderAdminEdit = () => {
       <>
         {item.product && (
           <View
-            className={`flex-row flex-1 min-h-[150px] bg-white shadow relative ${totalCurrentPage % 2 === 1 && index === totalCurrentPage - 1 ? 'rounded-t-lg' : 'rounded-lg'}`}>
+            className={`flex-row flex-1 min-h-[150px] bg-white shadow relative ${
+              totalCurrentPage % 2 === 1 && index === totalCurrentPage - 1
+                ? 'rounded-t-lg'
+                : 'rounded-lg'
+            }`}>
             <TouchableOpacity
               className="absolute right-3 top-3"
               disabled={itemLoadingStates[item._id]}
               onPress={() => handleDelete(item._id)}>
               {itemLoadingStates[item._id] ? (
                 <ActivityIndicator
-                  style={{ transform: [{ scaleX: 0.9 }, { scaleY: 0.9 }] }}
+                  style={{ transform: [{ scaleX: 0.6 }, { scaleY: 0.6 }] }}
                   size="large"
                   color="orange"
                 />
-              ) : (
+              ) : !isEdited ? (
                 <Image
                   source={require('../../../../assets/icons/delete-icon.png')}
-                  className="w-6 h-6"
+                  className="w-5 h-5"
                   tintColor="orange"
                 />
-              )}
+              ) : null}
             </TouchableOpacity>
             <View>
               {item.product && (
@@ -223,10 +274,13 @@ export const OrderAdminEdit = () => {
                     <NumericInputCustom
                       value={item.itemCount}
                       minValue={0}
-                      maxValue={item.product.count}
+                      maxValue={item.product?.count || 0}
                       onChange={(newValue: number): void => {
-                        dispatch(updateItemCount({ itemId: item._id, newValue }));
+                        if (!isEdited) {
+                          dispatch(updateAdminItemCount({ itemId: item._id, newValue }));
+                        }
                       }}
+                      disabled={isEdited}
                     />
                   )}
                 </View>
@@ -241,90 +295,96 @@ export const OrderAdminEdit = () => {
   // Refresh data
   const handleRefresh = (): void => {
     fetchData();
+    setEditMode(false);
   };
+
+  useEffect(() => {
+    if (!isLoading && isLoadingMore) {
+      setIsLoadingMore(false);
+    }
+  }, [isLoading, isLoadingMore]);
 
   return isLoading ? (
     <Loading />
   ) : (
     <Main>
-      <ScrollView
-        refreshControl={
-          <RefreshControl refreshing={isLoading ?? false} onRefresh={handleRefresh} />
-        }>
-        <View className="w-full p-4 space-y-6">
-          <View className="w-full">
-            <FlatList
-              data={items}
-              scrollEnabled={false}
-              ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-              horizontal={false}
-              renderItem={renderItem}
-            />
-            <View className="flex-row mt-2 flex-1 min-h-[40px] items-center px-4 bg-white border-gray-200 rounded-b-lg">
-              <TouchableOpacity onPress={handleNavigate}>
-                <Text className="text-orange-400 font-bold">+ Ավելացնել</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-          <View className="bg-white flex-row justify-between p-4 items-center w-full rounded-lg">
-            <Text className="text-lg text-gray-400">Ընդհանուր</Text>
-            <Text className="font-semibold">{formattedPrice(sumItemsPrice)} ․դր</Text>
-          </View>
-          <View className="space-y-1">
-            <Text>Ընտրել հաճախորդին</Text>
-            <DropDownPicker
-              open={open}
-              value={counterParty}
-              items={counterParties}
-              setOpen={setOpen}
-              placeholder="Ընտրել"
-              style={{
-                width: '100%',
-                borderRadius: 4,
-                borderColor: '#D3D3D3',
-                paddingLeft: 12,
-                paddingRight: 12,
-                backgroundColor: 'transparent',
-              }}
-              placeholderStyle={{
-                color: '#8a8686',
-                fontWeight: 'bold',
-              }}
-              setValue={(val) => handleSelectChange(val(val))}
-              listMode="SCROLLVIEW"
-              scrollViewProps={{
-                nestedScrollEnabled: true,
-              }}
-            />
-          </View>
-          <View className="flex-1 w-full items-center mt-3">
-            <Text className="text-lg text-gray-400">Անհրաժեշտ նշումներ</Text>
-            <View className="w-full rounded-lg overflow-hidden mt-3">
-              <TextInput
-                className={`bg-white mx-auto w-full px-2 py-3 text-base ${isTablet ? 'w-11/12 rounded-md' : 'w-full'}`}
-                value={order.necessaryNotes}
-                onChangeText={(text: string) => handleChangeNotes(text)}
+      <KeyboardAvoidingView behavior="padding" style={{ height: '100%' }}>
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          refreshControl={
+            <RefreshControl refreshing={isLoading ?? false} onRefresh={handleRefresh} />
+          }>
+          <View className="w-full p-4 space-y-4">
+            <View className="w-full">
+              <FlatList
+                data={items}
+                scrollEnabled={false}
+                ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+                horizontal={false}
+                renderItem={renderItem}
               />
+              {!isEdited ? (
+                <View className="flex-row mt-2 flex-1 min-h-[40px] items-center px-4 bg-white border-gray-200 rounded-b-lg">
+                  <TouchableOpacity onPress={handleNavigate}>
+                    <Text className="text-orange-400 font-bold">+ Ավելացնել</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : null}
+            </View>
+            <View className="bg-white flex-row justify-between p-4 items-center w-full rounded-lg">
+              <Text className="text-base text-gray-400">Ընդհանուր</Text>
+              <Text className="font-semibold text-gray-600">
+                {formattedPrice(sumItemsPrice)} ․դր
+              </Text>
+            </View>
+            <View className="space-y-1">
+              <Text className="text-gray-500">Ընտրել հաճախորդին</Text>
+              <SearchCounterparties disabled={isEdited} />
+            </View>
+            <View className="flex-1 w-full space-y-1 mt-3">
+              <Text className="text-gray-500">Անհրաժեշտ նշումներ</Text>
+              <View className="w-full rounded-lg overflow-hidden mt-3">
+                <TextInput
+                  className="bg-white mx-auto px-2 py-3 text-base w-full"
+                  value={order.necessaryNotes}
+                  editable={!isEdited}
+                  onChangeText={(text: string) => handleChangeNotes(text)}
+                />
+              </View>
+            </View>
+            <View className="w-full mt-6">
+              {isEdited ? (
+                <CrudMainButton
+                  handleSubmit={handleEdit}
+                  disabled={false}
+                  isLoading={false}
+                  className="py-4 bg-green-500">
+                  Կրկնել պատվերը
+                </CrudMainButton>
+              ) : (
+                <>
+                  <CrudMainButton
+                    handleSubmit={handleSave}
+                    disabled={!!isSaveLoading}
+                    isLoading={!!isSaveLoading}
+                    className="py-4 bg-green-500">
+                    Պահպանել
+                  </CrudMainButton>
+                  {!isConfirmed ? (
+                    <CrudMainButton
+                      handleSubmit={handleConfirm}
+                      disabled={isConfirmDisable}
+                      isLoading={!!isConfirmLoading}
+                      className="py-4 mt-2">
+                      Հաստատել Պատվերը
+                    </CrudMainButton>
+                  ) : null}
+                </>
+              )}
             </View>
           </View>
-          <View className="w-full mt-6">
-            <CrudMainButton
-              handleSubmit={handleClick}
-              disabled={false}
-              isLoading={false}
-              className="py-4 bg-gray-500">
-              Պահպանել
-            </CrudMainButton>
-            <CrudMainButton
-              handleSubmit={handleClick}
-              disabled={false}
-              isLoading={false}
-              className="py-4 mt-2">
-              Ստեղծել Պատվեր
-            </CrudMainButton>
-          </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </Main>
   );
 };

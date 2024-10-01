@@ -22,6 +22,7 @@ export const CrudList = <T,>(props: ICrudListProps<T>): React.ReactElement => {
   const {
     labelList,
     data,
+    executeNavigateAfterThisFn,
     navigateTo,
     renderItemComponent,
     renderButton,
@@ -40,8 +41,15 @@ export const CrudList = <T,>(props: ICrudListProps<T>): React.ReactElement => {
 
   const dispatch = useAppDispatch();
   const { navigate } = useNavigation<NavigationProp<TUserListNavigationProps>>();
-  const handleClick = (item: T): void => {
-    navigate(navigateTo, { item });
+
+  const handleClick = async (item: T): Promise<void> => {
+    if (executeNavigateAfterThisFn) {
+      await executeNavigateAfterThisFn((item as { _id: string })._id);
+
+      navigate(navigateTo, {});
+    } else {
+      navigate(navigateTo, { item });
+    }
   };
 
   const handleClearQuery = (): void => {

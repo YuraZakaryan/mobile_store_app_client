@@ -30,6 +30,7 @@ export interface IProductHistory extends TProduct {
 
 export interface ICurrentProduct extends TStateStatus {
   product: TProduct | null;
+  addToCardDialogStatus?: boolean;
 }
 
 export interface IProductDocument extends TStateStatus {

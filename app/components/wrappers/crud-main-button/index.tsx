@@ -15,7 +15,7 @@ export const CrudMainButton: React.FC<ICrudMainButton> = (props) => {
         disabled={disabled}
         onPress={() => handleSubmit()}>
         {isLoading ? (
-          <ActivityIndicator size="small" />
+          <ActivityIndicator size={22} />
         ) : (
           <Text className="text-center font-bold text-white">{children}</Text>
         )}

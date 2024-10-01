@@ -3,6 +3,7 @@ import { TUser } from '../user';
 
 export enum EOrderStatus {
   IN_PROGRESS = 'inProgress',
+  CONFIRMED = 'confirmed',
   ORDERED = 'ordered',
   ACCEPTED = 'accepted',
   DELIVERED = 'delivered',
@@ -47,3 +48,18 @@ export type TAdminOrder = {
   confirmedTime: string | null;
   createdAt: string | null;
 };
+
+export interface IStateCounterpartyWithId extends TStateCounterparty {
+  orderId: string;
+  necessaryNotes: string;
+  items: TOrderItem[];
+}
+
+export type TStateCounterparty = {
+  id: string;
+  name: string;
+};
+
+export interface IAdminOrderWithIsEdit extends TAdminOrder {
+  isEdited?: boolean;
+}

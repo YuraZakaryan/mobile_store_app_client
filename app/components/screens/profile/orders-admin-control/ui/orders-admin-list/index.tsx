@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { RefreshControl, ScrollView, Text, View } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../../../../../../hooks/redux';
 import { useDebounce } from '../../../../../../hooks/useDebounce';
 import { useIsTablet } from '../../../../../../hooks/useIsTablet';
+import { getOneAdminOrderThunk } from '../../../../../../redux/http/orderThunk';
 import { TAdminOrder } from '../../../../../../redux/types/order';
+import { formattedTimeForOrderItem } from '../../../../../../utils';
 import { getLimitNumber } from '../../../../../../utils/constants';
-import { EmptyOrder, Loading } from '../../../../../ui';
+import { Loading } from '../../../../../ui';
 import { CrudList, Main } from '../../../../../wrappers';
 import { IOrdersAdminList } from '../../types';
+import { CreateEmptyOrder } from '../create-empty-order';
 
 export const OrdersAdminList: React.FC<IOrdersAdminList> = (props) => {
-  const { ordersSelector, fetchOrdersThunk, emptyMessage } = props;
+  const { ordersSelector, fetchOrdersThunk } = props;
 
   const dispatch = useAppDispatch();
   const { isTablet, executeAfterDeviceCheck } = useIsTablet();
@@ -56,39 +59,38 @@ export const OrdersAdminList: React.FC<IOrdersAdminList> = (props) => {
     fetchData();
   };
 
-  return isLoading && !hasSearched ? (
+  const executeNavigateAfterThisFn = async (orderId: string) => {
+    await dispatch(getOneAdminOrderThunk(orderId));
+  };
+
+  return !!isLoading && !hasSearched ? (
     <Loading />
   ) : (
     <Main>
-      {orders?.length > 0 || hasSearched ? (
-        <ScrollView
-          refreshControl={<RefreshControl refreshing={isLoading} onRefresh={handleRefresh} />}
-          keyboardShouldPersistTaps="handled">
-          <View className="m-4">
-            <CrudList
-              data={orders}
-              navigateTo="admin-order-edit"
-              previousButtonDisable={currentOrderPage <= 1}
-              nextButtonDisable={currentOrderPage * LIMIT_NUMBER >= total_items}
-              handlePreviousPage={handlePrevUserPage}
-              handleNextPage={handleNextUserPage}
-              totalItems={total_items}
-              fieldButtonType="view"
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              hasSearched={hasSearched}
-              setHasSearched={setHasSearched}
-              searchFieldPlaceholder="Փնտրել պատվիրատույի անունով"
-              renderButton={() => (
-                <View className="w-full">
-                  <TouchableOpacity
-                    className="px-6 py-2 bg-orange-400 self-end rounded"
-                    onPress={() => console.log('dwawd')}>
-                    <Text className="font-semibold text-white">Ստեղծել պատվեր</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-              renderItemComponent={(index: number, item: TAdminOrder) => (
+      <ScrollView
+        refreshControl={<RefreshControl refreshing={isLoading} onRefresh={handleRefresh} />}
+        keyboardShouldPersistTaps="handled">
+        <View className="m-4">
+          <CrudList
+            data={orders}
+            executeNavigateAfterThisFn={executeNavigateAfterThisFn}
+            navigateTo="admin-order-edit"
+            previousButtonDisable={currentOrderPage <= 1}
+            nextButtonDisable={currentOrderPage * LIMIT_NUMBER >= total_items}
+            handlePreviousPage={handlePrevUserPage}
+            handleNextPage={handleNextUserPage}
+            totalItems={total_items}
+            fieldButtonType="view"
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            hasSearched={hasSearched}
+            setHasSearched={setHasSearched}
+            searchFieldPlaceholder="Փնտրել պատվիրատույի անունով"
+            renderButton={() => <CreateEmptyOrder />}
+            renderItemComponent={(index: number, item: TAdminOrder) => {
+              const createDate = formattedTimeForOrderItem(item.createdAt as string);
+
+              return (
                 <>
                   <View className="flex-row items-center gap-2">
                     <Text className="font-semibold">{index + 1}.</Text>
@@ -99,22 +101,13 @@ export const OrdersAdminList: React.FC<IOrdersAdminList> = (props) => {
                       {item.counterpartyName || 'Անանուն պատվեր'}
                     </Text>
                   </View>
-                  <Text>{item.items.length}</Text>
+                  <Text className="text-[12px]">{createDate}</Text>
                 </>
-              )}
-            />
-          </View>
-        </ScrollView>
-      ) : (
-        <View className="h-full items-center justify-center">
-          {/* <CreateItemButton
-            handleClick={() => console.log('')}
-            createButtonLabel="Սիխրոնիզացնել"
-            isLoading={false}
-          /> */}
-          <EmptyOrder text={emptyMessage} />
+              );
+            }}
+          />
         </View>
-      )}
+      </ScrollView>
     </Main>
   );
 };

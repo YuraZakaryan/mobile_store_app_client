@@ -5,6 +5,5 @@ export const OrdersAdminHistory = () => (
   <OrdersAdminList
     ordersSelector={(state) => state.order.adminHistoryOrders}
     fetchOrdersThunk={fetchAdminHistoryOrdersThunk}
-    emptyMessage="Չեն գտնվել պատվերներ"
   />
 );

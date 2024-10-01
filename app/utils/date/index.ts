@@ -42,3 +42,16 @@ export const hasTimePassed = (
 
   return timeDifferenceInSeconds >= seconds;
 };
+
+export const formattedTimeForOrderItem = (date: string | Date) => {
+  const parsedDate = new Date(date);
+
+  const day = String(parsedDate.getDate()).padStart(2, '0');
+  const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
+  const year = String(parsedDate.getFullYear()).slice(-2);
+  const hours = String(parsedDate.getHours()).padStart(2, '0');
+  const minutes = String(parsedDate.getMinutes()).padStart(2, '0');
+
+  const formattedDate = `${day}.${month}.${year} (${hours}:${minutes})`;
+  return formattedDate;
+};

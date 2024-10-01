@@ -23,6 +23,7 @@ const initialState: TInitialProductState = {
     isLoading: false,
     isError: false,
     isNetworkError: true,
+    addToCardDialogStatus: false,
   },
   productDocument: {
     dialogActive: false,
@@ -144,6 +145,9 @@ export const productSlice = createSlice({
     setSyncProductsDialogStatus(state: TInitialProductState, action: PayloadAction<boolean>) {
       state.syncProducts.dialogStatus = action.payload;
     },
+    setAddToCardDialogStatus(state: TInitialProductState, action: PayloadAction<boolean>) {
+      state.currentProduct.addToCardDialogStatus = action.payload;
+    },
     setSyncProductsImageType(state: TInitialProductState, action: PayloadAction<EImageAdd>) {
       state.syncProducts.imageSyncType = action.payload;
     },
@@ -243,6 +247,7 @@ export const productSlice = createSlice({
           isError: false,
           isLoading: false,
           isNetworkError: false,
+          addToCardDialogStatus: false,
         };
       })
       .addCase(fetchProductThunk.pending, (state: TInitialProductState): void => {
@@ -505,5 +510,6 @@ export const {
   clearCategoryThunk,
   resetProductsByCategory,
   setSyncProductsDialogStatus,
+  setAddToCardDialogStatus,
   setSyncProductsImageType,
 } = productSlice.actions;

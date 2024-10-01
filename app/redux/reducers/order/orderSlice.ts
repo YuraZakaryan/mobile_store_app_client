@@ -2,9 +2,13 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 import { TProductsWithStocks } from '../../../components/screens/profile/order-view/types';
 import {
+  addItemToAdminBasketThunk,
   cancelOrderThunk,
   changeOrderStatusThunk,
+  confirmAdminOrderThunk,
+  createEmptyAdminOrderThunk,
   createOrAddOrderThunk,
+  deleteAdminOrderItemThunk,
   deleteOrderItemThunk,
   deliverOrderThunk,
   fetchAdminActiveOrdersThunk,
@@ -16,6 +20,7 @@ import {
   getOrderByUserInProgressThunk,
   getProductsWithStocksThunk,
   toOrderThunk,
+  updateAdminOrderThunk,
 } from '../../http/orderThunk';
 import {
   TInitialBasketState,
@@ -23,7 +28,14 @@ import {
   TNewItemForm,
   TUpdateFieldAction,
 } from '../../types';
-import { EOrderStatus, EPackage, TAdminOrder, TOrder, TOrderItem } from '../../types/order';
+import {
+  EOrderStatus,
+  EPackage,
+  TAdminOrder,
+  TOrder,
+  TOrderItem,
+  TStateCounterparty,
+} from '../../types/order';
 
 const initialState: TInitialBasketState = {
   newItemForm: {
@@ -74,14 +86,14 @@ const initialState: TInitialBasketState = {
     items: [],
   },
   adminActiveOrders: {
-    isLoading: false,
+    isLoading: true,
     isError: false,
     isNetworkError: false,
     total_items: 0,
     items: [],
   },
   adminHistoryOrders: {
-    isLoading: false,
+    isLoading: true,
     isError: false,
     isNetworkError: false,
     total_items: 0,
@@ -95,6 +107,11 @@ const initialState: TInitialBasketState = {
     items: [],
   },
   create: {
+    isLoading: false,
+    isError: false,
+    isNetworkError: false,
+  },
+  createEmpty: {
     isLoading: false,
     isError: false,
     isNetworkError: false,
@@ -125,6 +142,21 @@ const initialState: TInitialBasketState = {
     isNetworkError: false,
   },
   deliverOrder: {
+    isLoading: false,
+    isError: false,
+    isNetworkError: false,
+  },
+  addItemToAdminBasket: {
+    isLoading: false,
+    isError: false,
+    isNetworkError: false,
+  },
+  saveAdminOrder: {
+    isLoading: false,
+    isError: false,
+    isNetworkError: false,
+  },
+  confirmAdminOrder: {
     isLoading: false,
     isError: false,
     isNetworkError: false,
@@ -165,6 +197,29 @@ const orderSlice = createSlice({
       state.basket.items = state.basket.items.map((item) =>
         item._id === itemId ? { ...item, itemCount: newValue } : item
       );
+    },
+    updateAdminItemCount: (
+      state: TInitialBasketState,
+      action: PayloadAction<{ itemId: string; newValue: number }>
+    ): void => {
+      const { itemId, newValue } = action.payload;
+      state.adminOrder.items = state.adminOrder.items.map((item) =>
+        item._id === itemId ? { ...item, itemCount: newValue } : item
+      );
+    },
+    updateCounterPartyOfAdminOrder: (
+      state: TInitialBasketState,
+      action: PayloadAction<TStateCounterparty>
+    ) => {
+      const { id, name } = action.payload;
+
+      if (id && name) {
+        state.adminOrder = {
+          ...state.adminOrder,
+          counterpartyId: id,
+          counterpartyName: name,
+        };
+      }
     },
   },
   extraReducers: (builder) =>
@@ -225,6 +280,30 @@ const orderSlice = createSlice({
         state.deleteItem.isNetworkError = false;
       })
       .addCase(deleteOrderItemThunk.rejected, (state: TInitialBasketState, action): void => {
+        state.deleteItem.isLoading = false;
+        if (action.payload === 'NetworkError') {
+          state.deleteItem.isNetworkError = true;
+        } else if (action.payload !== 404) {
+          state.deleteItem.isError = true;
+        }
+      })
+      .addCase(
+        deleteAdminOrderItemThunk.fulfilled,
+        (state, action: PayloadAction<string>): void => {
+          state.basket.items = state.basket.items.filter(
+            (item: TOrderItem): boolean => item._id !== action.payload
+          );
+          state.deleteItem.isLoading = false;
+          state.deleteItem.isError = false;
+          state.deleteItem.isNetworkError = false;
+        }
+      )
+      .addCase(deleteAdminOrderItemThunk.pending, (state: TInitialBasketState): void => {
+        state.deleteItem.isLoading = true;
+        state.deleteItem.isError = false;
+        state.deleteItem.isNetworkError = false;
+      })
+      .addCase(deleteAdminOrderItemThunk.rejected, (state: TInitialBasketState, action): void => {
         state.deleteItem.isLoading = false;
         if (action.payload === 'NetworkError') {
           state.deleteItem.isNetworkError = true;
@@ -529,6 +608,129 @@ const orderSlice = createSlice({
         } else if (action.payload !== 404) {
           state.adminOrder.requestStatus.isError = true;
         }
+      })
+      .addCase(
+        createEmptyAdminOrderThunk.fulfilled,
+        (state: TInitialBasketState, action: PayloadAction<TAdminOrder>): void => {
+          if (action.payload) {
+            state.adminOrder = {
+              requestStatus: {
+                isLoading: false,
+                isError: false,
+                isNetworkError: false,
+              },
+              ...action.payload,
+            };
+          }
+
+          state.createEmpty.isLoading = false;
+          state.createEmpty.isError = false;
+          state.createEmpty.isNetworkError = false;
+        }
+      )
+      .addCase(createEmptyAdminOrderThunk.pending, (state: TInitialBasketState): void => {
+        state.createEmpty.isLoading = true;
+        state.createEmpty.isError = false;
+        state.createEmpty.isNetworkError = false;
+      })
+      .addCase(createEmptyAdminOrderThunk.rejected, (state: TInitialBasketState, action): void => {
+        state.createEmpty.isLoading = false;
+        if (action.payload === 'NetworkError') {
+          state.createEmpty.isNetworkError = true;
+        }
+      })
+      .addCase(addItemToAdminBasketThunk.fulfilled, (state: TInitialBasketState): void => {
+        state.addItemToAdminBasket = {
+          isLoading: false,
+          isError: false,
+          isNetworkError: false,
+        };
+      })
+      .addCase(addItemToAdminBasketThunk.pending, (state: TInitialBasketState): void => {
+        state.addItemToAdminBasket = {
+          isLoading: true,
+          isError: false,
+          isNetworkError: false,
+        };
+      })
+      .addCase(addItemToAdminBasketThunk.rejected, (state: TInitialBasketState, action): void => {
+        state.addItemToAdminBasket.isLoading = false;
+        if (action.payload === 'NetworkError') {
+          state.addItemToAdminBasket.isNetworkError = true;
+        } else if (action.payload !== 404) {
+          state.addItemToAdminBasket.isError = true;
+        }
+      })
+      .addCase(
+        updateAdminOrderThunk.fulfilled,
+        (state: TInitialBasketState, action: PayloadAction<TAdminOrder>): void => {
+          if (action.payload) {
+            state.adminOrder = {
+              requestStatus: {
+                isLoading: false,
+                isError: false,
+                isNetworkError: false,
+              },
+              ...action.payload,
+            };
+          }
+
+          state.saveAdminOrder = {
+            isLoading: false,
+            isError: false,
+            isNetworkError: false,
+          };
+        }
+      )
+      .addCase(updateAdminOrderThunk.pending, (state: TInitialBasketState): void => {
+        state.saveAdminOrder = {
+          isLoading: true,
+          isError: false,
+          isNetworkError: false,
+        };
+      })
+      .addCase(updateAdminOrderThunk.rejected, (state: TInitialBasketState, action): void => {
+        state.saveAdminOrder.isLoading = false;
+        if (action.payload === 'NetworkError') {
+          state.saveAdminOrder.isNetworkError = true;
+        } else if (action.payload !== 404) {
+          state.saveAdminOrder.isError = true;
+        }
+      })
+      .addCase(
+        confirmAdminOrderThunk.fulfilled,
+        (state: TInitialBasketState, action: PayloadAction<TAdminOrder>): void => {
+          if (action.payload) {
+            state.adminOrder = {
+              requestStatus: {
+                isLoading: false,
+                isError: false,
+                isNetworkError: false,
+              },
+              ...action.payload,
+            };
+          }
+          state.confirmAdminOrder = {
+            isLoading: false,
+            isError: false,
+            isNetworkError: false,
+          };
+        }
+      )
+      .addCase(confirmAdminOrderThunk.pending, (state: TInitialBasketState): void => {
+        state.confirmAdminOrder = {
+          isLoading: true,
+          isError: false,
+          isNetworkError: false,
+        };
+      })
+      .addCase(confirmAdminOrderThunk.rejected, (state: TInitialBasketState, action): void => {
+        state.confirmAdminOrder.isLoading = false;
+        if (action.payload === 'NetworkError') {
+          state.confirmAdminOrder.isNetworkError = true;
+        } else if (action.payload !== 404) {
+          state.confirmAdminOrder.isError = true;
+        }
       }),
 });
 export const orderReducer = orderSlice.reducer;
@@ -537,6 +739,8 @@ export const {
   setProductId,
   setPackaging,
   updateItemCount,
+  updateAdminItemCount,
+  updateCounterPartyOfAdminOrder,
   setNecessaryNotes,
   setAdminOrderNecessaryNotes,
 } = orderSlice.actions;

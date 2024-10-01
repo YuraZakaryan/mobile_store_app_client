@@ -1,8 +1,7 @@
-import { Feather, FontAwesome } from '@expo/vector-icons';
+import { FontAwesome } from '@expo/vector-icons';
 import { NavigationProp, useNavigation, useRoute } from '@react-navigation/native';
 import React from 'react';
 import {
-  ActivityIndicator,
   Image,
   Modal,
   RefreshControl,
@@ -15,15 +14,13 @@ import {
 
 import ImageViewer from 'react-native-image-zoom-viewer';
 import { useAppDispatch, useAppSelector } from '../../../hooks/redux';
-import { createOrAddOrderThunk } from '../../../redux/http/orderThunk';
 import { fetchProductThunk } from '../../../redux/http/productThunk';
 import { changeForm, setProductId } from '../../../redux/reducers/order/orderSlice';
 import { TProduct, TRole } from '../../../redux/types';
-import { TOrderItem } from '../../../redux/types/order';
-import { SHOW_ERROR } from '../../../toasts';
-import { API_URL, ICON_MAIN_COLOR } from '../../../utils/constants';
+import { API_URL } from '../../../utils/constants';
 import { NumericInputCustom, SaleIcon } from '../../wrappers';
 import { ETypeInfo, TProductRouteParams } from './types';
+import { AddToCart } from './ui';
 import { InfoItem } from './wrapper';
 
 export const ProductPage = () => {
@@ -34,7 +31,7 @@ export const ProductPage = () => {
   const { setOptions } = useNavigation<NavigationProp<any, any>>();
   const route = useRoute();
   const { title, productId }: TProductRouteParams = route.params as TProductRouteParams;
-  const { newItemForm, create, basket, deleteItem } = useAppSelector((state) => state.order);
+  const { newItemForm, create, deleteItem } = useAppSelector((state) => state.order);
   const { user } = useAppSelector((state) => state.user);
   const { currentProduct } = useAppSelector((state) => state.product);
 
@@ -70,38 +67,9 @@ export const ProductPage = () => {
     dispatch(changeForm({ name, value }));
   };
 
-  // Check if the order exists in the basket
-  const orderExists: boolean = basket.items.some(
-    (order: TOrderItem): boolean => order.product._id === productId
-  );
-
-  // Check if the button should be disabled
-  const isButtonDisable: boolean =
-    newItemForm.itemCount === 0 || create.isLoading || orderExists || orderExistsAfterClick;
-
   const product = currentProduct.product as TProduct;
   // Check if the item has a discount
   const checkDiscount: boolean = product && product.discount > 0;
-
-  // Handle button click
-  const handleClick = (): void => {
-    dispatch(createOrAddOrderThunk(newItemForm))
-      .unwrap()
-      .then((res: TProduct) => res && setOrderExistsAfterClick(true))
-      .catch((err): void => {
-        if (err === 409) {
-          SHOW_ERROR('Ձեր էջը հաստատված չէ, փորձել մի փոքր ուշ');
-        } else if (err === 410) {
-          SHOW_ERROR('Ձեր հաշիվը արգելափակված է');
-        } else if (err === 502) {
-          SHOW_ERROR('ՈՉ ԲԱՎԱՐԱՐ ԱՊՐԱՆՔԻ ՔԱՆԱԿ, ԹԱՐՄԱՑՐԵՔ ԷՋԸ');
-        } else if (err === 401) {
-          SHOW_ERROR('Կխնդրեինք առաջին հերթին մուտք գործել');
-        } else {
-          SHOW_ERROR('Ապրանքի զամբյուղում ավելացնելու հետ կապված խնդրի է առաջացել');
-        }
-      });
-  };
 
   const handleRefresh = (): void => {
     fetchData();
@@ -228,27 +196,7 @@ export const ProductPage = () => {
 
                 {checkDiscount ? <InfoItem label="Զեղչ" content={product.discount + ' %'} /> : null}
               </View>
-              <View className="min-h-[40px] w-full flex-1 justify-center mt-5 items-center">
-                <TouchableOpacity
-                  className={`bg-orange-600 p-4 w-5/6 rounded-lg${
-                    isButtonDisable ? ' bg-gray-400' : ''
-                  }`}
-                  onPress={handleClick}
-                  disabled={isButtonDisable}>
-                  {create.isLoading ? (
-                    <ActivityIndicator size="small" />
-                  ) : orderExists || orderExistsAfterClick ? (
-                    <View className="flex-row items-center justify-center">
-                      <Feather name="shopping-cart" size={16} color={ICON_MAIN_COLOR} />
-                      <Text className="ml-2 text-white font-semibold">ԶԱՄԲՅՈՒՂՈՒՄ</Text>
-                    </View>
-                  ) : (
-                    <Text className="text-center text-white font-bold text-base">
-                      Ավելացնել զամբյուղում
-                    </Text>
-                  )}
-                </TouchableOpacity>
-              </View>
+              <AddToCart productId={productId} />
             </>
           )}
         </View>
