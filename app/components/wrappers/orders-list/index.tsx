@@ -3,7 +3,7 @@ import { FlatList, ScrollView, Text, View } from 'react-native';
 
 import { TOrder, TOrderItem } from '../../../redux/types/order';
 import { IOrderList } from '../../../types';
-import { calculateDiscountedPrice, formattedPrice } from '../../../utils/product';
+import { formattedPrice } from '../../../utils/product';
 import { OrderInfo } from '../order-info';
 import { OrderItemCard } from '../order-item-card';
 
@@ -11,10 +11,8 @@ export const OrdersList: React.FC<IOrderList> = React.memo((props) => {
   const { children, item } = props;
 
   const totalAmount = item?.items.reduce((acc, item) => {
-    if (item.product && item.product.priceWholesale) {
-      const itemPrice = item.product.discount
-        ? calculateDiscountedPrice(item.product.priceWholesale, item.product.discount)
-        : item.product.priceWholesale;
+    if (item.product && item.product.price) {
+      const itemPrice = item.product.price;
       return acc + item.itemCount * itemPrice;
     }
     return acc;

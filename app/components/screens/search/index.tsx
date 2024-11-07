@@ -19,8 +19,9 @@ import { useDebounce } from '../../../hooks/useDebounce';
 import { useIsTablet } from '../../../hooks/useIsTablet';
 import { searchProductsThunk } from '../../../redux/http/productThunk';
 import { clearSearchQuery, setSearchQuery } from '../../../redux/reducers/product/productSlice';
-import { TProduct } from '../../../redux/types';
+import { TProduct, TRole } from '../../../redux/types';
 import { ETypeError } from '../../../types';
+import { isAdmin } from '../../../utils';
 import { getLimitNumber } from '../../../utils/constants';
 import { Loading, NetworkError } from '../../ui';
 import { PaginationButtons, ProductItem } from '../../wrappers';
@@ -52,6 +53,8 @@ export const Search = () => {
     changeStatus,
     toOrder,
   } = useAppSelector((state) => state.order);
+
+  const { user } = useAppSelector((state) => state.user);
 
   const loadingStates: (boolean | null)[] = [
     createOrder.isLoading,
@@ -141,6 +144,7 @@ export const Search = () => {
   const previousButtonDisable: boolean = currentSearchProductPage <= 1;
   const nextButtonDisable: boolean = currentSearchProductPage * LIMIT_NUMBER >= search.total_items;
   const totalCurrentPage: number = search.items.length;
+  const hasAdmin = isAdmin(user?.role as TRole);
 
   return (search.isLoading && !initialSearch) || isTablet === null ? (
     <Loading />
@@ -176,7 +180,7 @@ export const Search = () => {
                   )}
                 </View>
               </View>
-              <SearchByBarCode handleSearchChange={handleSearchChange} />
+              {hasAdmin ? <SearchByBarCode handleSearchChange={handleSearchChange} /> : null}
             </View>
             {isError ? (
               <NetworkError

@@ -10,6 +10,11 @@ export enum EResetPasswordMode {
   NEW_PASS_SECTION = 'new-pass-section',
 }
 
+export enum EPriceType {
+  RETAIL = 'RETAIL',
+  WHOLESALE = 'WHOLESALE',
+}
+
 export type TRole = 'ADMIN' | 'MODERATOR' | 'USER' | 'SUPERUSER';
 
 export type TUser = {
@@ -20,6 +25,8 @@ export type TUser = {
   mail: string;
   address: string;
   phone: string;
+  priceType: EPriceType;
+  discountPercent: number;
   role: TRole;
   confirmed: boolean;
   stockToken: string;

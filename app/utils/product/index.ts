@@ -18,13 +18,17 @@ const calculateDiscountedPrice = (price: number, discount: number) => {
 const getOrderStatus = (status: EOrderStatus) => {
   return status === EOrderStatus.ORDERED
     ? 'Պատվիրված'
-    : status === EOrderStatus.ACCEPTED
-      ? 'Ընդունված'
-      : status === EOrderStatus.DELIVERED
-        ? 'Առաքված'
+    : status === EOrderStatus.CONFIRMED
+      ? 'Հաստատված'
+      : status === EOrderStatus.COMPLETED
+        ? 'Հաստատված պահոցի կողմից'
         : status === EOrderStatus.REJECTED
           ? 'Մերժված'
           : 'Ակտիվ';
+};
+
+const isDiscount = (percent: number) => {
+  return percent > 0;
 };
 
 const categoryHome = {
@@ -32,10 +36,11 @@ const categoryHome = {
   discountProducts: 'Զեղչեր',
 };
 export {
-  filterProductsLastDays,
-  filterItemsByDiscount,
-  formattedPrice,
   calculateDiscountedPrice,
-  getOrderStatus,
   categoryHome,
+  filterItemsByDiscount,
+  filterProductsLastDays,
+  formattedPrice,
+  getOrderStatus,
+  isDiscount,
 };

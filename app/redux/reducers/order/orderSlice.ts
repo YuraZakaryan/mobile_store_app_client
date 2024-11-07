@@ -1,6 +1,5 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
-import { TProductsWithStocks } from '../../../components/screens/profile/order-view/types';
 import {
   addItemToAdminBasketThunk,
   cancelOrderThunk,
@@ -18,24 +17,24 @@ import {
   fetchOrdersByAuthorThunk,
   getOneAdminOrderThunk,
   getOrderByUserInProgressThunk,
-  getProductsWithStocksThunk,
   toOrderThunk,
   updateAdminOrderThunk,
-} from '../../http/orderThunk';
+} from '../../http/orderThunk'
 import {
+  EPriceType,
   TInitialBasketState,
   TItemsWithTotalLength,
   TNewItemForm,
   TUpdateFieldAction,
-} from '../../types';
+} from '../../types'
 import {
   EOrderStatus,
-  EPackage,
   TAdminOrder,
   TOrder,
   TOrderItem,
   TStateCounterparty,
-} from '../../types/order';
+  TUpdatePricePayload,
+} from '../../types/order'
 
 const initialState: TInitialBasketState = {
   newItemForm: {
@@ -46,11 +45,9 @@ const initialState: TInitialBasketState = {
   basket: {
     status: EOrderStatus.IN_PROGRESS,
     items: [],
-    packaging: EPackage.BAG,
     necessaryNotes: '',
     author: null,
     confirmedTime: null,
-    acceptedTime: null,
     deliveredTime: null,
     rejectedTime: null,
     createdAt: null,
@@ -67,6 +64,8 @@ const initialState: TInitialBasketState = {
     items: [],
     status: EOrderStatus.IN_PROGRESS,
     necessaryNotes: '',
+    discountPercent: 0,
+    priceType: EPriceType.RETAIL,
     author: null,
     createdAt: null,
     confirmedTime: null,
@@ -146,11 +145,6 @@ const initialState: TInitialBasketState = {
     isError: false,
     isNetworkError: false,
   },
-  addItemToAdminBasket: {
-    isLoading: false,
-    isError: false,
-    isNetworkError: false,
-  },
   saveAdminOrder: {
     isLoading: false,
     isError: false,
@@ -174,20 +168,24 @@ const orderSlice = createSlice({
         [name]: value,
       };
     },
+    changeOrderStockField(
+      state: TInitialBasketState,
+      action: PayloadAction<TUpdateFieldAction>
+    ): void {
+      const { name, value } = action.payload;
+      state.adminOrder = {
+        ...state.adminOrder,
+        [name]: value,
+      };
+    },
     setProductId(state: TInitialBasketState, action: PayloadAction<TNewItemForm>): void {
       state.newItemForm = {
         ...state.newItemForm,
         ...action.payload,
       };
     },
-    setPackaging(state: TInitialBasketState, action: PayloadAction<EPackage>): void {
-      state.basket.packaging = action.payload;
-    },
     setNecessaryNotes(state: TInitialBasketState, action: PayloadAction<string>): void {
       state.basket.necessaryNotes = action.payload;
-    },
-    setAdminOrderNecessaryNotes(state: TInitialBasketState, action: PayloadAction<string>): void {
-      state.adminOrder.necessaryNotes = action.payload;
     },
     updateItemCount: (
       state: TInitialBasketState,
@@ -206,6 +204,16 @@ const orderSlice = createSlice({
       state.adminOrder.items = state.adminOrder.items.map((item) =>
         item._id === itemId ? { ...item, itemCount: newValue } : item
       );
+    },
+    updateAdminItemPrice: (
+      state: TInitialBasketState,
+      action: PayloadAction<TUpdatePricePayload>
+    ) => {
+      const { itemId, newPrice } = action.payload;
+      const item = state.adminOrder.items.find((item) => item._id === itemId);
+      if (item) {
+        item.product.price = newPrice;
+      }
     },
     updateCounterPartyOfAdminOrder: (
       state: TInitialBasketState,
@@ -392,33 +400,7 @@ const orderSlice = createSlice({
           state.ordersHistory.isError = true;
         }
       })
-      .addCase(
-        getProductsWithStocksThunk.fulfilled,
-        (state: TInitialBasketState, action: PayloadAction<TProductsWithStocks[]>): void => {
-          state.productsWithStocks = {
-            total_items: 0,
-            items: action.payload,
-            isError: false,
-            isNetworkError: false,
-            isLoading: false,
-          };
-        }
-      )
-      .addCase(getProductsWithStocksThunk.pending, (state: TInitialBasketState): void => {
-        state.ordersHistory.isLoading = true;
-        state.ordersHistory.isError = false;
-        state.ordersHistory.isNetworkError = false;
-      })
-      .addCase(getProductsWithStocksThunk.rejected, (state: TInitialBasketState, action): void => {
-        state.ordersHistory.items = [];
-        state.ordersHistory.isLoading = false;
 
-        if (action.payload === 'NetworkError') {
-          state.ordersHistory.isNetworkError = true;
-        } else if (action.payload !== 404) {
-          state.ordersHistory.isError = true;
-        }
-      })
       .addCase(
         fetchOrdersByAuthorThunk.fulfilled,
         (
@@ -640,25 +622,25 @@ const orderSlice = createSlice({
         }
       })
       .addCase(addItemToAdminBasketThunk.fulfilled, (state: TInitialBasketState): void => {
-        state.addItemToAdminBasket = {
+        state.create = {
           isLoading: false,
           isError: false,
           isNetworkError: false,
         };
       })
       .addCase(addItemToAdminBasketThunk.pending, (state: TInitialBasketState): void => {
-        state.addItemToAdminBasket = {
+        state.create = {
           isLoading: true,
           isError: false,
           isNetworkError: false,
         };
       })
       .addCase(addItemToAdminBasketThunk.rejected, (state: TInitialBasketState, action): void => {
-        state.addItemToAdminBasket.isLoading = false;
+        state.create.isLoading = false;
         if (action.payload === 'NetworkError') {
-          state.addItemToAdminBasket.isNetworkError = true;
+          state.create.isNetworkError = true;
         } else if (action.payload !== 404) {
-          state.addItemToAdminBasket.isError = true;
+          state.create.isError = true;
         }
       })
       .addCase(
@@ -736,11 +718,11 @@ const orderSlice = createSlice({
 export const orderReducer = orderSlice.reducer;
 export const {
   changeForm,
+  changeOrderStockField,
   setProductId,
-  setPackaging,
   updateItemCount,
   updateAdminItemCount,
+  updateAdminItemPrice,
   updateCounterPartyOfAdminOrder,
   setNecessaryNotes,
-  setAdminOrderNecessaryNotes,
 } = orderSlice.actions;

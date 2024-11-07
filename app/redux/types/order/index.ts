@@ -1,18 +1,13 @@
 import { TProduct } from '../product';
-import { TUser } from '../user';
+import { EPriceType, TUser } from '../user';
 
 export enum EOrderStatus {
   IN_PROGRESS = 'inProgress',
   CONFIRMED = 'confirmed',
+  COMPLETED = 'completed',
   ORDERED = 'ordered',
-  ACCEPTED = 'accepted',
   DELIVERED = 'delivered',
   REJECTED = 'rejected',
-}
-
-export enum EPackage {
-  BOX = 'box',
-  BAG = 'bag',
 }
 
 export type TOrderItem = {
@@ -27,12 +22,10 @@ export type TOrder = {
   _id?: string;
   items: TOrderItem[];
   status: EOrderStatus;
-  packaging: EPackage;
   author: TUser | null;
   necessaryNotes: string;
   createdAt: string | null;
   confirmedTime: string | null;
-  acceptedTime: string | null;
   deliveredTime: string | null;
   rejectedTime: string | null;
 };
@@ -43,9 +36,13 @@ export type TAdminOrder = {
   counterpartyId: string;
   items: TOrderItem[];
   necessaryNotes: string;
+  priceType: EPriceType;
+  discountPercent: number;
   status: EOrderStatus;
   author: TUser | null;
   confirmedTime: string | null;
+  completedTime: string | null;
+  rejectedTime: string | null;
   createdAt: string | null;
 };
 
@@ -63,3 +60,8 @@ export type TStateCounterparty = {
 export interface IAdminOrderWithIsEdit extends TAdminOrder {
   isEdited?: boolean;
 }
+
+export type TUpdatePricePayload = {
+  itemId: string;
+  newPrice: number;
+};

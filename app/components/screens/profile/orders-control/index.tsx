@@ -61,7 +61,7 @@ export const OrdersControl = () => {
     <Loading />
   ) : (
     <Main>
-      {orders.items.length > 0 || hasSearched ? (
+      {(Array.isArray(orders.items) && orders.items.length > 0) || hasSearched ? (
         <ScrollView
           refreshControl={
             <RefreshControl refreshing={orders.isLoading as boolean} onRefresh={handleRefresh} />
@@ -82,17 +82,19 @@ export const OrdersControl = () => {
               hasSearched={hasSearched}
               setHasSearched={setHasSearched}
               searchFieldPlaceholder="Փնտրել հաճախորդի անունով"
-              renderItemComponent={(index: number, item: TOrder) => (
-                <>
-                  <View className="flex-row items-center gap-2">
-                    <Text className="font-semibold">{index + 1}.</Text>
-                    <Text className="min-w-[85px] w-36" numberOfLines={1} ellipsizeMode="tail">
-                      {item.author?.firstname + ' ' + item.author?.lastname}
-                    </Text>
-                  </View>
-                  <Text>{item.items.length}</Text>
-                </>
-              )}
+              renderItemComponent={(index: number, item: TOrder) => {
+                return (
+                  <>
+                    <View className="flex-row items-center gap-2">
+                      <Text className="font-semibold">{index + 1}.</Text>
+                      <Text className="min-w-[85px] w-36" numberOfLines={1} ellipsizeMode="tail">
+                        {item.author?.firstname + ' ' + item.author?.lastname}
+                      </Text>
+                    </View>
+                    <Text>{item.items.length}</Text>
+                  </>
+                );
+              }}
             />
           </View>
         </ScrollView>

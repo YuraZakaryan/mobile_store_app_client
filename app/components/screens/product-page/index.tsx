@@ -15,9 +15,11 @@ import {
 import ImageViewer from 'react-native-image-zoom-viewer';
 import { useAppDispatch, useAppSelector } from '../../../hooks/redux';
 import { fetchProductThunk } from '../../../redux/http/productThunk';
+import { fetchUser } from '../../../redux/http/userThunk';
 import { changeForm, setProductId } from '../../../redux/reducers/order/orderSlice';
-import { TProduct, TRole } from '../../../redux/types';
+import { EPriceType, TProduct, TRole } from '../../../redux/types';
 import { API_URL } from '../../../utils/constants';
+import { isDiscount } from '../../../utils/product';
 import { NumericInputCustom, SaleIcon } from '../../wrappers';
 import { ETypeInfo, TProductRouteParams } from './types';
 import { AddToCart } from './ui';
@@ -68,15 +70,18 @@ export const ProductPage = () => {
   };
 
   const product = currentProduct.product as TProduct;
+
   // Check if the item has a discount
-  const checkDiscount: boolean = product && product.discount > 0;
+  const checkDiscount: boolean = isDiscount(user?.discountPercent as number);
 
   const handleRefresh = (): void => {
     fetchData();
+    dispatch(fetchUser());
   };
 
   const value = newItemForm.itemCount;
   const role = user?.role as TRole;
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'MODERATOR';
 
   const images = product?.picture ? [{ url: `${API_URL}/${product.picture}` }] : [];
 
@@ -108,7 +113,7 @@ export const ProductPage = () => {
                     alt="picture"
                   />
                 </TouchableOpacity>
-                {checkDiscount ? <SaleIcon discount={product.discount} /> : null}
+                {checkDiscount ? <SaleIcon discount={user?.discountPercent as number} /> : null}
                 <Modal visible={isModalVisible} transparent>
                   <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
                     <TouchableOpacity
@@ -147,49 +152,71 @@ export const ProductPage = () => {
                   </View>
                 </View>
                 <InfoItem type={ETypeInfo.LONG} label="Անվանում" content={product.title} />
-                <InfoItem label="Ընդհանուր քանակը" content={product.count} />
+                <InfoItem
+                  label="Ընդհանուր քանակը"
+                  content={`${product.count} ${isAdmin && !!product.totalReserved ? `(${product.totalReserved})` : ''}`}
+                />
                 <InfoItem label="Կոդ" content={product.code} />
                 {role === 'USER' ? (
                   <InfoItem
-                    label="Գին"
-                    content={product.priceWholesale}
+                    label="Գինը"
+                    content={product.price}
                     type={checkDiscount ? ETypeInfo.PRICE_WITH_DISCOUNTED : ETypeInfo.PRICE}
-                    discount={product.discount}
+                    additionalContent={
+                      user?.priceType === EPriceType.RETAIL
+                        ? product.priceRetail
+                        : product.priceWholesale
+                    }
                   />
                 ) : role === 'SUPERUSER' ? (
                   <>
                     <InfoItem
+                      label="Վերջնական գինը"
+                      content={product.price}
+                      type={checkDiscount ? ETypeInfo.PRICE_WITH_DISCOUNTED : ETypeInfo.PRICE}
+                      additionalContent={
+                        user?.priceType === EPriceType.RETAIL
+                          ? product.priceRetail
+                          : product.priceWholesale
+                      }
+                    />
+                    <InfoItem
                       label="Գին մանրածախ"
                       content={product.priceRetail}
-                      type={checkDiscount ? ETypeInfo.PRICE_WITH_DISCOUNTED : ETypeInfo.PRICE}
-                      discount={product.discount}
+                      type={ETypeInfo.PRICE}
                     />
                     <InfoItem
                       label="Գին մեծածախ"
                       content={product.priceWholesale}
-                      type={checkDiscount ? ETypeInfo.PRICE_WITH_DISCOUNTED : ETypeInfo.PRICE}
-                      discount={product.discount}
+                      type={ETypeInfo.PRICE}
                     />
                   </>
                 ) : (
                   <>
                     <InfoItem
+                      label="Վերջնական գինը"
+                      content={product.price}
+                      type={checkDiscount ? ETypeInfo.PRICE_WITH_DISCOUNTED : ETypeInfo.PRICE}
+                      additionalContent={
+                        user?.priceType === EPriceType.RETAIL
+                          ? product.priceRetail
+                          : product.priceWholesale
+                      }
+                    />
+                    <InfoItem
                       label="Գին մանրածախ"
                       content={product.priceRetail}
-                      type={checkDiscount ? ETypeInfo.PRICE_WITH_DISCOUNTED : ETypeInfo.PRICE}
-                      discount={product.discount}
+                      type={ETypeInfo.PRICE}
                     />
                     <InfoItem
                       label="Գին մեծածախ"
                       content={product.priceWholesale}
-                      type={checkDiscount ? ETypeInfo.PRICE_WITH_DISCOUNTED : ETypeInfo.PRICE}
-                      discount={product.discount}
+                      type={ETypeInfo.PRICE}
                     />
                     <InfoItem
                       label="Գին Wildberries"
                       content={product.priceWildberries}
                       type={checkDiscount ? ETypeInfo.PRICE_WITH_DISCOUNTED : ETypeInfo.PRICE}
-                      discount={product.discount}
                     />
                   </>
                 )}

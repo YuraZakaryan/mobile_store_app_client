@@ -90,7 +90,6 @@ export const toOrderThunk = createAsyncThunk(
   async (basket: TOrder, { rejectWithValue }) => {
     try {
       const { data } = await $authHost.put<TOrder>(`order/to-order/${basket._id}`, {
-        packaging: basket.packaging,
         necessaryNotes: basket.necessaryNotes,
         items: basket.items,
       });
@@ -227,7 +226,7 @@ export const cancelOrderThunk = createAsyncThunk(
   ) => {
     try {
       const { data } = await $authHost.put<TOrder>(`order/status/${_id}`, {
-        status: EOrderStatus.ACCEPTED,
+        status: EOrderStatus.REJECTED,
       });
       navigate('orders-completed');
       return data;
@@ -269,30 +268,13 @@ export const deliverOrderThunk = createAsyncThunk(
   }
 );
 
-export const getProductsWithStocksThunk = createAsyncThunk(
-  'getStocks/order',
-  async (ids: string[], { rejectWithValue }) => {
-    try {
-      const { data } = await $authHost.post('product/stocks/withCount', { ids });
-      return data;
-    } catch (err) {
-      const error = err as AxiosError;
-      if (!error.response) {
-        return rejectWithValue('NetworkError');
-      } else {
-        return rejectWithValue(error.response.status);
-      }
-    }
-  }
-);
-
 export const fetchAdminActiveOrdersThunk = createAsyncThunk(
   'fetchAdminActive/orders',
   async ({ page = 1, limit = 5, query = '' }: TFetchOptions, { rejectWithValue }) => {
     const skip: number = Math.max(page - 1, 0) * limit;
     try {
       const { data } = await $authHost.get<TItemsWithTotalLength<TAdminOrder[]>>(
-        `order/stock/all?status=inProgress&limit=${limit}&skip=${skip}&name=${query}`
+        `order/stock/all?limit=${limit}&skip=${skip}&name=${query}`
       );
       return data;
     } catch (err) {
@@ -314,7 +296,7 @@ export const fetchAdminHistoryOrdersThunk = createAsyncThunk(
 
     try {
       const { data } = await $authHost.get<TItemsWithTotalLength<TAdminOrder[]>>(
-        `order/stock/all?status=confirmed&limit=${limit}&skip=${skip}&name=${query}`
+        `order/stock/all?status=history&limit=${limit}&skip=${skip}&name=${query}`
       );
       return data;
     } catch (err) {

@@ -5,6 +5,7 @@ import { FormikValues } from 'formik';
 import { TInitialLoginFormValue } from '../../components/screens/auth/types';
 import { SecureStoreService } from '../../services';
 import {
+  EPriceType,
   TCounterParty,
   TCreateItemAndNavigate,
   TDeleteItem,
@@ -44,6 +45,8 @@ export const registrationThunk = createAsyncThunk(
     try {
       const { data } = await $authHost.post<TPayloadActionUser>('auth/registration', {
         ...formData,
+        priceType: EPriceType.RETAIL,
+        discountPercent: 0,
         role: 'USER',
         confirmed: false,
       });
@@ -260,6 +263,19 @@ export const updatePasswordThunk = createAsyncThunk(
   }
 );
 export const fetchMe = createAsyncThunk('me/user', async (_, { rejectWithValue }) => {
+  try {
+    const { data } = await $authHost.get('auth/me');
+    return data;
+  } catch (err) {
+    const error = err as AxiosError;
+    if (!error.response) {
+      return rejectWithValue('NetworkError');
+    } else {
+      return rejectWithValue(error.response.status);
+    }
+  }
+});
+export const fetchUser = createAsyncThunk('fetch/user', async (_, { rejectWithValue }) => {
   try {
     const { data } = await $authHost.get('auth/me');
     return data;

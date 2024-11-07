@@ -1,9 +1,12 @@
 import React from 'react';
 import { Image, Text, View } from 'react-native';
 
+import { useAppSelector } from '../../../hooks/redux';
+import { usePriceType } from '../../../hooks/userPriceType';
+import { EPriceType } from '../../../redux/types';
 import { TOrderItem } from '../../../redux/types/order';
 import { API_URL } from '../../../utils/constants';
-import { calculateDiscountedPrice, formattedPrice } from '../../../utils/product';
+import { formattedPrice, isDiscount } from '../../../utils/product';
 
 export interface IOrderItemCard {
   item: TOrderItem;
@@ -12,11 +15,16 @@ export interface IOrderItemCard {
 export const OrderItemCard: React.FC<IOrderItemCard> = React.memo((props) => {
   const { item } = props;
 
+  const { user } = useAppSelector((state) => state.user);
+
+  const { priceKey } = usePriceType(user?.priceType as EPriceType);
+
   if (!item.product) {
     return null;
   }
 
   const picture: string = item.product.picture;
+  const checkDiscount = isDiscount(user?.discountPercent as number);
 
   return (
     <View className="flex-row flex-1 min-h-[100px] bg-white shadow rounded-lg">
@@ -42,24 +50,15 @@ export const OrderItemCard: React.FC<IOrderItemCard> = React.memo((props) => {
               <Text className="text-sm text-red-500">{item.itemCount}</Text>
               <Text className="text-sm text-red-500">x</Text>
               <Text
-                className={`text-sm text-red-500 ${item.product.discount ? 'line-through text-gray-600' : ''}`}>
-                {formattedPrice(item.product.priceWholesale)}
+                className={`text-sm text-red-500 ${checkDiscount ? 'line-through text-gray-600' : ''}`}>
+                {formattedPrice(item.product[priceKey])}
               </Text>
-              {item.product.discount ? (
-                <Text className="text-sm text-red-500">
-                  {formattedPrice(
-                    calculateDiscountedPrice(item.product.priceWholesale, item.product.discount)
-                  )}
-                </Text>
+              {checkDiscount ? (
+                <Text className="text-sm text-red-500">{formattedPrice(item.product.price)}</Text>
               ) : null}
             </View>
             <Text className="text-sm text-gray-600">
-              {formattedPrice(
-                item.itemCount *
-                  (item.product.discount
-                    ? calculateDiscountedPrice(item.product.priceWholesale, item.product.discount)
-                    : item.product.priceWholesale)
-              )}
+              {formattedPrice(item.itemCount * item.product.price)}
               ․ԴՐ
             </Text>
           </View>

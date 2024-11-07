@@ -4,6 +4,7 @@ import {
   ActivityIndicator,
   FlatList,
   Image,
+  Keyboard,
   KeyboardAvoidingView,
   RefreshControl,
   ScrollView,
@@ -12,6 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import DropDownPicker from 'react-native-dropdown-picker';
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
 import { useIsTablet } from '../../../../hooks/useIsTablet';
 import {
@@ -21,17 +23,26 @@ import {
   updateAdminOrderThunk,
 } from '../../../../redux/http/orderThunk';
 import {
-  setAdminOrderNecessaryNotes,
+  changeOrderStockField,
   updateAdminItemCount,
+  updateAdminItemPrice,
 } from '../../../../redux/reducers/order/orderSlice';
+import { EPriceType } from '../../../../redux/types';
 import { EOrderStatus, TOrderItem } from '../../../../redux/types/order';
 import { SHOW_ERROR, SHOW_SUCCESS } from '../../../../toasts';
+import { formatDate, selectPriceType } from '../../../../utils';
 import { API_URL } from '../../../../utils/constants';
-import { calculateDiscountedPrice, formattedPrice } from '../../../../utils/product';
+import {
+  calculateDiscountedPrice,
+  formattedPrice,
+  getOrderStatus,
+} from '../../../../utils/product';
 import { Loading } from '../../../ui';
 import { Main, NumericInputCustom } from '../../../wrappers';
 import { CrudMainButton } from '../../../wrappers/crud-main-button';
+import { OrderInfoItem } from '../order-completed-view/wrapper/oreder-info-item';
 import { SearchCounterparties } from './ui';
+import { usePriceType } from '../../../../hooks/userPriceType';
 
 export const OrderAdminEdit = () => {
   const dispatch = useAppDispatch();
@@ -44,17 +55,19 @@ export const OrderAdminEdit = () => {
 
   const {
     adminOrder: order,
-    addItemToAdminBasket,
     saveAdminOrder: save,
     confirmAdminOrder: confirm,
     create,
     deleteItem,
   } = useAppSelector((state) => state.order);
 
+  const { user } = useAppSelector((state) => state.user);
+
   const [itemLoadingStates, setItemLoadingStates] = useState<{ [itemId: string]: boolean }>({});
 
   // State to track if more data is being loaded
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
+  const [priceTypeOpen, setPriceTypeOpen] = React.useState(false);
 
   const items = order.items;
   const totalCurrentPage: number = items.length;
@@ -67,8 +80,9 @@ export const OrderAdminEdit = () => {
     order.requestStatus.isLoading === true ||
     isTablet === null;
 
-  const isConfirmed = order.status === EOrderStatus.CONFIRMED;
+  const isConfirmed = order.status !== EOrderStatus.IN_PROGRESS;
   const isEdited = isConfirmed && !editMode;
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'MODERATOR';
 
   const isConfirmDisable =
     isAnyItemCountZero || !order.counterpartyId || !!isConfirmLoading || order.items.length === 0;
@@ -93,7 +107,7 @@ export const OrderAdminEdit = () => {
     } else {
       hasScreenBeenRendered.current = true;
     }
-  }, [addItemToAdminBasket.isLoading, deleteItem.isLoading, create.isLoading, isTablet]);
+  }, [deleteItem.isLoading, create.isLoading, isTablet]);
 
   // Handle deletion of an order item
   const handleDelete = (_id: string): void => {
@@ -114,18 +128,65 @@ export const OrderAdminEdit = () => {
       });
   };
 
+  useEffect(() => {
+    if (!isLoading && order) {
+      order.items.forEach((item) => {
+        const calculatedPrice = recalculatePrice(item, order.priceType, order.discountPercent);
+        if (item.product.price !== calculatedPrice) {
+          dispatch(updateAdminItemPrice({ itemId: item._id, newPrice: calculatedPrice }));
+        }
+      });
+    }
+  }, [isLoading, order, dispatch]);
+
+  const checkPriceType: Record<EPriceType, 'priceRetail' | 'priceWholesale'> = {
+    [EPriceType.RETAIL]: 'priceRetail',
+    [EPriceType.WHOLESALE]: 'priceWholesale',
+  };
+
+  const { priceKey } = usePriceType(order.priceType);
+
+  const orderStatus = getOrderStatus(order.status);
+
+  const recalculatePrice = (
+    item: TOrderItem,
+    priceType: EPriceType,
+    discountPercent: number
+  ): number => {
+    if (!item.product) return 0;
+
+    const basePrice = item.product[checkPriceType[priceType]];
+    const discountedPrice =
+      discountPercent > 0 ? calculateDiscountedPrice(basePrice, discountPercent) : basePrice;
+
+    return discountedPrice;
+  };
+
   const sumItemsPrice: number = items.reduce((acc: number, item: TOrderItem): number => {
-    if (item.product && item.product.priceWholesale) {
-      const itemPrice: number = item.product.discount
-        ? calculateDiscountedPrice(item.product.priceWholesale, item.product.discount)
-        : item.product.priceWholesale;
+    if (item.product && item.product[priceKey]) {
+      const itemPrice: number =
+        order.discountPercent > 0
+          ? calculateDiscountedPrice(item.product[priceKey], order.discountPercent)
+          : item.product[priceKey];
+
       return acc + itemPrice * item.itemCount;
     }
     return acc;
   }, 0);
 
-  const handleChangeNotes = (text: string): void => {
-    dispatch(setAdminOrderNecessaryNotes(text));
+  const handleChangeField = (key: string, value: string | EPriceType) => {
+    dispatch(changeOrderStockField({ name: key, value }));
+
+    if (key === 'discountPercent' || key === 'priceType') {
+      order.items.forEach((item) => {
+        const newPrice = recalculatePrice(
+          item,
+          key === 'priceType' ? (value as EPriceType) : order.priceType,
+          key === 'discountPercent' ? parseInt(value as string, 10) : order.discountPercent
+        );
+        dispatch(updateAdminItemPrice({ itemId: item._id, newPrice }));
+      });
+    }
   };
 
   const handleNavigate = (): void => {
@@ -241,7 +302,8 @@ export const OrderAdminEdit = () => {
                 {item.product && <Text className="text-gray-600">Կոդ։ {item.product.code}</Text>}
                 {item.product && (
                   <Text className="text-gray-600 font-semibold">
-                    Հասանելի քանակը։ {item.product.count}
+                    Հասանելի քանակը։
+                    {` ${item.product.count} ${isAdmin && !!item.product.totalReserved ? `(${item.product.totalReserved})` : ''}`}
                   </Text>
                 )}
                 <View className="flex-row items-center mt-2 ">
@@ -250,18 +312,15 @@ export const OrderAdminEdit = () => {
                     <View className="ml-1 flex-row items-center">
                       <Text
                         className={`text-orange-500  ${
-                          item.product.discount ? 'line-through text-gray-600' : ''
+                          order.discountPercent > 0 ? 'line-through text-gray-600' : ''
                         }`}>
-                        {item.product.priceWholesale}
+                        {item.product[priceKey]}
                         &nbsp;․դր
                       </Text>
-                      {item.product.discount ? (
+                      {order.discountPercent > 0 ? (
                         <Text className="text-sm text-orange-500 ml-1">
                           {formattedPrice(
-                            calculateDiscountedPrice(
-                              item.product.priceWholesale,
-                              item.product.discount
-                            )
+                            calculateDiscountedPrice(item.product[priceKey], order.discountPercent)
                           )}
                           &nbsp;․դր
                         </Text>
@@ -337,19 +396,109 @@ export const OrderAdminEdit = () => {
                 {formattedPrice(sumItemsPrice)} ․դր
               </Text>
             </View>
+            {isEdited ? (
+              <View className="mt-6 space-y-2">
+                <Text className="text-base font-bold text-gray-500">Ինֆորմացիա</Text>
+                <View>
+                  <OrderInfoItem label="Կարգավիճակ" text={orderStatus} />
+                  <OrderInfoItem
+                    label="Պատվերի ստեղծում"
+                    text={formatDate(order.createdAt as string)}
+                    textClassName="text-[11px]"
+                  />
+                  {order?.confirmedTime && (
+                    <OrderInfoItem
+                      label="Պատվերի հաստատում"
+                      text={formatDate(order?.confirmedTime as string)}
+                      textClassName="text-[11px]"
+                    />
+                  )}
+
+                  {order?.completedTime && (
+                    <OrderInfoItem
+                      label="Պատվերի հաստատում պահոցի կողմից"
+                      text={formatDate(order?.completedTime as string)}
+                      textClassName="text-[11px]"
+                    />
+                  )}
+
+                  {order?.rejectedTime && (
+                    <OrderInfoItem
+                      label="Պատվերի մերժում"
+                      text={formatDate(order?.rejectedTime as string)}
+                      textClassName="text-[11px]"
+                    />
+                  )}
+                </View>
+              </View>
+            ) : null}
+
             <View className="space-y-1">
               <Text className="text-gray-500">Ընտրել հաճախորդին</Text>
               <SearchCounterparties disabled={isEdited} />
             </View>
             <View className="flex-1 w-full space-y-1 mt-3">
-              <Text className="text-gray-500">Անհրաժեշտ նշումներ</Text>
-              <View className="w-full rounded-lg overflow-hidden mt-3">
-                <TextInput
-                  className="bg-white mx-auto px-2 py-3 text-base w-full"
-                  value={order.necessaryNotes}
-                  editable={!isEdited}
-                  onChangeText={(text: string) => handleChangeNotes(text)}
-                />
+              <View className="space-y-1 z-30">
+                <Text className="text-gray-500">Գնի տեսակը</Text>
+                <View className="w-full">
+                  <DropDownPicker
+                    open={priceTypeOpen}
+                    value={order.priceType}
+                    items={selectPriceType}
+                    setOpen={setPriceTypeOpen}
+                    placeholder="Ընտրել"
+                    style={{
+                      borderRadius: 6,
+                      borderColor: 'transparent',
+                      paddingLeft: 12,
+                      paddingRight: 12,
+                      backgroundColor: 'white',
+                    }}
+                    setValue={(val) => handleChangeField('priceType', val(val))}
+                    disabled={isEdited}
+                    listMode="SCROLLVIEW"
+                    scrollViewProps={{
+                      nestedScrollEnabled: true,
+                    }}
+                  />
+                </View>
+              </View>
+
+              <View className="space-y-2">
+                <Text className="text-gray-500">Զեղչ</Text>
+                <View className="w-full rounded-lg overflow-hidden">
+                  <TextInput
+                    onChangeText={(text) => {
+                      const numericText = text.replace(/[^0-9]/g, '');
+                      let value = parseInt(numericText, 10);
+                      if (isNaN(value)) {
+                        value = 0;
+                      }
+                      if (value > 100) {
+                        value = 100;
+                      }
+                      handleChangeField('discountPercent', String(value));
+                    }}
+                    onSubmitEditing={Keyboard.dismiss}
+                    placeholder="Զեղչ"
+                    keyboardType="number-pad"
+                    value={order.discountPercent.toString()}
+                    editable={!isEdited}
+                    className="bg-white mx-auto px-2 py-3 text-base w-full"
+                  />
+                </View>
+              </View>
+
+              <View className="space-y-2">
+                <Text className="text-gray-500">Անհրաժեշտ նշումներ</Text>
+                <View className="w-full rounded-lg overflow-hidden">
+                  <TextInput
+                    className="bg-white mx-auto px-2 py-3 text-base w-full"
+                    value={order.necessaryNotes}
+                    editable={!isEdited}
+                    onChangeText={(text: string) => handleChangeField('necessaryNotes', text)}
+                  />
+                </View>
               </View>
             </View>
             <View className="w-full mt-6">

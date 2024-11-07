@@ -41,7 +41,6 @@ export type TInitialBasketState = {
   changeStatus: TStateStatus;
   cancelOrder: TStateStatus;
   deliverOrder: TStateStatus;
-  addItemToAdminBasket: TStateStatus;
   saveAdminOrder: TStateStatus;
   confirmAdminOrder: TStateStatus;
 };

@@ -9,6 +9,7 @@ import {
   fetchCounterPartiesThunk,
   fetchMe,
   fetchUnconfirmedUsers,
+  fetchUser,
   fetchUsersThunk,
   loginThunk,
   registrationThunk,
@@ -231,23 +232,6 @@ export const userSlice = createSlice({
           state.bannedUsers.isError = true;
         }
       })
-      // .addCase(
-      //   fetchCounterPartiesThunk.fulfilled,
-      //   (
-      //     state: TInitialUserState,
-      //     action: PayloadAction<TItemsWithTotalLength<TCounterParty[]>>
-      //   ): void => {
-      //     const { total_items, items } = action.payload;
-
-      //     state.counterParties = {
-      //       total_items,
-      //       items,
-      //       isError: false,
-      //       isNetworkError: false,
-      //       isLoading: false,
-      //     };
-      //   }
-      // )
       .addCase(
         fetchCounterPartiesThunk.fulfilled,
         (
@@ -402,7 +386,13 @@ export const userSlice = createSlice({
         state.isAuth = false;
         state.user = null;
         state.fetchMe.isLoading = false;
-      }),
+      })
+      .addCase(
+        fetchUser.fulfilled,
+        (state: TInitialUserState, action: PayloadAction<TUser>): void => {
+          state.user = action.payload;
+        }
+      ),
 });
 export const userReducer = userSlice.reducer;
 export const { setAuthMode, clearResetPassword, logOut, setCounterpartiesSearchQuery } =

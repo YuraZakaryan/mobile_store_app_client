@@ -1,4 +1,4 @@
-import { TRole, TUser } from '../../../../../redux/types';
+import { EPriceType, TRole, TUser } from '../../../../../redux/types';
 
 export interface TUserCreateEditRouteParams {
   item?: TUser;
@@ -13,6 +13,8 @@ export type TInitialUserCreateEditFormValue = {
   address: string;
   password?: string;
   phone: string;
+  priceType: EPriceType;
+  discountPercent: number;
   stockToken: string;
   role: TRole;
   confirmed: boolean;

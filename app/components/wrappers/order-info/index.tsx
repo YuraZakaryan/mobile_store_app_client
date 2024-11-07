@@ -1,7 +1,6 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 
-import { EPackage } from '../../../redux/types/order';
 import { IOrderInfo } from '../../../types';
 import { formatDate } from '../../../utils';
 import { formattedPrice, getOrderStatus } from '../../../utils/product';
@@ -30,16 +29,6 @@ export const OrderInfo: React.FC<IOrderInfo> = React.memo((props) => {
         <OrderInfoItem label="Հասցե" text={item.author?.address as string} />
         <OrderInfoItem label="Կարգավիճակը" text={orderStatus} />
         <OrderInfoItem label="Ընդհանուր գինը" text={`${formattedPrice(totalAmount)} ․դր`} />
-        <OrderInfoItem
-          label="Փաթեթավորման տեսակը"
-          text={
-            item?.packaging === EPackage.BAG
-              ? 'Տոպրակ'
-              : item?.packaging === EPackage.BOX
-                ? 'Արկղ'
-                : 'Անորոշ'
-          }
-        />
         <OrderInfoItem label="Ընդհանուր քանակը" text={totalCount as number} />
         <OrderInfoItem
           label="Պատվերի ստեղծում"
@@ -50,14 +39,6 @@ export const OrderInfo: React.FC<IOrderInfo> = React.memo((props) => {
           <OrderInfoItem
             label="Պատվերի հաստատում"
             text={formatDate(item?.confirmedTime as string)}
-            textClassName="text-[11px]"
-          />
-        )}
-
-        {item?.acceptedTime && (
-          <OrderInfoItem
-            label="Պատվերի ընդունում"
-            text={formatDate(item?.acceptedTime as string)}
             textClassName="text-[11px]"
           />
         )}

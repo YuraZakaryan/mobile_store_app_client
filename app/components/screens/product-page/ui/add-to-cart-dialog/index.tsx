@@ -40,7 +40,6 @@ export const AddToCart: React.FC<IAddToCart> = ({ productId }) => {
     deleteItem,
     newItemForm,
     adminActiveOrders: orders,
-    addItemToAdminBasket,
   } = useAppSelector((state) => state.order);
 
   const fetchOrders = (): void => {
@@ -166,7 +165,7 @@ export const AddToCart: React.FC<IAddToCart> = ({ productId }) => {
 
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'MODERATOR';
   const isDialogOpen = currentProduct.addToCardDialogStatus && isAdmin;
-  const isLoading = create.isLoading || addItemToAdminBasket.isLoading;
+  const isLoading = create.isLoading;
 
   const isOrderExist = (orderExists || orderExistsAfterClick) && !isAdmin;
   const isAdminOrderExist = (orderExists || orderExistsAfterClick) && isAdmin;

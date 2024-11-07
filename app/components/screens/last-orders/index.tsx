@@ -6,7 +6,7 @@ import { fetchOrdersByAuthorThunk } from '../../../redux/http/orderThunk';
 import { EOrderStatus, TOrder, TOrderItem } from '../../../redux/types/order';
 import { formatDate, groupedHistory } from '../../../utils';
 import { LIMIT_NUMBER } from '../../../utils/constants';
-import { calculateDiscountedPrice, formattedPrice, getOrderStatus } from '../../../utils/product';
+import { formattedPrice, getOrderStatus } from '../../../utils/product';
 import { EmptyOrder, Loading } from '../../ui';
 import { Main, OrderItemCard, PaginationButtons } from '../../wrappers';
 
@@ -92,12 +92,7 @@ export const LastOrders = () => {
                         return acc;
                       }
 
-                      const price = item.product.discount
-                        ? calculateDiscountedPrice(
-                            item.product.priceWholesale,
-                            item.product.discount
-                          )
-                        : item.product.priceWholesale;
+                      const price = item.product.price;
 
                       return acc + item.itemCount * price;
                     },
@@ -119,7 +114,7 @@ export const LastOrders = () => {
                           className={`font-bold ${
                             order.status === EOrderStatus.ORDERED
                               ? 'text-blue-400'
-                              : order.status === EOrderStatus.ACCEPTED
+                              : order.status === EOrderStatus.CONFIRMED
                                 ? 'text-orange-500'
                                 : order.status === EOrderStatus.DELIVERED
                                   ? 'text-green-600'

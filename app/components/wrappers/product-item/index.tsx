@@ -7,9 +7,8 @@ import { useAppDispatch } from '../../../hooks/redux';
 import { updateCurrentProduct } from '../../../redux/reducers/product/productSlice';
 import { IProductItem } from '../../../types';
 import { API_URL } from '../../../utils/constants';
-import { calculateDiscountedPrice, formattedPrice } from '../../../utils/product';
+import { formattedPrice } from '../../../utils/product';
 import { TProductItemParamList } from '../../screens/home/types';
-import { SaleIcon } from '../sale-icon';
 
 export const ProductItem: React.FC<IProductItem> = React.memo((props) => {
   const dispatch = useAppDispatch();
@@ -20,7 +19,7 @@ export const ProductItem: React.FC<IProductItem> = React.memo((props) => {
     dispatch(updateCurrentProduct(null));
     navigate('product', { title: item.title, productId: item._id });
   };
-  const checkDiscount: boolean = item.discount > 0;
+
   const imageUrl = item.picture
     ? item.picture.includes('https')
       ? item.picture
@@ -38,7 +37,6 @@ export const ProductItem: React.FC<IProductItem> = React.memo((props) => {
       <TouchableOpacity onPress={handleNavigate} className="w-full">
         <View className="items-center">
           <Image source={imageUrl} alt={item.title} className={`w-32 h-32 ${imageClassName}`} />
-          {checkDiscount ? <SaleIcon discount={item.discount} /> : null}
         </View>
         <View className={`p-3 gap-1 justify-between h-24 h-${height}`}>
           <View>
@@ -47,18 +45,7 @@ export const ProductItem: React.FC<IProductItem> = React.memo((props) => {
             </Text>
           </View>
           <View>
-            {checkDiscount ? (
-              <>
-                <Text className="text-gray-600 line-through">
-                  {formattedPrice(item.priceWholesale)} ․դր
-                </Text>
-                <Text className="text-red-500">
-                  {formattedPrice(calculateDiscountedPrice(item.priceWholesale, item.discount))} ․դր
-                </Text>
-              </>
-            ) : (
-              <Text className="text-red-500">{formattedPrice(item.priceWholesale)} ․դր</Text>
-            )}
+            <Text className="text-red-500">{formattedPrice(item.price)} ․դր</Text>
           </View>
         </View>
       </TouchableOpacity>

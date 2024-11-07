@@ -6,7 +6,7 @@ export enum ETypeInfo {
 
 export interface IInfoItem {
   label: string;
-  discount?: number;
+  additionalContent?: string | number;
   content: string | number;
   type?: ETypeInfo;
 }

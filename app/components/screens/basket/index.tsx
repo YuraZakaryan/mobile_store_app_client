@@ -18,15 +18,12 @@ import {
   getOrderByUserInProgressThunk,
   toOrderThunk,
 } from '../../../redux/http/orderThunk';
-import {
-  setNecessaryNotes,
-  setPackaging,
-  updateItemCount,
-} from '../../../redux/reducers/order/orderSlice';
-import { EPackage, TOrder, TOrderItem } from '../../../redux/types/order';
+import { fetchUser } from '../../../redux/http/userThunk';
+import { setNecessaryNotes, updateItemCount } from '../../../redux/reducers/order/orderSlice';
+import { TOrder, TOrderItem } from '../../../redux/types/order';
 import { SHOW_ERROR, SHOW_SUCCESS } from '../../../toasts';
 import { API_URL } from '../../../utils/constants';
-import { calculateDiscountedPrice, formattedPrice } from '../../../utils/product';
+import { formattedPrice } from '../../../utils/product';
 import { EmptyOrder } from '../../ui';
 import { Main, NumericInputCustom } from '../../wrappers';
 
@@ -51,19 +48,12 @@ export const Basket = () => {
 
   // Calculate the total price of items in the basket
   const sumItemsPrice: number = basket.items.reduce((acc: number, item: TOrderItem): number => {
-    if (item.product && item.product.priceWholesale) {
-      const itemPrice: number = item.product.discount
-        ? calculateDiscountedPrice(item.product.priceWholesale, item.product.discount)
-        : item.product.priceWholesale;
+    if (item.product && item.product.price) {
+      const itemPrice: number = item.product.price;
       return acc + itemPrice * item.itemCount;
     }
     return acc;
   }, 0);
-
-  // Handle change in packaging type
-  const handleChangePackagingType = (typePackaging: EPackage): void => {
-    dispatch(setPackaging(typePackaging));
-  };
 
   // Handle change in notes
   const handleChangeNotes = (text: string): void => {
@@ -106,6 +96,7 @@ export const Basket = () => {
   // Refresh data
   const handleRefresh = (): void => {
     fetchData();
+    dispatch(fetchUser());
   };
 
   return (
@@ -179,24 +170,10 @@ export const Basket = () => {
                                 <Text className="text-orange-500 font-semibold ">Գին։</Text>
                                 {item.product && (
                                   <View className="ml-1 flex-row items-center">
-                                    <Text
-                                      className={`text-orange-500  ${
-                                        item.product.discount ? 'line-through text-gray-600' : ''
-                                      }`}>
-                                      {item.product.priceWholesale}
+                                    <Text className="text-orange-500">
+                                      {item.product.price}
                                       &nbsp;․դր
                                     </Text>
-                                    {item.product.discount ? (
-                                      <Text className="text-sm text-orange-500 ml-1">
-                                        {formattedPrice(
-                                          calculateDiscountedPrice(
-                                            item.product.priceWholesale,
-                                            item.product.discount
-                                          )
-                                        )}
-                                        &nbsp;․դր
-                                      </Text>
-                                    ) : null}
                                   </View>
                                 )}
                               </View>
@@ -227,35 +204,6 @@ export const Basket = () => {
               <Text className="font-semibold">{formattedPrice(sumItemsPrice)} ․դր</Text>
             </View>
             <View className="w-full items-center">
-              <View>
-                <Text className="text-lg text-gray-400">Փաթեթավորման տեսակը</Text>
-              </View>
-              <View className="flex-row rounded-lg shadow bg-white mt-3">
-                <TouchableOpacity
-                  className={`items-center justify-center py-2 min-w-[160px]${
-                    basket.packaging === EPackage.BAG ? ' bg-orange-400 rounded-lg' : ''
-                  }`}
-                  onPress={() => handleChangePackagingType(EPackage.BAG)}>
-                  <Text
-                    className={`text-base text-gray-500${
-                      basket.packaging === EPackage.BAG ? ' text-black' : ''
-                    }`}>
-                    Տոպրակ
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  className={`items-center justify-center py-2 min-w-[160px]${
-                    basket.packaging === EPackage.BOX ? ' bg-orange-400 rounded-lg' : ''
-                  }`}
-                  onPress={() => handleChangePackagingType(EPackage.BOX)}>
-                  <Text
-                    className={`text-base text-gray-500${
-                      basket.packaging === EPackage.BOX ? ' text-black' : ''
-                    }`}>
-                    Արկղ
-                  </Text>
-                </TouchableOpacity>
-              </View>
               <View className="flex-1 w-full items-center mt-3">
                 <Text className="text-lg text-gray-400">Անհրաժեշտ նշումներ</Text>
                 <View className="w-full rounded-lg overflow-hidden mt-3">

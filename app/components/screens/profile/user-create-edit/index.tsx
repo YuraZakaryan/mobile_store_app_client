@@ -13,9 +13,9 @@ import {
   toggleBanThunk,
   updateUserThunk,
 } from '../../../../redux/http/userThunk';
-import { TPayloadActionUser, TRole, TUser } from '../../../../redux/types';
+import { EPriceType, TPayloadActionUser, TRole, TUser } from '../../../../redux/types';
 import { SHOW_ERROR, SHOW_SUCCESS } from '../../../../toasts';
-import { isAdmin, selectRoles } from '../../../../utils';
+import { isAdmin, selectPriceType, selectRoles } from '../../../../utils';
 import { ICON_MAIN_COLOR, NETWORK_ERROR_MESSAGE } from '../../../../utils/constants';
 import { registrationFormSchema, updateUserFormSchema } from '../../../../validation';
 import {
@@ -32,6 +32,8 @@ import { TInitialUserCreateEditFormValue, TUserCreateEditRouteParams } from './t
 export const UserCreateEdit = () => {
   const dispatch = useAppDispatch();
   const [open, setOpen] = React.useState(false);
+  const [priceTypeOpen, setPriceTypeOpen] = React.useState(false);
+
   const route = useRoute();
   const { user, createUser, updateUser, cancelUser, banUser } = useAppSelector(
     (state) => state.user
@@ -54,18 +56,29 @@ export const UserCreateEdit = () => {
     address: item?.address || '',
     password: '',
     phone: item?.phone || '',
+    discountPercent: item?.discountPercent ?? 0,
+    priceType: (item?.priceType as EPriceType) || EPriceType.RETAIL,
     role: item?.role || 'USER',
     stockToken: item?.stockToken || '',
     confirmed: !item?.confirmed ? true : item?.confirmed || false,
   };
 
-  const handleSelectChange = (value: string, setFieldValue: FormikValues['setFieldValue']) => {
-    setFieldValue('role', value);
+  const handleSelectChange = (
+    key: string,
+    value: string,
+    setFieldValue: FormikValues['setFieldValue']
+  ) => {
+    setFieldValue(key, value);
   };
 
   const onSubmit = async (values: FormikValues): Promise<void> => {
+    const formData = {
+      ...values,
+      discountPercent: Number(values.discountPercent),
+    };
+
     if (item) {
-      await dispatch(updateUserThunk({ id: item?._id as string, formData: values, navigate }))
+      await dispatch(updateUserThunk({ id: item?._id as string, formData, navigate }))
         .unwrap()
         .then((res: TUser | void): void => {
           if (res && user?._id === res._id) {
@@ -87,7 +100,7 @@ export const UserCreateEdit = () => {
           }
         });
     } else {
-      await dispatch(createUserThunk({ formData: values, navigate }))
+      await dispatch(createUserThunk({ formData, navigate }))
         .unwrap()
         .then((res: TPayloadActionUser) => res && SHOW_SUCCESS('Հաճախորդը հաջողությամբ ստեղծվեց'))
         .catch((err): void => {
@@ -238,8 +251,11 @@ export const UserCreateEdit = () => {
                   <MaskInput
                     className="rounded px-3 py-4 border border-gray-600"
                     value={values.phone}
-                    onChangeText={(unmasked) => {
-                      handleChange('phone')(unmasked.replace(/\D/g, ''));
+                    onChangeText={(masked) => {
+                      if (!masked.startsWith('(0')) {
+                        masked = '(0' + masked.replace(/[^0-9]/g, '').slice(2);
+                      }
+                      handleChange('phone')(masked.replace(/\D/g, ''));
                     }}
                     mask={[
                       '(',
@@ -260,20 +276,6 @@ export const UserCreateEdit = () => {
                   />
                 </FieldWithError>
               </LabelInput>
-              {isAdmin((user?.role as TRole) || 'USER') ? (
-                <LabelInput label="Պահոցի թոքեն">
-                  <FieldWithError fieldName="stockToken" errors={errors} touched={touched}>
-                    <TextInput
-                      onChangeText={handleChange('stockToken')}
-                      onBlur={handleBlur('stockToken')}
-                      onSubmitEditing={Keyboard.dismiss}
-                      placeholder="Թոքեն"
-                      value={values.stockToken}
-                      className="rounded px-3 py-3 border border-gray-600"
-                    />
-                  </FieldWithError>
-                </LabelInput>
-              ) : null}
 
               {!item ? (
                 <>
@@ -305,28 +307,91 @@ export const UserCreateEdit = () => {
                 </>
               ) : null}
               {!isUser && (
-                <LabelInput label="Պարտականությունը" className="z-30" required>
-                  <DropDownPicker
-                    open={open}
-                    value={values.role}
-                    items={selectRoles}
-                    setOpen={setOpen}
-                    style={{
-                      borderRadius: 4,
-                      borderColor: 'gray',
-                      paddingLeft: 12,
-                      paddingRight: 12,
-                      backgroundColor: 'transparent',
-                    }}
-                    setValue={(val) => handleSelectChange(val(val), setFieldValue)}
-                    listMode="SCROLLVIEW"
-                    scrollViewProps={{
-                      nestedScrollEnabled: true,
-                    }}
-                  />
-                </LabelInput>
-              )}
+                <>
+                  <LabelInput label="Գնի տեսակը" className="z-30" required>
+                    <DropDownPicker
+                      open={priceTypeOpen}
+                      value={values.priceType}
+                      items={selectPriceType}
+                      setOpen={setPriceTypeOpen}
+                      placeholder="Ընտրել"
+                      style={{
+                        borderRadius: 4,
+                        borderColor: 'gray',
+                        paddingLeft: 12,
+                        paddingRight: 12,
+                        backgroundColor: 'transparent',
+                      }}
+                      setValue={(val) => handleSelectChange('priceType', val(val), setFieldValue)}
+                      listMode="SCROLLVIEW"
+                      scrollViewProps={{
+                        nestedScrollEnabled: true,
+                      }}
+                    />
+                  </LabelInput>
 
+                  <LabelInput label="Զեղչ">
+                    <FieldWithError fieldName="discountPercent" errors={errors} touched={touched}>
+                      <TextInput
+                        onChangeText={(text) => {
+                          const numericText = text.replace(/[^0-9]/g, '');
+                          let value = parseInt(numericText, 10);
+                          if (isNaN(value)) {
+                            value = 0;
+                          }
+                          if (value > 100) {
+                            value = 100;
+                          }
+                          handleChange('discountPercent')(String(value));
+                        }}
+                        onBlur={handleBlur('discountPercent')}
+                        onSubmitEditing={Keyboard.dismiss}
+                        placeholder="Զեղչ"
+                        keyboardType="number-pad"
+                        value={values.discountPercent.toString()}
+                        className="rounded px-3 py-3 border border-gray-600"
+                      />
+                    </FieldWithError>
+                  </LabelInput>
+
+                  <LabelInput label="Պարտականությունը" className="z-30" required>
+                    <DropDownPicker
+                      open={open}
+                      value={values.role}
+                      items={selectRoles}
+                      setOpen={setOpen}
+                      placeholder="Ընտրել"
+                      style={{
+                        borderRadius: 4,
+                        borderColor: 'gray',
+                        paddingLeft: 12,
+                        paddingRight: 12,
+                        backgroundColor: 'transparent',
+                      }}
+                      setValue={(val) => handleSelectChange('role', val(val), setFieldValue)}
+                      listMode="SCROLLVIEW"
+                      scrollViewProps={{
+                        nestedScrollEnabled: true,
+                      }}
+                    />
+                  </LabelInput>
+                </>
+              )}
+              {isAdmin(user?.role as TRole) &&
+              (values.role === 'MODERATOR' || values.role === 'ADMIN') ? (
+                <LabelInput label="Պահոցի թոքեն">
+                  <FieldWithError fieldName="stockToken" errors={errors} touched={touched}>
+                    <TextInput
+                      onChangeText={handleChange('stockToken')}
+                      onBlur={handleBlur('stockToken')}
+                      onSubmitEditing={Keyboard.dismiss}
+                      placeholder="Թոքեն"
+                      value={values.stockToken}
+                      className="rounded px-3 py-3 border border-gray-600"
+                    />
+                  </FieldWithError>
+                </LabelInput>
+              ) : null}
               <CrudButtonGroup>
                 <View>
                   <CrudMainButton
@@ -336,7 +401,7 @@ export const UserCreateEdit = () => {
                     {item ? (item.confirmed ? 'Պահպանել' : 'Հաստատել') : 'Ստեղծել'}
                   </CrudMainButton>
                 </View>
-                {item && user?.role === 'ADMIN' && user?._id !== item._id ? (
+                {item && isAdmin(user?.role as TRole) && user?._id !== item._id ? (
                   <View>
                     <DeleteButton
                       handleDelete={!item.confirmed ? handleCancel : toggleBan}

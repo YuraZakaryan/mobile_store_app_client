@@ -65,10 +65,11 @@ export interface IFieldWithError<T extends FormikValues> extends PropsWithChildr
   errors: FormikErrors<T>;
   touched: FormikTouched<T> | any;
 }
-export type TRoleSelect = {
+export type TSelect = {
   label: string;
   value: string;
 };
+
 export interface IDeleteButton extends PropsWithChildren, TClassName {
   isLoading: boolean;
   handleDelete: () => void;
